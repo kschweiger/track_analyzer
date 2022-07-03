@@ -1,5 +1,7 @@
 from math import asin, degrees
 
+import numpy as np
+
 from gpx_track_analyzer.model import Position2D, Position3D
 from gpx_track_analyzer.utils import calc_elevation_metrics, distance
 
@@ -50,3 +52,15 @@ def test_calc_elevation_metrics(mocker):
     assert metrics.slopes == exp_slopes
 
     assert len(metrics.slopes) == len(positions)
+
+
+def test_calc_elevation_metrics_nan(mocker):
+    mocker.patch("gpx_track_analyzer.utils.distance", return_value=150)
+    positions = [
+        Position3D(0, 0, 100),
+        Position3D(0, 0, 1000),
+    ]
+
+    metrics = calc_elevation_metrics(positions)
+
+    assert metrics.slopes == [0.0, np.nan]

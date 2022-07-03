@@ -3,6 +3,7 @@ from math import asin, cos, degrees, pi, sqrt
 from typing import Callable, List, Tuple, Union
 
 import coloredlogs
+import numpy as np
 
 from gpx_track_analyzer.model import ElevationMetrics, Position2D, Position3D
 
@@ -54,7 +55,12 @@ def calc_elevation_metrics(
         else:
             downhill += pp_elevation
 
-        slopes.append(degrees(asin(pp_elevation / pp_distance)))
+        o_by_h = pp_elevation / pp_distance
+        # Addressing **ValueError: math domain error**
+        if o_by_h > 1 or o_by_h < -1:
+            slopes.append(np.NaN)
+        else:
+            slopes.append(degrees(asin(o_by_h)))
 
     return ElevationMetrics(uphill, abs(downhill), slopes)
 

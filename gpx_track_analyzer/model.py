@@ -35,8 +35,10 @@ class SegmentOverview:
                            velocities below the XX percentile)
         avg_velocity (float): Average velocity in the segment in m/s (only considering
                            velocities below the XX percentile)
-        max_elevation (float): Maximum elevation in the segment in m
-        min_elevation (float): Minimum elevation in the segment in m
+        max_elevation (None | float): Maximum elevation in the segment in m
+        min_elevation (None | float): Minimum elevation in the segment in m
+        uphill_elevation (None | float): Elevation traveled uphill in m
+        downhill_elevation (None | float): Elevation traveled downhill in m
         moving_distance_km (float): moving_distance converted the km
         total_distance_km (float): total_distance converted the km
         max_velocity_kmh (float): max_velocity converted the km/h
@@ -54,6 +56,9 @@ class SegmentOverview:
 
     max_elevation: Optional[float]
     min_elevation: Optional[float]
+
+    uphill_elevation: Optional[float]
+    downhill_elevation: Optional[float]
 
     # Attributes that will be calculated from primary attributes
     moving_distance_km: float = field(init=False)
