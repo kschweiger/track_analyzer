@@ -1,0 +1,4 @@
+gpxpy==1.5.0
+    # via gpx-track-analyzer (setup.py)
+numpy==1.23.0
+    # via gpx-track-analyzer (setup.py)
