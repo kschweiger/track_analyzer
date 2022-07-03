@@ -1,4 +1,8 @@
+coloredlogs==15.0.1
+    # via gpx-track-analyzer (setup.py)
 gpxpy==1.5.0
     # via gpx-track-analyzer (setup.py)
+humanfriendly==10.0
+    # via coloredlogs
 numpy==1.23.0
     # via gpx-track-analyzer (setup.py)
