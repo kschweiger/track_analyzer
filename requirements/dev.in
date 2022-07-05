@@ -7,3 +7,5 @@ pre-commit
 black
 flake8
 mypy
+
+types-requests

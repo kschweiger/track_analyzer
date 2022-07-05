@@ -1,0 +1,2 @@
+class APIResponseExceptions(Exception):
+    pass
