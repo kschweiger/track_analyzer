@@ -206,3 +206,16 @@ class FileTrack(Track):
     @property
     def track(self) -> GPXTrack:
         return self._track
+
+
+class ByteTrack(Track):
+    def __init__(self, bytefile, n_track: int = 0, **kwargs):
+        super().__init__(**kwargs)
+
+        gpx = gpxpy.parse(bytefile)
+
+        self._track = gpx.tracks[n_track]
+
+    @property
+    def track(self) -> GPXTrack:
+        return self._track
