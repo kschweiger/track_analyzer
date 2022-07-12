@@ -4,7 +4,7 @@ Enhance gpx tracks with external data. E.g. elevation data
 import json
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import requests
 from gpxpy.gpx import GPXTrack
@@ -55,8 +55,59 @@ class ElevationEnhancer(Enhancer):
         pass
 
 
+class OpenTopoElevationEnhancer(ElevationEnhancer):
+    def __init__(
+        self,
+        url="https://api.opentopodata.org/",
+        dataset="eudem25m",
+        interpolation="cubic",
+    ):
+        self.url = f"{url}/v1/{dataset}"
+        self.interpolation = interpolation
+
+    def get_elevation_data(
+        self,
+        input_coordinates: List[Tuple[float, float]],
+        split_requests: Optional[int] = None,
+    ) -> List[float]:
+
+        if split_requests is None:
+            split_input_coord = [input_coordinates]
+        else:
+            split_input_coord = [
+                input_coordinates[i : i + split_requests]
+                for i in range(0, len(input_coordinates), split_requests)
+            ]
+
+        ret_elevations = []
+        for coords in split_input_coord:
+            locations = ""
+            for latitude, longitude in coords:
+                locations += f"{latitude},{longitude}|"
+
+            locations = locations[:-1]
+            resp = requests.post(
+                self.url,
+                data={
+                    "locations": locations,
+                    "interpolation": self.interpolation,
+                },
+            )
+
+            if resp.status_code == 200:
+                result_data = resp.json()
+                for res in result_data["results"]:
+
+                    ret_elevations.append(res["elevation"])
+
+            else:
+                raise APIResponseExceptions(resp.text)
+
+        return ret_elevations
+
+
 class OpenElevationEnhancer(ElevationEnhancer):
-    def __init__(self, url="https://api.open-elevation.com/api/v1/lookup"):
+    def __init__(self, url="https://api.open-elevation.com"):
         """
         Use the/a OpenElevation API (https://open-elevation.com) to enhance a GPX track
         with elevation information. Alternatively, set up you own open-elevation api
@@ -66,7 +117,7 @@ class OpenElevationEnhancer(ElevationEnhancer):
         Args:
             url: URL of the API gateway
         """
-        self.url = url
+        self.url = f"{url}/api/v1/lookup"
 
         self.headers = CaseInsensitiveDict()
         self.headers["Accept"] = "application/json"

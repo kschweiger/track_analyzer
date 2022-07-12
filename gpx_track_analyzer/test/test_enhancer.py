@@ -1,6 +1,6 @@
 import pytest
 
-from gpx_track_analyzer.enhancer import OpenElevationEnhancer
+from gpx_track_analyzer.enhancer import OpenElevationEnhancer, OpenTopoElevationEnhancer
 from gpx_track_analyzer.exceptions import APIResponseExceptions
 
 
@@ -19,3 +19,23 @@ def test_open_elevation_enhancer_api_exceptions():
 
     with pytest.raises(APIResponseExceptions):
         enhancer.get_elevation_data([])
+
+
+def test_opentopo_elevation_enhancer():
+    enhancer = OpenTopoElevationEnhancer()
+
+    query_data = [(48.8588897, 2.320041), (41.161758, -8.583933)]
+
+    ret_data = enhancer.get_elevation_data(query_data)
+
+    assert ret_data == [44.59263610839844, 113.41450500488281]
+
+
+def test_opentopo_elevation_enhancer_splitting():
+    enhancer = OpenTopoElevationEnhancer()
+
+    query_data = [(48.8588897, 2.320041), (41.161758, -8.583933)]
+
+    ret_data = enhancer.get_elevation_data(query_data, 1)
+
+    assert ret_data == [44.59263610839844, 113.41450500488281]
