@@ -1,12 +1,13 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import List, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import gpxpy
 import numpy as np
+import pandas as pd
 from gpxpy.gpx import GPX, GPXTrack, GPXTrackSegment
 
-from gpx_track_analyzer.model import Position2D, Position3D, SegmentOverview
+from gpx_track_analyzer.model import Position3D, SegmentOverview
 from gpx_track_analyzer.utils import calc_elevation_metrics
 
 logger = logging.getLogger(__name__)
@@ -41,11 +42,9 @@ class Track(ABC):
         (
             time,
             distance,
-            speeds_and_distances,
-            position_2d,
-            position_3d,
             stopped_time,
             stopped_distance,
+            data,
         ) = self._get_processed_data_for_segment(
             self.track.segments[n_segment], self.stopped_speed_threshold
         )
@@ -53,17 +52,10 @@ class Track(ABC):
         total_time = time + stopped_time
         total_distance = distance + stopped_distance
 
-        speed_percentile = np.percentile(
-            [s for s, _ in speeds_and_distances], self.max_speed_percentile
-        )
+        data = self._apply_outlier_cleaning(data)
 
-        speeds_in_percentile = [
-            s for s, _ in speeds_and_distances if s <= speed_percentile
-        ]
-
-        max_speed = max(speeds_in_percentile)
-
-        avg_speed = sum(speeds_in_percentile) / len(speeds_in_percentile)
+        max_speed = data.speed[data.in_speed_percentile].max()
+        avg_speed = data.speed[data.in_speed_percentile].mean()
 
         max_elevation = None
         min_elevation = None
@@ -71,11 +63,14 @@ class Track(ABC):
         uphill = None
         downhill = None
 
-        if position_3d:
-            elevations = [p.elevation for p in position_3d]
-            max_elevation = max(elevations)
-            min_elevation = min(elevations)
-
+        if not data.elevation.isna().all():
+            max_elevation = data.elevation.max()
+            min_elevation = data.elevation.min()
+            position_3d = [
+                Position3D(rec["latitude"], rec["longitude"], rec["elevation"])
+                for rec in data.to_dict("records")
+                if not np.isnan(rec["elevation"])
+            ]
             elevation_metrics = calc_elevation_metrics(position_3d)
 
             uphill = elevation_metrics.uphill
@@ -96,17 +91,39 @@ class Track(ABC):
 
         return overview
 
+    def get_segment_data(self, n_segment: int = 0):
+        (
+            time,
+            distance,
+            stopped_time,
+            stopped_distance,
+            data,
+        ) = self._get_processed_data_for_segment(
+            self.track.segments[n_segment], self.stopped_speed_threshold
+        )
+
+        data = self._apply_outlier_cleaning(data)
+
+        return data
+
+    def _apply_outlier_cleaning(self, data: pd.DataFrame) -> pd.DataFrame:
+
+        speed_percentile = np.percentile(
+            [s for s in data.speed[data.speed.notna()].to_list()],
+            self.max_speed_percentile,
+        )
+
+        data_ = data.copy()
+
+        data_["in_speed_percentile"] = data_.apply(
+            lambda c: c.speed <= speed_percentile, axis=1
+        )
+
+        return data_
+
     def _get_processed_data_for_segment(
         self, segment: GPXTrackSegment, stopped_speed_threshold: float = 1
-    ) -> Tuple[
-        float,
-        float,
-        List[Tuple[float, float]],
-        List[Position2D],
-        List[Position3D],
-        float,
-        float,
-    ]:
+    ) -> Tuple[float, float, float, float, pd.DataFrame]:
         """
         Calculate the speed and distance from point to point for a segment. This follows
         the implementation of the get_moving_data method in the implementation of
@@ -127,12 +144,23 @@ class Track(ABC):
         distance = 0.0
         stopped_distance = 0.0
 
-        speeds_and_distances: List[Tuple[float, float]] = []
-        position_2d: List[Position2D] = []
-        position_3d: List[Position3D] = []
-
         threshold_ms = stopped_speed_threshold / 3.6
 
+        data: Dict[str, List[Optional[Union[float, bool]]]] = {
+            "latitude": [],
+            "longitude": [],
+            "elevation": [],
+            "speed": [],
+            "distance": [],
+            "cum_distance": [],
+            "cum_distance_moving": [],
+            "cum_distance_stopped": [],
+            "moving": [],
+        }
+
+        cum_distance = 0
+        cum_moving = 0
+        cum_stopped = 0
         for previous, point in zip(segment.points, segment.points[1:]):
             # Ignore first and last point
             if point.time and previous.time:
@@ -146,38 +174,47 @@ class Track(ABC):
                 seconds = timedelta.total_seconds()
                 if seconds > 0 and point_distance is not None:
                     if point_distance:
-                        if (point_distance / seconds) <= threshold_ms:
+
+                        is_stopped = (
+                            True
+                            if (point_distance / seconds) <= threshold_ms
+                            else False
+                        )
+
+                        data["distance"].append(point_distance)
+
+                        if is_stopped:
                             stopped_time += seconds
                             stopped_distance += point_distance
+                            cum_stopped += point_distance
+                            data["moving"].append(False)
                         else:
                             time += seconds
                             distance += point_distance
-                        if time:
-                            speeds_and_distances.append(
-                                (
-                                    point_distance / seconds,
-                                    point_distance,
-                                )
-                            )
-                            position_2d.append(
-                                Position2D(point.latitude, point.longitude)
-                            )
-                            if point.has_elevation():
-                                position_3d.append(
-                                    Position3D(
-                                        point.latitude, point.longitude, point.elevation
-                                    )
-                                )
+                            cum_moving += point_distance
+                            data["moving"].append(True)
 
-        return (
-            time,
-            distance,
-            speeds_and_distances,
-            position_2d,
-            position_3d,
-            stopped_time,
-            stopped_distance,
-        )
+                        cum_distance += point_distance
+                        data["cum_distance"].append(cum_distance)
+                        data["cum_distance_moving"].append(cum_moving)
+                        data["cum_distance_stopped"].append(cum_stopped)
+
+                        if not is_stopped:
+                            data["speed"].append(point_distance / seconds)
+                            data["latitude"].append(point.latitude)
+                            data["longitude"].append(point.longitude)
+                            if point.has_elevation():
+                                data["elevation"].append(point.elevation)
+                            else:
+                                data["elevation"].append(None)
+                        else:
+                            data["speed"].append(None)
+                            data["latitude"].append(None)
+                            data["longitude"].append(None)
+                            data["elevation"].append(None)
+
+        data_df = pd.DataFrame(data)
+        return (time, distance, stopped_time, stopped_distance, data_df)
 
 
 class FileTrack(Track):
