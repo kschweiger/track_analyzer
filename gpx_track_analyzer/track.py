@@ -30,6 +30,10 @@ class Track(ABC):
     def track(self) -> GPXTrack:
         ...
 
+    @property
+    def n_segments(self) -> int:
+        return len(self.track.segments)
+
     def get_segment_overview(self, n_segment: int = 0) -> SegmentOverview:
         """
         Get overall metrics for a segment
