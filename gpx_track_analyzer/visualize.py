@@ -1,3 +1,5 @@
+from typing import Optional
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -9,8 +11,8 @@ def plot_track_2d(
     data: pd.DataFrame,
     include_velocity: bool = False,
     strict_data_selection: bool = False,
-    height: int = 600,
-    width: int = 1800,
+    height: Optional[int] = 600,
+    width: Optional[int] = 1800,
 ) -> Figure:
     mask = data.moving
     if strict_data_selection:
@@ -29,8 +31,15 @@ def plot_track_2d(
         ),
         secondary_y=False,
     )
-    fig.update_yaxes(title_text="Elevation [m]", secondary_y=False)
-    fig.update_xaxes(title_text="Distance [km/h]")
+    fig.update_yaxes(
+        title_text="Elevation [m]",
+        secondary_y=False,
+        range=[
+            data_for_plot.elevation.min() * 0.97,
+            data_for_plot.elevation.max() * 1.05,
+        ],
+    )
+    fig.update_xaxes(title_text="Distance [m]")
     if include_velocity:
         velocities = data_for_plot.apply(lambda c: c.speed * 3.6, axis=1)
         fig.add_trace(
@@ -49,7 +58,11 @@ def plot_track_2d(
             range=[0, velocities.max() * 2.1],
         )
 
-    fig.update_layout(showlegend=False, autosize=False, height=height, width=width)
+    fig.update_layout(showlegend=False, autosize=False)
+    if height is not None:
+        fig.update_layout(height=height)
+    if width is not None:
+        fig.update_layout(width=width)
     return fig
 
 
