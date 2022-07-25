@@ -6,6 +6,8 @@ import plotly.graph_objects as go
 from plotly.graph_objs import Figure
 from plotly.subplots import make_subplots
 
+from gpx_track_analyzer.utils import center_geolocation
+
 
 def plot_track_2d(
     data: pd.DataFrame,
@@ -58,7 +60,9 @@ def plot_track_2d(
             range=[0, velocities.max() * 2.1],
         )
 
-    fig.update_layout(showlegend=False, autosize=False)
+    fig.update_layout(
+        showlegend=False, autosize=False, margin={"r": 0, "t": 0, "l": 0, "b": 0}
+    )
     if height is not None:
         fig.update_layout(height=height)
     if width is not None:
@@ -78,6 +82,32 @@ def plot_track_3d(data: pd.DataFrame, strict_data_selection: bool = False) -> Fi
     return fig
 
 
+def plot_track_on_map(
+    data: pd.DataFrame,
+    zoom: int = 13,
+    height: Optional[int] = None,
+    width: Optional[int] = None,
+) -> Figure:
+    mask = data.moving
+
+    center_lat, center_lon = center_geolocation(
+        [(r["latitude"], r["longitude"]) for r in data[mask].to_dict("records")]
+    )
+    fig = px.line_mapbox(
+        data[mask],
+        lat="latitude",
+        lon="longitude",
+        zoom=zoom,
+        center={"lon": center_lon, "lat": center_lat},
+        height=height,
+        width=width,
+    )
+    fig.update_layout(mapbox_style="open-street-map")
+    fig.update_layout(margin={"r": 57, "t": 0, "l": 49, "b": 0})
+
+    return fig
+
+
 if __name__ == "__main__":
     import sys
 
@@ -88,5 +118,6 @@ if __name__ == "__main__":
     track = FileTrack(file)
     data = track.get_segment_data(0)
 
-    fig = plot_track_2d(data, True)
+    # fig = plot_track_2d(data, True)
+    fig = plot_track_on_map(data)
     fig.show()
