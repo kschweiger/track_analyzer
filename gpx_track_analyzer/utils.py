@@ -1,5 +1,5 @@
 import logging
-from math import asin, cos, degrees, pi, sqrt
+from math import asin, atan2, cos, degrees, pi, sin, sqrt
 from typing import Callable, List, Tuple, Union
 
 import coloredlogs
@@ -86,3 +86,33 @@ def init_logging(this_level: Union[int, str]) -> bool:
     level, _ = parse_level(this_level)
     coloredlogs.install(level=level, fmt=log_format)
     return True
+
+
+def center_geolocation(geolocations: List[Tuple[float, float]]):
+    """
+    Calculate an estimated (based on the assumption the earth is a perfect sphere) given
+    a list of latitude, longitude pairs in degree.
+
+    Based on: https://gist.github.com/amites/3718961
+
+    Args:
+        geolocations: List of latitude, longitude pairs in degree
+
+    Returns: Estimate center latitude, longitude pair in degree
+    """
+    x, y, z = 0.0, 0.0, 0.0
+
+    for lat, lon in geolocations:
+        lat = float(lat) * pi / 180
+        lon = float(lon) * pi / 180
+        x += cos(lat) * cos(lon)
+        y += cos(lat) * sin(lon)
+        z += sin(lat)
+
+    x = float(x / len(geolocations))
+    y = float(y / len(geolocations))
+    z = float(z / len(geolocations))
+
+    lat_c, lon_c = atan2(z, sqrt(x * x + y * y)), atan2(y, x)
+
+    return lat_c * 180 / pi, lon_c * 180 / pi

@@ -1,9 +1,14 @@
-from math import asin, degrees
+from math import asin, degrees, isclose
 
 import numpy as np
+import pytest
 
 from gpx_track_analyzer.model import Position2D, Position3D
-from gpx_track_analyzer.utils import calc_elevation_metrics, distance
+from gpx_track_analyzer.utils import (
+    calc_elevation_metrics,
+    center_geolocation,
+    distance,
+)
 
 
 def test_distance_far():
@@ -64,3 +69,13 @@ def test_calc_elevation_metrics_nan(mocker):
     metrics = calc_elevation_metrics(positions)
 
     assert metrics.slopes == [0.0, np.nan]
+
+
+@pytest.mark.parametrize(
+    ("coords", "exp_lat", "exp_lon"),
+    [([(10, 0), (20, 0)], 15, 0), ([(0, 10), (0, 20)], 0, 15)],
+)
+def test_center_geolocation(coords, exp_lat, exp_lon):
+    ret_lat, ret_lon = center_geolocation(coords)
+    assert isclose(ret_lat, exp_lat)
+    assert isclose(ret_lon, exp_lon)
