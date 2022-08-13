@@ -30,6 +30,16 @@ class Track(ABC):
         self.stopped_speed_threshold = stopped_speed_threshold
         self.max_speed_percentile = max_speed_percentile
 
+        # Features computed from the tracks
+        self.ascent_boundaries: Dict[int, List[Tuple[int, int]]] = {}
+        self.descent_boundaries: Dict[int, List[Tuple[int, int]]] = {}
+
+        self.peaks: Dict[int, List[int]] = {}
+        self.valleys: Dict[int, List[int]] = {}
+
+        self.global_max_elevation_point: Dict[int, int] = {}
+        self.global_min_elevation_point: Dict[int, int] = {}
+
     @property
     @abstractmethod
     def track(self) -> GPXTrack:
@@ -113,7 +123,11 @@ class Track(ABC):
 
         return overview
 
-    def get_segment_data(self, n_segment: int = 0) -> pd.DataFrame:
+    def get_segment_data(
+        self,
+        n_segment: int = 0,
+        include_all_points: bool = False,
+    ):
         (
             time,
             distance,
@@ -121,7 +135,9 @@ class Track(ABC):
             stopped_distance,
             data,
         ) = self._get_processed_data_for_segment(
-            self.track.segments[n_segment], self.stopped_speed_threshold
+            self.track.segments[n_segment],
+            self.stopped_speed_threshold,
+            include_all_points,
         )
 
         if self.track.segments[n_segment].has_times():
@@ -206,7 +222,10 @@ class Track(ABC):
         return data_
 
     def _get_processed_data_for_segment(
-        self, segment: GPXTrackSegment, stopped_speed_threshold: float = 1
+        self,
+        segment: GPXTrackSegment,
+        stopped_speed_threshold: float = 1,
+        include_all_points: bool = False,
     ) -> Tuple[float, float, float, float, pd.DataFrame]:
         """
         Calculate the speed and distance from point to point for a segment. This follows
@@ -230,6 +249,7 @@ class Track(ABC):
             "elevation": [],
             "speed": [],
             "distance": [],
+            "distance_2d": [],
             "cum_distance": [],
             "cum_distance_moving": [],
             "cum_distance_stopped": [],
@@ -243,9 +263,13 @@ class Track(ABC):
                 stopped_time,
                 stopped_distance,
                 data,
-            ) = self._get_processed_data_w_time(segment, data, threshold_ms)
+            ) = self._get_processed_data_w_time(
+                segment, data, threshold_ms, include_all_points
+            )
         else:
-            distance, data = self._get_processed_data_wo_time(segment, data)
+            distance, data = self._get_processed_data_wo_time(
+                segment, data, include_all_points
+            )
             time, stopped_distance, stopped_time = 0, 0, 0
 
         data_df = pd.DataFrame(data)
@@ -253,7 +277,11 @@ class Track(ABC):
         return (time, distance, stopped_time, stopped_distance, data_df)
 
     def _get_processed_data_w_time(
-        self, segment: GPXTrackSegment, data: Dict[str, List[Any]], threshold_ms: float
+        self,
+        segment: GPXTrackSegment,
+        data: Dict[str, List[Any]],
+        threshold_ms: float,
+        include_all_points: bool = False,
     ) -> Tuple[float, float, float, float, Dict[str, List[Any]]]:
 
         time = 0.0
@@ -265,16 +293,29 @@ class Track(ABC):
         cum_distance = 0
         cum_moving = 0
         cum_stopped = 0
+
+        if include_all_points:
+            data["latitude"].append(segment.points[0].latitude)
+            data["longitude"].append(segment.points[0].longitude)
+            data["elevation"].append(segment.points[0].elevation)
+            data["speed"].append(None)
+            data["distance"].append(None)
+            data["distance_2d"].append(None)
+            data["cum_distance"].append(None)
+            data["cum_distance_moving"].append(None)
+            data["cum_distance_stopped"].append(None)
+            data["moving"].append(None)
+
         for previous, point in zip(segment.points, segment.points[1:]):
             # Ignore first and last point
             if point.time and previous.time:
                 timedelta = point.time - previous.time
 
+                point_distance_2d = point.distance_2d(previous)
                 if point.elevation and previous.elevation:
                     point_distance = point.distance_3d(previous)
                 else:
-                    point_distance = point.distance_2d(previous)
-
+                    point_distance = point_distance_2d
                 seconds = timedelta.total_seconds()
                 if seconds > 0 and point_distance is not None:
                     if point_distance:
@@ -286,6 +327,7 @@ class Track(ABC):
                         )
 
                         data["distance"].append(point_distance)
+                        data["distance_2d"].append(point_distance_2d)
 
                         if is_stopped:
                             stopped_time += seconds
@@ -319,10 +361,26 @@ class Track(ABC):
         return time, distance, stopped_time, stopped_distance, data
 
     def _get_processed_data_wo_time(
-        self, segment: GPXTrackSegment, data: Dict[str, List[Any]]
+        self,
+        segment: GPXTrackSegment,
+        data: Dict[str, List[Any]],
+        include_all_points: bool = False,
     ) -> Tuple[float, Dict[str, List[Any]]]:
         cum_distance = 0
         distance = 0.0
+
+        if include_all_points:
+            data["latitude"].append(segment.points[0].latitude)
+            data["longitude"].append(segment.points[0].longitude)
+            data["elevation"].append(segment.points[0].elevation)
+            data["speed"].append(None)
+            data["distance"].append(None)
+            data["distance_2d"].append(None)
+            data["cum_distance"].append(None)
+            data["cum_distance_moving"].append(None)
+            data["cum_distance_stopped"].append(None)
+            data["moving"].append(None)
+
         for previous, point in zip(segment.points, segment.points[1:]):
             if point.elevation and previous.elevation:
                 point_distance = point.distance_3d(previous)
@@ -332,6 +390,7 @@ class Track(ABC):
                 distance += point_distance
 
                 data["distance"].append(point_distance)
+                data["distance_2d"].append(point_distance)
                 data["latitude"].append(point.latitude)
                 data["longitude"].append(point.longitude)
                 if point.has_elevation():
@@ -347,6 +406,202 @@ class Track(ABC):
                 data["moving"].append(True)
 
         return distance, data
+
+    def find_ascents_descents(
+        self,
+        segment_data: Optional[pd.DataFrame],
+        n_segment: int = 0,
+        min_elevation_diff_in_section: float = 50,  # TODO: Class Attr?
+        max_flat_distance_in_section: float = 10,  # TODO: Class Attr?
+        min_elevation_diff_slope: float = 10,  # TODO: Class Attr?
+    ) -> None:
+        if segment_data is None:
+            segment_data = self.get_segment_data(n_segment, False, True)
+
+        self.find_peaks_valleys(
+            segment_data,
+            n_segment=n_segment,
+            min_elevation_diff_in_section=min_elevation_diff_in_section,
+            max_flat_distance_in_section=max_flat_distance_in_section,
+            min_elevation_diff_slope=min_elevation_diff_slope,
+        )
+
+        data = segment_data[segment_data.moving].copy()
+
+        def calc_cum_elevation_between_pois(
+            data: pd.DataFrame, idx_1: int, idx_2: int
+        ) -> float:
+            relevant_data = data.iloc[idx_1:idx_2]
+            rcrds = relevant_data.to_dict("records")
+            print(rcrds)
+            prev_ele = rcrds[0]["elevation"]
+            cum_ele = 0.0
+            for rcrd in rcrds[1:]:
+                cum_ele += rcrd["elevation"] + prev_ele
+                prev_ele = rcrd["elevation"]
+
+            return cum_ele
+
+        all_pois = sorted(self.peaks[n_segment] + self.valleys[n_segment])
+
+        if not all_pois:
+            self.ascent_boundaries[n_segment] = []
+            self.descent_boundaries[n_segment] = []
+            return None
+
+        prev_poi = all_pois[0]
+
+        ascent_boundaries = []
+        descent_boundaries = []
+
+        for poi in all_pois[1:]:
+            if prev_poi in self.valleys[n_segment] and poi in self.peaks[n_segment]:
+                logger.debug("Ascent with boundaries: %s - %s", prev_poi, poi)
+                # if (
+                #     abs(calc_cum_elevation_between_pois(data, prev_poi, poi))
+                #     >= min_elevation_diff_slope
+                # ):
+                ascent_boundaries.append((prev_poi, poi))
+            if prev_poi in self.peaks[n_segment] and poi in self.valleys[n_segment]:
+                logger.debug("Descent with boundaries: %s - %s", prev_poi, poi)
+                # if (
+                #     abs(calc_cum_elevation_between_pois(data, prev_poi, poi))
+                #     >= min_elevation_diff_slope
+                # ):
+                descent_boundaries.append((prev_poi, poi))
+            prev_poi = poi
+        self.ascent_boundaries[n_segment] = ascent_boundaries
+        self.descent_boundaries[n_segment] = descent_boundaries
+
+        print("ballo")
+
+    def find_peaks_valleys(
+        self,
+        segment_data: Optional[pd.DataFrame],
+        n_segment: int = 0,
+        min_elevation_diff_in_section: float = 50,  # TODO: Class Attr?
+        max_flat_distance_in_section: float = 10,  # TODO: Class Attr?
+        min_elevation_diff_slope: float = 10,  # TODO: Class Attr?
+    ) -> None:
+        """
+        Find peaks and valleys in the track and save them as class attributes
+
+        Args:
+            segment_data:
+            n_segment:
+        """
+        logger.debug("Finding peaks and valleys. Using:")
+        logger.debug(
+            "  min_elevation_diff_in_section : %s", min_elevation_diff_in_section
+        )
+        logger.debug(
+            "  max_flat_distance_in_section : %s", max_flat_distance_in_section
+        )
+        logger.debug("  min_elevation_diff_slope : %s", min_elevation_diff_slope)
+
+        if segment_data is None:
+            segment_data = self.get_segment_data(n_segment, False, True)
+
+        peaks = []
+        valleys = []
+
+        data = segment_data[segment_data.moving].copy()
+        data["distance_2d"].fillna(0, inplace=True)
+        data["distance"].fillna(0, inplace=True)
+
+        rcrds = data.to_dict("records")
+
+        ele_n_idx = [(i, rcrd["elevation"]) for i, rcrd in enumerate(rcrds)]
+
+        global_max_idx, global_max_ele = max(ele_n_idx, key=lambda x: x[1])
+        global_min_idx, global_min_ele = min(ele_n_idx, key=lambda x: x[1])
+
+        self.global_max_elevation_point[n_segment] = global_max_idx
+        self.global_min_elevation_point[n_segment] = global_min_idx
+
+        if (global_max_ele - global_min_ele) <= min_elevation_diff_in_section:
+            logger.debug(
+                "Max (%s) and min (%s) of track are less than min distance set (%s)",
+                global_max_ele,
+                global_min_ele,
+                min_elevation_diff_in_section,
+            )
+            self.peaks[n_segment] = []
+            self.valleys[n_segment] = []
+            return None
+
+        prev_ele = rcrds[0]["elevation"]
+
+        cum_distance = 0
+        cum_distance_flat = 0
+        cum_elevation = 0
+        idx_cummulated = 0
+
+        prev_poi_elevation = rcrds[0]["elevation"]
+        prev_poi_idx = 0
+
+        for idx, rcrd in enumerate(rcrds):
+            dist = rcrd["distance_2d"]
+            ele = rcrd["elevation"]
+            elevation_diff = rcrd["elevation"] - prev_ele
+            if abs(elevation_diff) <= min_elevation_diff_slope:
+                cum_distance_flat += rcrd["distance_2d"]
+            cum_distance += rcrd["distance_2d"]
+            prev_cum_elevation = cum_elevation
+            cum_elevation += elevation_diff
+            if abs(cum_elevation) >= min_elevation_diff_slope:
+                reset = False
+                if prev_cum_elevation > cum_elevation >= min_elevation_diff_in_section:
+                    peaks.append(idx - 1)
+                    if prev_poi_idx not in valleys:
+                        valleys.append(prev_poi_idx)
+                    reset = True
+                if (
+                    prev_cum_elevation
+                    < cum_elevation
+                    < (-1 * min_elevation_diff_in_section)
+                ):
+                    valleys.append(idx - 1)
+                    if prev_poi_idx not in peaks:
+                        peaks.append(prev_poi_idx)
+                    reset = True
+                if reset:
+                    prev_poi_elevation = prev_ele
+                    prev_poi_idx = idx - 1
+                    cum_elevation = elevation_diff
+                    cum_distance = rcrd["distance_2d"]
+                    cum_distance_flat = 0
+
+            if (
+                cum_distance_flat >= max_flat_distance_in_section
+                and abs(cum_elevation) <= min_elevation_diff_in_section
+            ):
+                cum_distance = 0
+                cum_elevation = 0
+                cum_distance_flat = 0
+                idx_cummulated = idx
+                prev_poi_idx = idx
+                prev_poi_elevation = rcrd["elevation"]
+
+            prev_ele = rcrd["elevation"]
+        if abs(cum_elevation) >= min_elevation_diff_slope:
+            if cum_elevation >= min_elevation_diff_in_section:
+                peaks.append(len(rcrds) - 1)
+                if prev_poi_idx not in valleys:
+                    valleys.append(prev_poi_idx)
+            if cum_elevation <= (-1 * min_elevation_diff_in_section):
+                valleys.append(len(rcrds) - 1)
+                if prev_poi_idx not in peaks:
+                    peaks.append(prev_poi_idx)
+
+        self.peaks[n_segment] = peaks
+        self.valleys[n_segment] = valleys
+
+        logger.debug("Found the following for segment %s", n_segment)
+        logger.debug("  peaks: %s", self.peaks[n_segment])
+        logger.debug("  valleys: %s", self.valleys[n_segment])
+
+        print("hall")
 
 
 class FileTrack(Track):

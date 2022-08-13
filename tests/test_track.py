@@ -1,4 +1,6 @@
+import math
 from datetime import datetime
+from typing import Any, Dict, List
 from unittest.mock import MagicMock
 
 import gpxpy
@@ -14,8 +16,7 @@ from gpx_track_analyzer.model import SegmentOverview
 from gpx_track_analyzer.track import FileTrack, PyTrack
 
 
-@pytest.fixture()
-def generate_mock_track():
+def gen_track(points=None):
     gpx = gpxpy.gpx.GPX()
 
     # Create first track in our GPX:
@@ -27,29 +28,69 @@ def generate_mock_track():
     gpx_track.segments.append(gpx_segment)
 
     # Create points:
-    point_values = [
-        (2.1234, 5, 100, "2022-06-01T14:30:35+00:00"),
-        (2.1235, 5, 105, "2022-06-01T14:30:40+00:00"),
-        (2.1236, 5, 110, "2022-06-01T14:30:45+00:00"),
-        (2.1237, 5, 115, "2022-06-01T14:30:50+00:00"),
-        (2.1238, 5, 105, "2022-06-01T14:30:55+00:00"),
-        (2.1239, 5, 100, "2022-06-01T14:31:00+00:00"),
-        (2.1240, 5, 90, "2022-06-01T14:31:05+00:00"),
-        (2.1241, 5, 100, "2022-06-01T14:31:10+00:00"),
-    ]
+    if points is None:
+        point_values = [
+            (2.1234, 5, 100, "2022-06-01T14:30:35+00:00"),
+            (2.1235, 5, 105, "2022-06-01T14:30:40+00:00"),
+            (2.1236, 5, 110, "2022-06-01T14:30:45+00:00"),
+            (2.1237, 5, 115, "2022-06-01T14:30:50+00:00"),
+            (2.1238, 5, 105, "2022-06-01T14:30:55+00:00"),
+            (2.1239, 5, 100, "2022-06-01T14:31:00+00:00"),
+            (2.1240, 5, 90, "2022-06-01T14:31:05+00:00"),
+            (2.1241, 5, 100, "2022-06-01T14:31:10+00:00"),
+        ]
+    else:
+        point_values = points
 
-    for lat, long, ele, isotime in point_values:
+    for lat, long, ele, time in point_values:
 
         gpx_segment.points.append(
             gpxpy.gpx.GPXTrackPoint(
                 lat,
                 long,
                 elevation=ele,
-                time=datetime.fromisoformat(isotime),
+                time=datetime.fromisoformat(time) if isinstance(time, str) else time,
             )
         )
-
     return gpx
+
+
+def gen_segment_data(elevations: List[int]) -> Dict[str, Any]:
+    data: Dict[str, Any] = {
+        "latitude": [],
+        "longitude": [],
+        "elevation": [],
+        "speed": [],
+        "distance": [],
+        "distance_2d": [],
+        "cum_distance": [],
+        "cum_distance_moving": [],
+        "cum_distance_stopped": [],
+        "moving": [],
+    }
+    prev_elevation = elevations[0]
+    for i, elevation_value in enumerate(elevations):
+        elevation_diff = abs(elevation_value - prev_elevation)
+        prev_elevation = elevation_value
+        data["latitude"].append(1)
+        data["longitude"].append(1)
+        data["elevation"].append(elevation_value)
+        data["speed"].append(2.5 if i != 0 else None)
+        data["distance"].append(
+            math.sqrt(49 + elevation_diff * elevation_diff) if i != 0 else None
+        )
+        data["distance_2d"].append(7 if i != 0 else None)
+        data["cum_distance"].append(None)  # Not important
+        data["cum_distance_moving"].append(None)  # Not important
+        data["cum_distance_stopped"].append(None)  # Not important
+        data["moving"].append(True)  # Not important
+
+    return data
+
+
+@pytest.fixture()
+def generate_mock_track():
+    return gen_track(None)
 
 
 def test_track(mocker, generate_mock_track):
@@ -229,3 +270,77 @@ def test_get_point_data_in_segment_exception_time():
 
     with pytest.raises(TrackTransformationException):
         track.get_point_data_in_segmnet()
+
+
+@pytest.mark.parametrize(
+    ("elevations", "peaks", "valleys"),
+    [
+        ([100, 110, 120, 110, 120, 110, 100, 110], [], []),
+        ([100, 120, 140, 150, 160, 180, 200], [6], [0]),
+        ([200, 180, 160, 150, 140, 120, 100], [0], [6]),
+        ([100, 130, 160, 200, 160, 130, 90], [3], [0, 6]),
+        ([100, 130, 160, 200, 160, 130, 90, 120, 150, 180], [3, 9], [0, 6]),
+        ([100, 110, 100, 130, 160, 200, 160, 130, 90], [5], [2, 8]),
+        ([100, 110, 100, 130, 160, 200, 160, 130, 90, 100, 110, 100], [5], [2, 8]),
+        (
+            [100, 120, 140, 150, 160, 180, 200, 190, 210, 205, 200, 180, 160, 120],
+            [6, 10],
+            [0, 13],
+        ),
+    ],
+)
+def test_peaks_and_valleys(elevations, peaks, valleys):
+    data = gen_segment_data(elevations)
+    MockedFileTrack = FileTrack
+    MockedFileTrack._get_pgx = MagicMock()
+    MockedFileTrack._get_pgx.return_value = MagicMock()
+    track = MockedFileTrack("bogus_file_name.gpx")
+    track.get_segment_data = MagicMock()
+    track.get_segment_data.return_value = pd.DataFrame(data)
+
+    assert track.peaks == {}
+    assert track.valleys == {}
+
+    track.find_peaks_valleys(pd.DataFrame(data), 0)
+
+    assert track.peaks[0] == peaks
+    assert track.valleys[0] == valleys
+
+
+@pytest.mark.parametrize(
+    ("elevations", "ascents", "descents"),
+    [
+        ([100, 110, 120, 110, 120, 110, 100, 110], [], []),
+        ([100, 120, 140, 150, 160, 180, 200], [(0, 6)], []),
+        ([100, 130, 160, 200, 160, 130, 90], [(0, 3)], [(3, 6)]),
+        ([100, 110, 100, 130, 160, 200, 160, 130, 90], [(2, 5)], [(5, 8)]),
+        (
+            [100, 110, 100, 130, 160, 200, 160, 130, 90, 100, 110, 100],
+            [(2, 5)],
+            [(5, 8)],
+        ),
+        (
+            [100, 120, 140, 150, 160, 180, 200, 190, 210, 205, 200, 180, 160, 120],
+            [(0, 6)],
+            [(10, 13)],
+        ),
+    ],
+)
+def test_ascents_descents(elevations, ascents, descents):
+
+    data = gen_segment_data(elevations)
+
+    MockedFileTrack = FileTrack
+    MockedFileTrack._get_pgx = MagicMock()
+    MockedFileTrack._get_pgx.return_value = MagicMock()
+    track = MockedFileTrack("bogus_file_name.gpx")
+    track.get_segment_data = MagicMock()
+    track.get_segment_data.return_value = pd.DataFrame(data)
+
+    assert track.ascent_boundaries == {}
+    assert track.descent_boundaries == {}
+
+    track.find_ascents_descents(pd.DataFrame(data), n_segment=0)
+
+    assert track.ascent_boundaries[0] == ascents
+    assert track.descent_boundaries[0] == descents

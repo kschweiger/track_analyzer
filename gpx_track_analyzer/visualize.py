@@ -22,6 +22,10 @@ def plot_track_2d(
     color_elevation: Optional[str] = None,
     color_velocity: Optional[str] = None,
     color_poi: Optional[str] = None,
+    peaks: Optional[List[int]] = None,
+    valleys: Optional[List[int]] = None,
+    ascents: Optional[List[Tuple[int, int]]] = None,
+    descents: Optional[List[Tuple[int, int]]] = None,
 ) -> Figure:
     mask = data.moving
     if strict_data_selection:
@@ -48,6 +52,53 @@ def plot_track_2d(
             data_for_plot.elevation.max() * 1.05,
         ],
     )
+
+    if valleys is not None:
+        for v in valleys:
+            fig.add_vline(
+                x=data_for_plot.iloc[v].cum_distance_moving,
+                line_width=2,
+                line_dash="dash",
+                line_color="green",
+            )
+    if peaks is not None:
+        for p in peaks:
+            fig.add_vline(
+                x=data_for_plot.iloc[p].cum_distance_moving,
+                line_width=2,
+                line_dash="dash",
+                line_color="orange",
+            )
+
+    if descents is not None:
+        for descent in descents:
+            left_bound, right_bound = descent
+            fig.add_trace(
+                go.Scatter(
+                    x=data_for_plot.iloc[left_bound:right_bound].cum_distance_moving,
+                    y=data_for_plot.iloc[left_bound:right_bound].elevation,
+                    mode="lines",
+                    name="Elevation [m]",
+                    fill="tozeroy",
+                    marker_color="purple",
+                ),
+                secondary_y=False,
+            )
+    if ascents is not None:
+        for ascent in ascents:
+            left_bound, right_bound = ascent
+            fig.add_trace(
+                go.Scatter(
+                    x=data_for_plot.iloc[left_bound:right_bound].cum_distance_moving,
+                    y=data_for_plot.iloc[left_bound:right_bound].elevation,
+                    mode="lines",
+                    name="Elevation [m]",
+                    fill="tozeroy",
+                    marker_color="pink",
+                ),
+                secondary_y=False,
+            )
+
     fig.update_xaxes(title_text="Distance [m]")
     if include_velocity:
         velocities = data_for_plot.apply(lambda c: c.speed * 3.6, axis=1)
