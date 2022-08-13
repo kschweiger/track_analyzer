@@ -540,6 +540,9 @@ class Track(ABC):
         prev_poi_elevation = rcrds[0]["elevation"]
         prev_poi_idx = 0
 
+        last_poi_was_peak = False
+        last_poi_was_valley = False
+
         for idx, rcrd in enumerate(rcrds):
             dist = rcrd["distance_2d"]
             ele = rcrd["elevation"]
@@ -552,18 +555,31 @@ class Track(ABC):
             if abs(cum_elevation) >= min_elevation_diff_slope:
                 reset = False
                 if prev_cum_elevation > cum_elevation >= min_elevation_diff_in_section:
-                    peaks.append(idx - 1)
-                    if prev_poi_idx not in valleys:
-                        valleys.append(prev_poi_idx)
+                    if not last_poi_was_peak:
+                        peaks.append(idx - 1)
+                        if prev_poi_idx not in valleys:
+                            valleys.append(prev_poi_idx)
+                    else:
+                        peaks.pop()
+                        peaks.append(idx - 1)
+                    last_poi_was_peak = True
+                    last_poi_was_valley = False
                     reset = True
                 if (
                     prev_cum_elevation
                     < cum_elevation
                     < (-1 * min_elevation_diff_in_section)
                 ):
-                    valleys.append(idx - 1)
-                    if prev_poi_idx not in peaks:
-                        peaks.append(prev_poi_idx)
+                    if not last_poi_was_valley:
+                        valleys.append(idx - 1)
+                        if prev_poi_idx not in peaks:
+                            peaks.append(prev_poi_idx)
+                    else:
+                        valleys.pop()
+                        valleys.append(idx - 1)
+
+                    last_poi_was_peak = False
+                    last_poi_was_valley = True
                     reset = True
                 if reset:
                     prev_poi_elevation = prev_ele
@@ -581,6 +597,8 @@ class Track(ABC):
                 cum_distance_flat = 0
                 idx_cummulated = idx
                 prev_poi_idx = idx
+                last_poi_was_peak = False
+                last_poi_was_valley = False
                 prev_poi_elevation = rcrd["elevation"]
 
             prev_ele = rcrd["elevation"]
@@ -600,8 +618,6 @@ class Track(ABC):
         logger.debug("Found the following for segment %s", n_segment)
         logger.debug("  peaks: %s", self.peaks[n_segment])
         logger.debug("  valleys: %s", self.valleys[n_segment])
-
-        print("hall")
 
 
 class FileTrack(Track):
