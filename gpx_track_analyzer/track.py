@@ -433,11 +433,10 @@ class Track(ABC):
         ) -> float:
             relevant_data = data.iloc[idx_1:idx_2]
             rcrds = relevant_data.to_dict("records")
-            print(rcrds)
             prev_ele = rcrds[0]["elevation"]
             cum_ele = 0.0
             for rcrd in rcrds[1:]:
-                cum_ele += rcrd["elevation"] + prev_ele
+                cum_ele += rcrd["elevation"] - prev_ele
                 prev_ele = rcrd["elevation"]
 
             return cum_ele
@@ -457,23 +456,24 @@ class Track(ABC):
         for poi in all_pois[1:]:
             if prev_poi in self.valleys[n_segment] and poi in self.peaks[n_segment]:
                 logger.debug("Ascent with boundaries: %s - %s", prev_poi, poi)
-                # if (
-                #     abs(calc_cum_elevation_between_pois(data, prev_poi, poi))
-                #     >= min_elevation_diff_slope
-                # ):
-                ascent_boundaries.append((prev_poi, poi))
+                # Before adding ascent check if it section between valley and peak is
+                # flat (aka. Die cumulative elevation is less than pass set parameters
+                if (
+                    abs(calc_cum_elevation_between_pois(data, prev_poi, poi))
+                    >= min_elevation_diff_slope
+                ):
+                    ascent_boundaries.append((prev_poi, poi))
             if prev_poi in self.peaks[n_segment] and poi in self.valleys[n_segment]:
                 logger.debug("Descent with boundaries: %s - %s", prev_poi, poi)
-                # if (
-                #     abs(calc_cum_elevation_between_pois(data, prev_poi, poi))
-                #     >= min_elevation_diff_slope
-                # ):
-                descent_boundaries.append((prev_poi, poi))
+                # Same check as for ascents
+                if (
+                    abs(calc_cum_elevation_between_pois(data, prev_poi, poi))
+                    >= min_elevation_diff_slope
+                ):
+                    descent_boundaries.append((prev_poi, poi))
             prev_poi = poi
         self.ascent_boundaries[n_segment] = ascent_boundaries
         self.descent_boundaries[n_segment] = descent_boundaries
-
-        print("ballo")
 
     def find_peaks_valleys(
         self,
