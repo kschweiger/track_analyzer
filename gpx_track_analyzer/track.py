@@ -482,13 +482,20 @@ class Track(ABC):
         min_elevation_diff_in_section: float = 50,  # TODO: Class Attr?
         max_flat_distance_in_section: float = 10,  # TODO: Class Attr?
         min_elevation_diff_slope: float = 10,  # TODO: Class Attr?
+        debug: bool = True,
     ) -> None:
         """
         Find peaks and valleys in the track and save them as class attributes
 
         Args:
-            segment_data:
-            n_segment:
+            segment_data: Data of the segment (from get_segment_data method). If None
+                          is passed, the data will be retrieved based on the passed
+                          value of n_segment.
+            n_segment: Segment in the track to be analyzed
+            min_elevation_diff_in_section:
+            max_flat_distance_in_section:
+            min_elevation_diff_slope:
+            debug: Enables additional debug logging msgs
         """
         logger.debug("Finding peaks and valleys. Using:")
         logger.debug(
@@ -552,9 +559,27 @@ class Track(ABC):
             cum_distance += rcrd["distance_2d"]
             prev_cum_elevation = cum_elevation
             cum_elevation += elevation_diff
-            if abs(cum_elevation) >= min_elevation_diff_slope:
+            if abs(cum_elevation) >= min_elevation_diff_in_section:
                 reset = False
-                if prev_cum_elevation > cum_elevation >= min_elevation_diff_in_section:
+                if (
+                    prev_cum_elevation - cum_elevation
+                ) > 0.9 and cum_elevation >= min_elevation_diff_in_section:
+                    if debug:
+                        logger.debug("Found peak:")
+                        logger.debug(
+                            "  idx: %s, distance: %s, elevation: %s", idx, dist, ele
+                        )
+                        logger.debug("  cum_distance: %s", cum_distance)
+                        logger.debug("  cum_distance_flat: %s", cum_distance_flat)
+                        logger.debug("  last_poi_was_peak: %s", last_poi_was_peak)
+                        logger.debug("  prev_cum_elevation: %s", prev_cum_elevation)
+                        logger.debug("  cum_elevation: %s", cum_elevation)
+                        logger.debug(
+                            "  prev_cum_ele - cum_ele: %s",
+                            prev_cum_elevation - cum_elevation,
+                        )
+                        logger.debug("  prev_poi_idx: %s", prev_poi_idx)
+                        logger.debug("  prev_poi_elevation: %s", prev_poi_elevation)
                     if not last_poi_was_peak:
                         peaks.append(idx - 1)
                         if prev_poi_idx not in valleys:
@@ -565,11 +590,25 @@ class Track(ABC):
                     last_poi_was_peak = True
                     last_poi_was_valley = False
                     reset = True
-                if (
-                    prev_cum_elevation
-                    < cum_elevation
-                    < (-1 * min_elevation_diff_in_section)
+                if (prev_cum_elevation - cum_elevation) < -0.9 and cum_elevation < (
+                    -1 * min_elevation_diff_in_section
                 ):
+                    if debug:
+                        logger.debug("Found Valley:")
+                        logger.debug(
+                            "  idx: %s, distance: %s, elevation: %s", idx, dist, ele
+                        )
+                        logger.debug("  cum_distance: %s", cum_distance)
+                        logger.debug("  cum_distance_flat: %s", cum_distance_flat)
+                        logger.debug("  last_poi_was_peak: %s", last_poi_was_peak)
+                        logger.debug("  prev_cum_elevation: %s", prev_cum_elevation)
+                        logger.debug("  cum_elevation: %s", cum_elevation)
+                        logger.debug(
+                            "  prev_cum_ele - cum_ele: %s",
+                            prev_cum_elevation - cum_elevation,
+                        )
+                        logger.debug("  prev_poi_idx: %s", prev_poi_idx)
+                        logger.debug("  prev_poi_elevation: %s", prev_poi_elevation)
                     if not last_poi_was_valley:
                         valleys.append(idx - 1)
                         if prev_poi_idx not in peaks:
@@ -590,7 +629,7 @@ class Track(ABC):
 
             if (
                 cum_distance_flat >= max_flat_distance_in_section
-                and abs(cum_elevation) <= min_elevation_diff_in_section
+                and abs(cum_elevation) <= 15
             ):
                 cum_distance = 0
                 cum_elevation = 0

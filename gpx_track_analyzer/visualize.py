@@ -26,6 +26,7 @@ def plot_track_2d(
     valleys: Optional[List[int]] = None,
     ascents: Optional[List[Tuple[int, int]]] = None,
     descents: Optional[List[Tuple[int, int]]] = None,
+    idx_x_axis: bool = False,
 ) -> Figure:
     mask = data.moving
     if strict_data_selection:
@@ -36,7 +37,7 @@ def plot_track_2d(
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     fig.add_trace(
         go.Scatter(
-            x=data_for_plot.cum_distance_moving,
+            x=data_for_plot.index if idx_x_axis else data_for_plot.cum_distance_moving,
             y=data_for_plot.elevation,
             mode="lines",
             name="Elevation [m]",
@@ -56,15 +57,20 @@ def plot_track_2d(
     if valleys is not None:
         for v in valleys:
             fig.add_vline(
-                x=data_for_plot.iloc[v].cum_distance_moving,
+                x=data_for_plot.iloc[v].name
+                if idx_x_axis
+                else data_for_plot.iloc[v].cum_distance_moving,
                 line_width=2,
                 line_dash="dash",
                 line_color="green",
             )
     if peaks is not None:
         for p in peaks:
+
             fig.add_vline(
-                x=data_for_plot.iloc[p].cum_distance_moving,
+                x=data_for_plot.iloc[p].name
+                if idx_x_axis
+                else data_for_plot.iloc[p].cum_distance_moving,
                 line_width=2,
                 line_dash="dash",
                 line_color="orange",
@@ -75,7 +81,9 @@ def plot_track_2d(
             left_bound, right_bound = descent
             fig.add_trace(
                 go.Scatter(
-                    x=data_for_plot.iloc[left_bound:right_bound].cum_distance_moving,
+                    x=data_for_plot.iloc[left_bound:right_bound].index
+                    if idx_x_axis
+                    else data_for_plot.iloc[left_bound:right_bound].cum_distance_moving,
                     y=data_for_plot.iloc[left_bound:right_bound].elevation,
                     mode="lines",
                     name="Elevation [m]",
@@ -89,7 +97,9 @@ def plot_track_2d(
             left_bound, right_bound = ascent
             fig.add_trace(
                 go.Scatter(
-                    x=data_for_plot.iloc[left_bound:right_bound].cum_distance_moving,
+                    x=data_for_plot.iloc[left_bound:right_bound].index
+                    if idx_x_axis
+                    else data_for_plot.iloc[left_bound:right_bound].cum_distance_moving,
                     y=data_for_plot.iloc[left_bound:right_bound].elevation,
                     mode="lines",
                     name="Elevation [m]",
