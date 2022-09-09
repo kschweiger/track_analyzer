@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 from gpx_track_analyzer.enhancer import OpenElevationEnhancer, OpenTopoElevationEnhancer
@@ -33,6 +35,7 @@ def test_opentopo_elevation_enhancer():
     assert ret_data == [44.59263610839844, 113.41450500488281]
 
 
+@pytest.mark.skipif(os.environ.get("TEST_ENV") == "CI", reason="Not tested on CI")
 def test_opentopo_elevation_enhancer_splitting():
     enhancer = OpenTopoElevationEnhancer()
 
