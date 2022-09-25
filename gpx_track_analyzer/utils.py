@@ -1,12 +1,18 @@
 import logging
 from datetime import timedelta
 from math import asin, atan2, cos, degrees, pi, sin, sqrt
-from typing import Callable, List, Optional, Tuple, Union
 
 import coloredlogs
 import numpy as np
 from gpxpy.gpx import GPXTrackPoint
+from copy import deepcopy
+from typing import Any, Callable, Optional, List, Tuple, Union
 
+import coloredlogs
+import pandas as pd
+
+from gpx_track_analyzer.enums import SegmentCharacter
+from gpx_track_analyzer.find_line_segments import MergedStepResult
 from gpx_track_analyzer.model import ElevationMetrics, Position2D, Position3D
 
 logger = logging.getLogger(__name__)
@@ -193,3 +199,54 @@ def interpolate_linear(
         )
 
     return ret_points
+def find_min_max_in_segements(
+    segements: List[MergedStepResult], data: pd.DataFrame, val_col: str
+):
+    data_for_func_call = []
+    for segment in segements:
+        start_idx, end_idx = segment.idx
+        data_for_func_call.append(
+            (
+                (start_idx, data.iloc[start_idx][val_col]),
+                (end_idx, data.iloc[end_idx][val_col]),
+                segment.character,
+            )
+        )
+
+    find_min_max(data_for_func_call)
+
+
+def find_min_max(
+    data: List[Tuple[Tuple[int, float], Tuple[int, float], SegmentCharacter]]
+) -> List[int]:
+    def find(
+        data: List[Tuple[Tuple[int, float], Tuple[int, float], SegmentCharacter]],
+        comp_func: Callable,
+    ):
+        for ss, se, c in data:
+            ...
+
+    ...
+
+
+class ResettingDict:
+    def __init__(self, keys: List[str], default_value: Any):
+        self._base_dict = {key: default_value for key in keys}
+        self.dict = deepcopy(self._base_dict)
+
+    def reset(self):
+        self.dict = deepcopy(self._base_dict)
+
+    def add(self, key, value):
+        self.dict[key] += value
+
+
+class ResettingListDict(ResettingDict):
+    def __init__(self, keys: List[str]):
+        super().__init__(keys, [])
+
+    def append(self, key, value):
+        self.dict[key].append(value)
+
+    def extend(self, key, values):
+        self.dict[key].extend(values)

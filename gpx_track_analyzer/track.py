@@ -2,6 +2,8 @@ import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
+from collections import defaultdict
+from copy import deepcopy
 
 import gpxpy
 import numpy as np
@@ -12,8 +14,16 @@ from gpx_track_analyzer.exceptions import (
     TrackInitializationException,
     TrackTransformationException,
 )
-from gpx_track_analyzer.model import Position3D, SegmentOverview
 from gpx_track_analyzer.utils import calc_elevation_metrics, interpolate_linear
+from gpx_track_analyzer.enums import SegmentCharacter
+from gpx_track_analyzer.find_line_segments import (
+    MergedStepResult,
+    StepResult,
+    find_line_segments,
+    merge_merged_step_result,
+    merge_step_result,
+)
+from gpx_track_analyzer.model import Chunk, Position3D, SegmentOverview
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +41,11 @@ class Track(ABC):
         self.max_speed_percentile = max_speed_percentile
 
         # Features computed from the tracks
-        self.ascent_boundaries: Dict[int, List[Tuple[int, int]]] = {}
-        self.descent_boundaries: Dict[int, List[Tuple[int, int]]] = {}
+        self.ascent_boundaries: Dict[int, List[Tuple[int, int]]] = defaultdict(list)
+        self.descent_boundaries: Dict[int, List[Tuple[int, int]]] = defaultdict(list)
+
+        self.ascent_chunks: Dict[int, List[Chunk]] = defaultdict(list)
+        self.descent_chunks: Dict[int, List[Chunk]] = defaultdict(list)
 
         self.peaks: Dict[int, List[int]] = {}
         self.valleys: Dict[int, List[int]] = {}
@@ -127,7 +140,12 @@ class Track(ABC):
         self,
         n_segment: int = 0,
         include_all_points: bool = False,
+        reduce_points: bool = False,
     ):
+        seg = deepcopy(self.track.segments[n_segment])
+        if reduce_points:
+            logger.debug("Simplifying track")
+            seg.reduce_points(min_distance=50)
         (
             time,
             distance,
@@ -135,7 +153,7 @@ class Track(ABC):
             stopped_distance,
             data,
         ) = self._get_processed_data_for_segment(
-            self.track.segments[n_segment],
+            seg,
             self.stopped_speed_threshold,
             include_all_points,
         )
@@ -251,7 +269,9 @@ class Track(ABC):
             "distance": [],
             "distance_2d": [],
             "cum_distance": [],
+            "cum_distance_2d": [],
             "cum_distance_moving": [],
+            "cum_distance_moving_2d": [],
             "cum_distance_stopped": [],
             "moving": [],
         }
@@ -292,6 +312,8 @@ class Track(ABC):
 
         cum_distance = 0
         cum_moving = 0
+        cum_distance_2d = 0
+        cum_moving_2d = 0
         cum_stopped = 0
 
         if include_all_points:
@@ -302,7 +324,9 @@ class Track(ABC):
             data["distance"].append(None)
             data["distance_2d"].append(None)
             data["cum_distance"].append(None)
+            data["cum_distance_2d"].append(None)
             data["cum_distance_moving"].append(None)
+            data["cum_distance_moving_2d"].append(None)
             data["cum_distance_stopped"].append(None)
             data["moving"].append(None)
 
@@ -338,11 +362,15 @@ class Track(ABC):
                             time += seconds
                             distance += point_distance
                             cum_moving += point_distance
+                            cum_moving_2d += point_distance_2d
                             data["moving"].append(True)
 
                         cum_distance += point_distance
+                        cum_distance_2d += point_distance_2d
                         data["cum_distance"].append(cum_distance)
                         data["cum_distance_moving"].append(cum_moving)
+                        data["cum_distance_2d"].append(cum_distance_2d)
+                        data["cum_distance_moving_2d"].append(cum_moving_2d)
                         data["cum_distance_stopped"].append(cum_stopped)
 
                         if not is_stopped:
@@ -407,6 +435,270 @@ class Track(ABC):
 
         return distance, data
 
+    def find_ascents_descents_b(
+        self,
+        segment_data: Optional[pd.DataFrame],
+        n_segment: int = 0,
+        line_delay: int = 10,
+        line_slope_merge_tolerance: float = 0.75,
+        flat_slope_threshold: float = 1.0,
+        merge_short_segments: float = 150,
+        include_short_segments_up_to: float = 350,
+        include_in_chunk_up_to: float = 500,
+    ):
+        """
+
+        Args:
+            segment_data:
+            n_segment:
+            line_delay: Delay (in points) used in the line finding to stop the iteration
+                        after finding a best fitting line for a segment
+            line_slope_merge_tolerance: Slope tolerance use the initially merge
+                                        consecutive segments in degrees. E.g. pass 0.5
+                                        means that consecutive segments withing a 0.5°
+                                        band around the slope of the first segment will
+                                        be merged into one segment.
+            flat_slope_threshold: Absolute value in degrees used to determine if a
+                                  segment is flat, ascend, or descend. E.g. passing 1
+                                  means that segments with sloped between -1° and 1° are
+                                  considered flat.
+            merge_short_segments: Define a maximum length of "short" segments.Will be
+                                  used to merge short intermediate segments
+            include_short_segments_up_to: Define a minimum lengths of segments. If a
+                                          segment is shorter than the passed value, it
+                                          is added to the next segment.
+
+        Returns:
+
+        """
+        if segment_data is None:
+            segment_data = self.get_segment_data(
+                n_segment, False, True, simplify_segment=True
+            )
+
+        data = segment_data[segment_data.moving].copy()
+
+        # First: Get all segments that fit a line -->  This can be a lot
+        results = find_line_segments(
+            data=data,
+            x="cum_distance_moving_2d",
+            y="elevation",
+            delay=line_delay,
+            merge_slope_tolerance=line_slope_merge_tolerance,
+        )
+
+        # Second: Now we want to reduce these segments to large segments that are flat,
+        #         ascending, or descending.
+        def check_step_character(
+            step: StepResult, threshold: float
+        ) -> SegmentCharacter:
+            if abs(step.slope) <= threshold:
+                return SegmentCharacter.FLAT
+            if step.slope < 0:
+                return SegmentCharacter.DECENT
+            else:
+                return SegmentCharacter.ASCENT
+
+        segments: List[MergedStepResult] = []
+        last_segment_character = check_step_character(results[0], flat_slope_threshold)
+        merge_results = [results[0]]
+        for res in results[1:]:
+            this_character = check_step_character(res, flat_slope_threshold)
+            if this_character == last_segment_character:
+                merge_results.append(res)
+            else:
+                merged_segment = merge_step_result(merge_results)
+
+                ss, se = merged_segment.idx
+                segments.append(
+                    MergedStepResult(
+                        score=merged_segment.score,
+                        slope=merged_segment.slope,  # TODO: Change to Mean slope?
+                        mean_slope=sum([r.slope for r in merge_results])
+                        / len(merge_results),
+                        length=data["cum_distance_moving_2d"].iloc[se]
+                        - data["cum_distance_moving_2d"].iloc[ss],
+                        idx=merged_segment.idx,
+                        params=merged_segment.params,
+                        merged_results=merge_results,
+                        character=last_segment_character,
+                    )
+                )
+                last_segment_character = this_character
+                merge_results = [res]
+        if merge_results:
+            merged_segment = merge_step_result(merge_results)
+            ss, se = merged_segment.idx
+            segments.append(
+                MergedStepResult(
+                    score=merged_segment.score,
+                    slope=merged_segment.slope,  # TODO: Change to Mean slope?
+                    mean_slope=sum([r.slope for r in merge_results])
+                    / len(merge_results),
+                    length=data["cum_distance_moving_2d"].iloc[se]
+                    - data["cum_distance_moving_2d"].iloc[ss],
+                    idx=merged_segment.idx,
+                    params=merged_segment.params,
+                    merged_results=merge_results,
+                    character=last_segment_character,
+                )
+            )
+        # Third: In a last step, "transition segments" should be identified and merged
+        #        into the outer segments
+        final_segments_indices: List[List[int]] = []
+        segments_2_merge = []
+        segments_2_merge_len = 0
+        for i, segment in enumerate(segments):
+            if segment.length > merge_short_segments:
+                if segments_2_merge:
+                    if segments_2_merge_len >= include_short_segments_up_to:
+                        final_segments_indices.append(segments_2_merge)
+                        final_segments_indices.append([i])
+                    else:
+                        # TODO: Might have to calc character weighed by lengths
+                        char_len = {}
+                        mc_character = None
+                        max_len = -99
+                        for character in SegmentCharacter:
+                            this_len = sum(
+                                [
+                                    segments[j].length
+                                    for j in segments_2_merge
+                                    if segments[j].character == character
+                                ]
+                            )
+                            if this_len >= max_len:
+                                max_len = this_len
+                                mc_character = character
+
+                        # mc_character, _ = Counter(
+                        #     [segments[j].character for j in segments_2_merge]
+                        # ).most_common(1)[0]
+                        if segment.character == mc_character:
+                            final_segments_indices.append(segments_2_merge + [i])
+                        else:
+                            final_segments_indices[-1].extend(segments_2_merge)
+                            final_segments_indices.append([i])
+                    segments_2_merge_len = 0
+                    segments_2_merge = []
+                else:
+                    final_segments_indices.append([i])
+            else:
+                segments_2_merge_len += segment.length
+                segments_2_merge.append(i)
+
+        final_segments = []
+        for indices in final_segments_indices:
+            if len(indices) == 1:
+                final_segments.append(segments[indices[0]])
+            else:
+                merge_segements = [segments[ind] for ind in indices]
+                final_segments.append(
+                    merge_merged_step_result(
+                        merge_segements,
+                        data=data,
+                        x="cum_distance_moving_2d",
+                        y="elevation",
+                        flat_threshold=flat_slope_threshold,
+                    )
+                )
+
+        # Chunking
+        chunks: List[Chunk] = []
+        merge_to_chunk: List[int] = []
+        prev_character = SegmentCharacter.FLAT
+        chunk_len = 0
+        for i, final_segment in enumerate(final_segments):
+            if not merge_to_chunk:
+                merge_to_chunk.append(i)
+                chunk_len = final_segment.length
+                prev_character = final_segment.character
+                continue
+
+            if final_segment.character == prev_character:
+                chunk_len += final_segment.length
+                merge_to_chunk.append(i)
+            else:
+                merge_prev = False
+                ic = len(chunks)
+                try:
+                    merge_prev = (
+                        chunks[ic - 2].character == prev_character
+                        and chunks[ic - 1].length <= include_in_chunk_up_to
+                    )
+                except IndexError:
+                    pass
+
+                if merge_prev:
+                    chunks.append(
+                        Chunk(
+                            chunks[ic - 2].ids + chunks[ic - 1].ids + merge_to_chunk,
+                            chunks[ic - 2].length + chunks[ic - 1].length + chunk_len,
+                            prev_character,
+                        )
+                    )
+                    chunks.pop(ic - 2)
+                    chunks.pop(ic - 2)
+                else:
+                    chunks.append(Chunk(merge_to_chunk, chunk_len, prev_character))
+                prev_character = final_segment.character
+                chunk_len = final_segment.length
+                merge_to_chunk = [i]
+        if merge_to_chunk:
+            chunks.append(Chunk(merge_to_chunk, chunk_len, prev_character))
+
+        for chunk in chunks:
+            if chunk.length > 1500:
+                if chunk.character == SegmentCharacter.ASCENT:
+                    self.ascent_chunks[n_segment].append(chunk)
+                    self.ascent_boundaries[n_segment].append(
+                        (
+                            final_segments[chunk.ids[0]].idx[0],
+                            final_segments[chunk.ids[-1]].idx[-1],
+                        )
+                    )
+                elif chunk.character == SegmentCharacter.DECENT:
+                    self.descent_chunks[n_segment].append(chunk)
+                    self.descent_boundaries[n_segment].append(
+                        (
+                            final_segments[chunk.ids[0]].idx[0],
+                            final_segments[chunk.ids[-1]].idx[-1],
+                        )
+                    )
+
+        # TEMP
+        from matplotlib import pyplot as plt
+
+        def calc_line(values, a, b):
+            line_vals = []
+            for val, _ in values:
+                line_vals.append((a * val) + b)
+
+            return line_vals
+
+        values = [
+            (r["cum_distance_moving_2d"], r["elevation"])
+            for r in data.to_dict("records")
+        ]
+        plt.plot([v[0] for v in values], [v[1] for v in values], "x")
+        for res in final_segments:
+            # a, b = res.params
+            # line = calc_line(values, a, b)
+            # plt.plot([v[0] for v in values], line)
+            s, e = res.idx
+            plt.vlines(data.iloc[s].cum_distance_moving_2d, 360, 550)
+            plt.vlines(data.iloc[e].cum_distance_moving_2d, 360, 550, colors="orange")
+        for c in chunks:
+            chunk = c.ids
+            ss, es = chunk[0], chunk[-1]
+            s, _ = final_segments[ss].idx
+            _, e = final_segments[es].idx
+            plt.vlines(data.iloc[s].cum_distance_moving_2d, 360, 550, colors="pink")
+            plt.vlines(data.iloc[e].cum_distance_moving_2d, 360, 550, colors="red")
+        plt.show()
+
+        return None
+
     def find_ascents_descents(
         self,
         segment_data: Optional[pd.DataFrame],
@@ -416,7 +708,9 @@ class Track(ABC):
         min_elevation_diff_slope: float = 10,  # TODO: Class Attr?
     ) -> None:
         if segment_data is None:
-            segment_data = self.get_segment_data(n_segment, False, True)
+            segment_data = self.get_segment_data(
+                n_segment, False, True, reduce_points=True
+            )
 
         self.find_peaks_valleys(
             segment_data,
@@ -507,7 +801,9 @@ class Track(ABC):
         logger.debug("  min_elevation_diff_slope : %s", min_elevation_diff_slope)
 
         if segment_data is None:
-            segment_data = self.get_segment_data(n_segment, False, True)
+            segment_data = self.get_segment_data(
+                n_segment, False, True, simplify_segment=True
+            )
 
         peaks = []
         valleys = []
@@ -563,7 +859,7 @@ class Track(ABC):
                 reset = False
                 if (
                     prev_cum_elevation - cum_elevation
-                ) > 0.9 and cum_elevation >= min_elevation_diff_in_section:
+                ) > 1.5 and cum_elevation >= min_elevation_diff_in_section:
                     if debug:
                         logger.debug("Found peak:")
                         logger.debug(
@@ -590,7 +886,7 @@ class Track(ABC):
                     last_poi_was_peak = True
                     last_poi_was_valley = False
                     reset = True
-                if (prev_cum_elevation - cum_elevation) < -0.9 and cum_elevation < (
+                if (prev_cum_elevation - cum_elevation) < -1.5 and cum_elevation < (
                     -1 * min_elevation_diff_in_section
                 ):
                     if debug:

@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
 
+from gpx_track_analyzer.enums import SegmentCharacter
+
 
 @dataclass
 class Position2D:
@@ -76,3 +78,10 @@ class SegmentOverview:
         self.avg_velocity_kmh = (
             None if self.avg_velocity is None else 3.6 * self.avg_velocity
         )
+
+
+@dataclass
+class Chunk:
+    ids: List[int]
+    length: float
+    character: SegmentCharacter

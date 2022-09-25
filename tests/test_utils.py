@@ -2,12 +2,14 @@ from math import asin, degrees, isclose
 
 import numpy as np
 import pytest
+from enums import SegmentCharacter
 
 from gpx_track_analyzer.model import Position2D, Position3D
 from gpx_track_analyzer.utils import (
     calc_elevation_metrics,
     center_geolocation,
     distance,
+    find_min_max,
 )
 
 
@@ -79,3 +81,24 @@ def test_center_geolocation(coords, exp_lat, exp_lon):
     ret_lat, ret_lon = center_geolocation(coords)
     assert isclose(ret_lat, exp_lat)
     assert isclose(ret_lon, exp_lon)
+
+
+@pytest.mark.parametrize(
+    ("data", "exp_min_max"),
+    [
+        # ---------------------------------------------------
+        (
+            [
+                ((0, 300), (10, 350), SegmentCharacter.ASCENT),
+                ((10, 350), (20, 400), SegmentCharacter.ASCENT),
+                ((20, 400), (30, 350), SegmentCharacter.DECENT),
+                ((30, 350), (40, 320), SegmentCharacter.DECENT),
+            ],
+            [0, 20, 40],
+        ),
+        # ---------------------------------------------------
+        # ([], []),
+    ],
+)
+def test_find_min_max(data, exp_min_max):
+    assert exp_min_max == find_min_max(data)
