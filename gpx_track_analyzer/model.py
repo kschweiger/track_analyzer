@@ -51,8 +51,8 @@ class SegmentOverview:
     moving_distance: float
     total_distance: float
 
-    max_velocity: float
-    avg_velocity: float
+    max_velocity: Optional[float]
+    avg_velocity: Optional[float]
 
     max_elevation: Optional[float]
     min_elevation: Optional[float]
@@ -61,13 +61,18 @@ class SegmentOverview:
     downhill_elevation: Optional[float]
 
     # Attributes that will be calculated from primary attributes
-    moving_distance_km: float = field(init=False)
-    total_distance_km: float = field(init=False)
-    max_velocity_kmh: float = field(init=False)
-    avg_velocity_kmh: float = field(init=False)
+    moving_distance_km: Optional[float] = field(init=False)
+    total_distance_km: Optional[float] = field(init=False)
+    max_velocity_kmh: Optional[float] = field(init=False)
+    avg_velocity_kmh: Optional[float] = field(init=False)
 
     def __post_init__(self):
+
         self.moving_distance_km = self.moving_distance / 1000
         self.total_distance_km = self.total_distance / 1000
-        self.max_velocity_kmh = 3.6 * self.max_velocity
-        self.avg_velocity_kmh = 3.6 * self.avg_velocity
+        self.max_velocity_kmh = (
+            None if self.max_velocity is None else 3.6 * self.max_velocity
+        )
+        self.avg_velocity_kmh = (
+            None if self.avg_velocity is None else 3.6 * self.avg_velocity
+        )

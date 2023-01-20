@@ -1,12 +1,14 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Tuple, Union
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import gpxpy
 import numpy as np
 import pandas as pd
-from gpxpy.gpx import GPX, GPXTrack, GPXTrackSegment
+from gpxpy.gpx import GPX, GPXTrack, GPXTrackPoint, GPXTrackSegment
 
+from gpx_track_analyzer.exceptions import TrackInitializationException
 from gpx_track_analyzer.model import Position3D, SegmentOverview
 from gpx_track_analyzer.utils import calc_elevation_metrics
 
@@ -56,10 +58,14 @@ class Track(ABC):
         total_time = time + stopped_time
         total_distance = distance + stopped_distance
 
-        data = self._apply_outlier_cleaning(data)
+        max_speed = None
+        avg_speed = None
 
-        max_speed = data.speed[data.in_speed_percentile].max()
-        avg_speed = data.speed[data.in_speed_percentile].mean()
+        if self.track.segments[n_segment].has_times():
+            data = self._apply_outlier_cleaning(data)
+
+            max_speed = data.speed[data.in_speed_percentile].max()
+            avg_speed = data.speed[data.in_speed_percentile].mean()
 
         max_elevation = None
         min_elevation = None
@@ -95,7 +101,7 @@ class Track(ABC):
 
         return overview
 
-    def get_segment_data(self, n_segment: int = 0):
+    def get_segment_data(self, n_segment: int = 0) -> pd.DataFrame:
         (
             time,
             distance,
@@ -106,7 +112,8 @@ class Track(ABC):
             self.track.segments[n_segment], self.stopped_speed_threshold
         )
 
-        data = self._apply_outlier_cleaning(data)
+        if self.track.segments[n_segment].has_times():
+            data = self._apply_outlier_cleaning(data)
 
         return data
 
@@ -142,12 +149,6 @@ class Track(ABC):
 
         """
 
-        time = 0.0
-        stopped_time = 0.0
-
-        distance = 0.0
-        stopped_distance = 0.0
-
         threshold_ms = stopped_speed_threshold / 3.6
 
         data: Dict[str, List[Optional[Union[float, bool]]]] = {
@@ -161,6 +162,32 @@ class Track(ABC):
             "cum_distance_stopped": [],
             "moving": [],
         }
+
+        if segment.has_times():
+            (
+                time,
+                distance,
+                stopped_time,
+                stopped_distance,
+                data,
+            ) = self._get_processed_data_w_time(segment, data, threshold_ms)
+        else:
+            distance, data = self._get_processed_data_wo_time(segment, data)
+            time, stopped_distance, stopped_time = 0, 0, 0
+
+        data_df = pd.DataFrame(data)
+
+        return (time, distance, stopped_time, stopped_distance, data_df)
+
+    def _get_processed_data_w_time(
+        self, segment: GPXTrackSegment, data: Dict[str, List[Any]], threshold_ms: float
+    ) -> Tuple[float, float, float, float, Dict[str, List[Any]]]:
+
+        time = 0.0
+        stopped_time = 0.0
+
+        distance = 0.0
+        stopped_distance = 0.0
 
         cum_distance = 0
         cum_moving = 0
@@ -216,9 +243,37 @@ class Track(ABC):
                             data["latitude"].append(None)
                             data["longitude"].append(None)
                             data["elevation"].append(None)
+        return time, distance, stopped_time, stopped_distance, data
 
-        data_df = pd.DataFrame(data)
-        return (time, distance, stopped_time, stopped_distance, data_df)
+    def _get_processed_data_wo_time(
+        self, segment: GPXTrackSegment, data: Dict[str, List[Any]]
+    ) -> Tuple[float, Dict[str, List[Any]]]:
+        cum_distance = 0
+        distance = 0.0
+        for previous, point in zip(segment.points, segment.points[1:]):
+            if point.elevation and previous.elevation:
+                point_distance = point.distance_3d(previous)
+            else:
+                point_distance = point.distance_2d(previous)
+            if point_distance is not None:
+                distance += point_distance
+
+                data["distance"].append(point_distance)
+                data["latitude"].append(point.latitude)
+                data["longitude"].append(point.longitude)
+                if point.has_elevation():
+                    data["elevation"].append(point.elevation)
+                else:
+                    data["elevation"].append(None)
+
+                cum_distance += point_distance
+                data["cum_distance"].append(cum_distance)
+                data["cum_distance_moving"].append(None)
+                data["cum_distance_stopped"].append(None)
+                data["speed"].append(None)
+                data["moving"].append(None)
+
+        return distance, data
 
 
 class FileTrack(Track):
@@ -256,6 +311,52 @@ class ByteTrack(Track):
         gpx = gpxpy.parse(bytefile)
 
         self._track = gpx.tracks[n_track]
+
+    @property
+    def track(self) -> GPXTrack:
+        return self._track
+
+
+class PyTrack(Track):
+    def __init__(
+        self,
+        points: List[Tuple[float, float]],
+        elevations: Optional[List[float]],
+        times: Optional[List[datetime]],
+        **kwargs
+    ):
+        super().__init__(**kwargs)
+
+        if elevations is not None:
+            if len(points) != len(elevations):
+                raise TrackInitializationException(
+                    "Different number of points and elevations was passed"
+                )
+            elevations_ = elevations
+        else:
+            elevations_ = len(points) * [None]
+
+        if times is not None:
+            if len(points) != len(times):
+                raise TrackInitializationException(
+                    "Different number of points and times was passed"
+                )
+            times_ = times
+        else:
+            times_ = len(points) * [None]
+
+        gpx = GPX()
+
+        gpx_track = GPXTrack()
+        gpx.tracks.append(gpx_track)
+
+        gpx_segment = GPXTrackSegment()
+        gpx_track.segments.append(gpx_segment)
+
+        for (lat, lng), ele, time in zip(points, elevations_, times_):
+            gpx_segment.points.append(GPXTrackPoint(lat, lng, elevation=ele, time=time))
+
+        self._track = gpx.tracks[0]
 
     @property
     def track(self) -> GPXTrack:

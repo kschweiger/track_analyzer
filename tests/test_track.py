@@ -2,10 +2,13 @@ from datetime import datetime
 from unittest.mock import MagicMock
 
 import gpxpy
+import pandas as pd
 import pytest
+from gpxpy.gpx import GPXTrack
 
+from gpx_track_analyzer.exceptions import TrackInitializationException
 from gpx_track_analyzer.model import SegmentOverview
-from gpx_track_analyzer.track import FileTrack
+from gpx_track_analyzer.track import FileTrack, PyTrack
 
 
 @pytest.fixture()
@@ -54,3 +57,61 @@ def test_track(mocker, generate_mock_track):
     track = MockedFileTrack("bogus_file_name.gpx")
     segment_overview = track.get_segment_overview(0)
     assert isinstance(segment_overview, SegmentOverview)
+
+
+@pytest.mark.parametrize(
+    ("points", "elevations", "time"),
+    [
+        ([(50, 50), (51, 51), (52, 52)], None, None),
+        ([(50, 50), (51, 51), (52, 52)], [100, 200, 300], None),
+        (
+            [(50, 50), (51, 51), (52, 52)],
+            None,
+            [
+                datetime(2023, 1, 1, 10),
+                datetime(2023, 1, 1, 11),
+                datetime(2023, 1, 1, 12),
+            ],
+        ),
+        (
+            [(50, 50), (51, 51), (52, 52)],
+            [100, 200, 300],
+            [
+                datetime(2023, 1, 1, 10),
+                datetime(2023, 1, 1, 11),
+                datetime(2023, 1, 1, 12),
+            ],
+        ),
+    ],
+)
+def test_py_track(points, elevations, time):
+    track = PyTrack(points, elevations, time)
+
+    assert isinstance(track.track, GPXTrack)
+
+    data = track.get_segment_data()
+
+    assert isinstance(data, pd.DataFrame)
+
+    overview = track.get_segment_overview()
+
+    assert isinstance(overview, SegmentOverview)
+
+
+@pytest.mark.parametrize(
+    ("points", "elevations", "time"),
+    [
+        ([(50, 50), (51, 51), (52, 52)], [100, 200], None),
+        (
+            [(50, 50), (51, 51), (52, 52)],
+            None,
+            [
+                datetime(2023, 1, 1, 10),
+                datetime(2023, 1, 1, 11),
+            ],
+        ),
+    ],
+)
+def test_py_track_init_exceptions(points, elevations, time):
+    with pytest.raises(TrackInitializationException):
+        PyTrack(points, elevations, time)

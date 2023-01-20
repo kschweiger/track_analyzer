@@ -8,3 +8,7 @@ class APIHealthCheckFailedException(Exception):
 
 class APIDataNotAvailableException(Exception):
     pass
+
+
+class TrackInitializationException(Exception):
+    pass
