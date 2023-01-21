@@ -271,7 +271,7 @@ class Track(ABC):
                 data["cum_distance_moving"].append(None)
                 data["cum_distance_stopped"].append(None)
                 data["speed"].append(None)
-                data["moving"].append(None)
+                data["moving"].append(True)
 
         return distance, data
 
