@@ -48,7 +48,7 @@ def test_opentopo_elevation_enhancer_splitting():
 
 
 def enhancer_test_track(mocker, inplace):
-    enhancer = OpenTopoElevationEnhancer()
+    enhancer = OpenTopoElevationEnhancer(skip_checks=True)
 
     mock_get_data = mocker.Mock()
     mock_get_data.return_value = [250, 275]

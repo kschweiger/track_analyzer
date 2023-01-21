@@ -69,26 +69,28 @@ class OpenTopoElevationEnhancer(ElevationEnhancer):
         url="https://api.opentopodata.org/",
         dataset="eudem25m",
         interpolation="cubic",
+        skip_checks: bool = False,
     ):
         self.base_url = url
         self.url = f"{url}/v1/{dataset}"
         self.interpolation = interpolation
 
-        logger.debug("Doing server health check")
-        try:
-            resp = requests.get(f"{self.base_url}/health")
-        except requests.exceptions.ConnectionError as e:
-            raise APIHealthCheckFailedException(str(e))
-        if resp.status_code != 200:
-            raise APIHealthCheckFailedException(resp.text)
+        if not skip_checks:
+            logger.debug("Doing server health check")
+            try:
+                resp = requests.get(f"{self.base_url}/health")
+            except requests.exceptions.ConnectionError as e:
+                raise APIHealthCheckFailedException(str(e))
+            if resp.status_code != 200:
+                raise APIHealthCheckFailedException(resp.text)
 
-        logger.debug("Doing dataset check")
-        resp = requests.get(f"{self.base_url}/datasets")
-        if resp.status_code != 200:
-            raise APIHealthCheckFailedException(resp.text)
-        datasets = [ds["name"] for ds in resp.json()["results"]]
-        if dataset not in datasets:
-            raise APIDataNotAvailableException("Dataset %s not available" % dataset)
+            logger.debug("Doing dataset check")
+            resp = requests.get(f"{self.base_url}/datasets")
+            if resp.status_code != 200:
+                raise APIHealthCheckFailedException(resp.text)
+            datasets = [ds["name"] for ds in resp.json()["results"]]
+            if dataset not in datasets:
+                raise APIDataNotAvailableException("Dataset %s not available" % dataset)
 
     def get_elevation_data(
         self,
