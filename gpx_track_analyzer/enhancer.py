@@ -13,7 +13,7 @@ from requests.structures import CaseInsensitiveDict
 from gpx_track_analyzer.exceptions import (
     APIDataNotAvailableException,
     APIHealthCheckFailedException,
-    APIResponseExceptions,
+    APIResponseException,
 )
 
 logger = logging.getLogger(__name__)
@@ -23,14 +23,14 @@ class Enhancer(ABC):
     """Base class for GPX Track enhancement"""
 
     @abstractmethod
-    def enhance_track(self, track: GPXTrack) -> GPXTrack:
+    def enhance_track(self, track: GPXTrack, inplace: bool = False) -> GPXTrack:
         pass
 
 
 class ElevationEnhancer(Enhancer):
     """Base class for enhancing GPX Tracks with externally provided elevation data"""
 
-    def enhance_track(self, track: GPXTrack) -> GPXTrack:
+    def enhance_track(self, track: GPXTrack, inplace: bool = False) -> GPXTrack:
         """
         Main method to enhance a passed GPX track with elevation information
 
@@ -40,7 +40,11 @@ class ElevationEnhancer(Enhancer):
         Returns: The enhanced track
 
         """
-        track_ = track.clone()
+        if inplace:
+            track_ = track
+        else:
+            track_ = track.clone()
+
         for segment in track_.segments:
             request_coordinates = []
             for point in segment.points:
@@ -91,7 +95,7 @@ class OpenTopoElevationEnhancer(ElevationEnhancer):
         input_coordinates: List[Tuple[float, float]],
         split_requests: Optional[int] = None,
     ) -> List[float]:
-
+        logger.debug("Getting elevation data")
         if split_requests is None:
             split_input_coord = [input_coordinates]
         else:
@@ -122,7 +126,7 @@ class OpenTopoElevationEnhancer(ElevationEnhancer):
                     ret_elevations.append(res["elevation"])
 
             else:
-                raise APIResponseExceptions(resp.text)
+                raise APIResponseException(resp.text)
 
         return ret_elevations
 
@@ -170,4 +174,13 @@ class OpenElevationEnhancer(ElevationEnhancer):
 
             return ret_elevations
         else:
-            raise APIResponseExceptions(resp.text)
+            raise APIResponseException(resp.text)
+
+
+def get_enhancer(name: str) -> Enhancer:
+    if name == "OpenTopoElevation":
+        return OpenTopoElevationEnhancer
+    elif name == "OpenElevation":
+        return OpenElevationEnhancer
+    else:
+        raise NotImplementedError("Can not return Enhancer for name %s" % name)

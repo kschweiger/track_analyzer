@@ -1,4 +1,4 @@
-class APIResponseExceptions(Exception):
+class APIResponseException(Exception):
     pass
 
 
