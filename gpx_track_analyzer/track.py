@@ -268,7 +268,7 @@ class Track(ABC):
 
                 cum_distance += point_distance
                 data["cum_distance"].append(cum_distance)
-                data["cum_distance_moving"].append(None)
+                data["cum_distance_moving"].append(cum_distance)
                 data["cum_distance_stopped"].append(None)
                 data["speed"].append(None)
                 data["moving"].append(True)
