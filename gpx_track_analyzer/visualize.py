@@ -1,4 +1,5 @@
-from typing import Optional
+import logging
+from typing import List, Optional, Tuple
 
 import pandas as pd
 import plotly.express as px
@@ -8,6 +9,8 @@ from plotly.subplots import make_subplots
 
 from gpx_track_analyzer.utils import center_geolocation
 
+logger = logging.getLogger(__name__)
+
 
 def plot_track_2d(
     data: pd.DataFrame,
@@ -15,6 +18,10 @@ def plot_track_2d(
     strict_data_selection: bool = False,
     height: Optional[int] = 600,
     width: Optional[int] = 1800,
+    pois: Optional[List[Tuple[float, float]]] = None,
+    color_elevation: Optional[str] = None,
+    color_velocity: Optional[str] = None,
+    color_poi: Optional[str] = None,
 ) -> Figure:
     mask = data.moving
     if strict_data_selection:
@@ -60,6 +67,32 @@ def plot_track_2d(
             range=[0, velocities.max() * 2.1],
         )
 
+    if pois is not None:
+        for i_poi, poi in enumerate(pois):
+            lat, lng = poi
+            poi_data = data_for_plot[
+                (data_for_plot.latitude == lat) & (data_for_plot.longitude == lng)
+            ]
+            if poi_data.empty:
+                logger.warning("Could not find POI in data. Skipping")
+                continue
+            poi_x = poi_data.iloc[0].cum_distance_moving
+            poi_y = poi_data.iloc[0].elevation
+
+            fig.add_scatter(
+                name=f"PIO {i_poi} @ {lat} / {lng}",
+                x=[poi_x],
+                y=[poi_y],
+                mode="markers",
+                marker=dict(
+                    size=20,
+                    color="MediumPurple" if color_poi is None else color_poi,
+                    symbol="triangle-up",
+                    standoff=10,
+                    angle=180,
+                ),
+            )
+
     fig.update_layout(
         showlegend=False, autosize=False, margin={"r": 0, "t": 0, "l": 0, "b": 0}
     )
@@ -67,6 +100,19 @@ def plot_track_2d(
         fig.update_layout(height=height)
     if width is not None:
         fig.update_layout(width=width)
+
+    fig.update_xaxes(
+        range=[
+            data_for_plot.iloc[0].cum_distance_moving,
+            data_for_plot.iloc[-1].cum_distance_moving,
+        ]
+    )
+
+    if color_elevation is not None:
+        fig.data[0].marker.color = color_elevation
+    if color_velocity is not None and include_velocity:
+        fig.data[1].marker.color = color_velocity
+
     return fig
 
 
