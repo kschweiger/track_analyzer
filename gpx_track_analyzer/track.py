@@ -10,7 +10,7 @@ from gpxpy.gpx import GPX, GPXTrack, GPXTrackPoint, GPXTrackSegment
 
 from gpx_track_analyzer.exceptions import TrackInitializationException
 from gpx_track_analyzer.model import Position3D, SegmentOverview
-from gpx_track_analyzer.utils import calc_elevation_metrics
+from gpx_track_analyzer.utils import calc_elevation_metrics, interpolate_linear
 
 logger = logging.getLogger(__name__)
 
@@ -116,6 +116,37 @@ class Track(ABC):
             data = self._apply_outlier_cleaning(data)
 
         return data
+
+    def interpolate_points_in_segment(self, spacing: float, n_segment: int = 0) -> None:
+        """
+        Add additdion points to a segment by interpolating along the direct line
+        between each point pair according to the passed spacing parameter
+
+        :param spacing: Minimum distance between points added by the interpolation
+        :param n_segment: segment in the track to use, defaults to 0
+        """
+        init_points = self.track.segments[n_segment].points
+
+        new_segment_points = []
+        for i, (start, end) in enumerate(zip(init_points[:-1], init_points[1:])):
+            new_points = interpolate_linear(
+                start=start,
+                end=end,
+                spacing=spacing,
+            )
+
+            if new_points is None:
+                if i == 0:
+                    new_segment_points.extend([start, end])
+                else:
+                    new_segment_points.extend([end])
+                continue
+
+            if i == 0:
+                new_segment_points.extend(new_points)
+            else:
+                new_segment_points.extend(new_points[1:])
+        self.track.segments[n_segment].points = new_segment_points
 
     def _apply_outlier_cleaning(self, data: pd.DataFrame) -> pd.DataFrame:
 

@@ -10,7 +10,7 @@ class Position2D:
 
 @dataclass
 class Position3D(Position2D):
-    elevation: float
+    elevation: Optional[float]
 
 
 @dataclass

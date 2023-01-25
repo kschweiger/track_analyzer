@@ -9,6 +9,7 @@ from gpxpy.gpx import GPXTrack
 from gpx_track_analyzer.exceptions import TrackInitializationException
 from gpx_track_analyzer.model import SegmentOverview
 from gpx_track_analyzer.track import FileTrack, PyTrack
+from gpx_track_analyzer.utils import init_logging
 
 
 @pytest.fixture()
@@ -115,3 +116,73 @@ def test_py_track(points, elevations, time):
 def test_py_track_init_exceptions(points, elevations, time):
     with pytest.raises(TrackInitializationException):
         PyTrack(points, elevations, time)
+
+
+def test_interpolate_linear_points_in_segment_lat_lng_only():
+    init_logging(10)
+    # Distacne 2d: ~1000m
+    track = PyTrack([(0, 0), (0.0089933, 0)], None, None)
+
+    track.interpolate_points_in_segment(spacing=200)
+
+    assert len(track.track.segments[0].points) == 6
+    for point in track.track.segments[0].points:
+        assert point.elevation is None
+        assert point.time is None
+
+
+def test_interpolate_linear_points_in_segment_no_interpolation():
+    init_logging(10)
+    # Distacne 2d: ~1000m
+    track = PyTrack([(0, 0), (0.0089933, 0)], None, None)
+
+    track.interpolate_points_in_segment(spacing=2000)
+
+    assert len(track.track.segments[0].points) == 2
+
+
+def test_interpolate_linear_points_in_segment_lat_lng_ele():
+    init_logging(10)
+    # Distacne 2d: ~1000m
+    track = PyTrack([(0, 0), (0.0089933, 0)], [100, 200], None)
+
+    track.interpolate_points_in_segment(spacing=200)
+
+    assert len(track.track.segments[0].points) == 6
+    for point in track.track.segments[0].points:
+        assert point.elevation is not None
+        assert point.time is None
+
+
+def test_interpolate_linear_points_in_segment_lat_lng_ele_time():
+    init_logging(10)
+    # Distacne 2d: ~1000m
+    track = PyTrack(
+        [(0, 0), (0.0089933, 0)],
+        [100, 200],
+        [datetime(2023, 1, 1, 10), datetime(2023, 1, 1, 10, 30)],
+    )
+
+    track.interpolate_points_in_segment(spacing=200)
+
+    assert len(track.track.segments[0].points) == 6
+    for point in track.track.segments[0].points:
+        assert point.elevation is not None
+        assert point.time is not None
+
+
+@pytest.mark.parametrize(
+    ("points", "n_exp"),
+    [
+        ([(0, 0), (0.0089933, 0), (0.0010, 0)], 10),
+        ([(0, 0), (0.0089933, 0), (0.0010, 0), (0.0011, 0)], 11),
+    ],
+)
+def test_interpolate_linear_points_in_segment_multiple_points(points, n_exp):
+    init_logging(10)
+    # Distacne 2d: ~1000m
+    track = PyTrack(points, None, None)
+
+    track.interpolate_points_in_segment(spacing=200)
+
+    assert len(track.track.segments[0].points) == n_exp

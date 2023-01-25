@@ -1,9 +1,11 @@
 import logging
+from datetime import timedelta
 from math import asin, atan2, cos, degrees, pi, sin, sqrt
-from typing import Callable, List, Tuple, Union
+from typing import Callable, List, Optional, Tuple, Union
 
 import coloredlogs
 import numpy as np
+from gpxpy.gpx import GPXTrackPoint
 
 from gpx_track_analyzer.model import ElevationMetrics, Position2D, Position3D
 
@@ -116,3 +118,76 @@ def center_geolocation(geolocations: List[Tuple[float, float]]):
     lat_c, lon_c = atan2(z, sqrt(x * x + y * y)), atan2(y, x)
 
     return lat_c * 180 / pi, lon_c * 180 / pi
+
+
+def interpolate_linear(
+    start: GPXTrackPoint, end: GPXTrackPoint, spacing: float
+) -> Optional[List[GPXTrackPoint]]:
+    """
+    Simple linear interpolation between GPXTrackPoint. Supports latitude, longitude
+    (required), elevation (optional), and time (optional)
+    """
+
+    pp_distance = distance(
+        Position2D(start.latitude, start.longitude),
+        Position2D(end.latitude, end.longitude),
+    )
+    if pp_distance < 2 * spacing:
+        return None
+
+    logger.debug(
+        "pp-distance %s | n_points interpol %s ", pp_distance, pp_distance // spacing
+    )
+
+    fracs = np.arange(0, (pp_distance // spacing) + 1)
+    lat_int = np.interp(
+        fracs, [0, pp_distance // spacing], [start.latitude, end.latitude]
+    )
+    lng_int = np.interp(
+        fracs, [0, pp_distance // spacing], [start.longitude, end.longitude]
+    )
+
+    if start.elevation is None or end.elevation is None:
+        elevation_int = len(lng_int) * [None]
+    else:
+        elevation_int = np.interp(
+            fracs, [0, pp_distance // spacing], [start.elevation, end.elevation]
+        )
+
+    if start.time is None or end.time is None:
+        time_int = len(lng_int) * [None]
+    else:
+        time_int = np.interp(
+            fracs,
+            [0, pp_distance // spacing],
+            [0, (end.time - start.time).total_seconds()],
+        )
+
+    ret_points = []
+
+    for lat, lng, ele, seconds in zip(lat_int, lng_int, elevation_int, time_int):
+        if seconds is not None:
+            time = start.time + timedelta(seconds=seconds)
+        else:
+            time = None
+        ret_points.append(
+            GPXTrackPoint(
+                lat,
+                lng,
+                elevation=ele,
+                time=time,
+            )
+        )
+        logger.debug(
+            "New point %s / %s / %s / %s -> distance to origin %s",
+            lat,
+            lng,
+            ele,
+            time,
+            distance(
+                Position2D(start.latitude, start.longitude),
+                Position2D(lat, lng),
+            ),
+        )
+
+    return ret_points
