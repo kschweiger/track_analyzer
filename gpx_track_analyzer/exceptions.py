@@ -12,3 +12,7 @@ class APIDataNotAvailableException(Exception):
 
 class TrackInitializationException(Exception):
     pass
+
+
+class TrackTransformationException(Exception):
+    pass

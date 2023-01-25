@@ -6,10 +6,12 @@ import pandas as pd
 import pytest
 from gpxpy.gpx import GPXTrack
 
-from gpx_track_analyzer.exceptions import TrackInitializationException
+from gpx_track_analyzer.exceptions import (
+    TrackInitializationException,
+    TrackTransformationException,
+)
 from gpx_track_analyzer.model import SegmentOverview
 from gpx_track_analyzer.track import FileTrack, PyTrack
-from gpx_track_analyzer.utils import init_logging
 
 
 @pytest.fixture()
@@ -119,7 +121,6 @@ def test_py_track_init_exceptions(points, elevations, time):
 
 
 def test_interpolate_linear_points_in_segment_lat_lng_only():
-    init_logging(10)
     # Distacne 2d: ~1000m
     track = PyTrack([(0, 0), (0.0089933, 0)], None, None)
 
@@ -132,8 +133,6 @@ def test_interpolate_linear_points_in_segment_lat_lng_only():
 
 
 def test_interpolate_linear_points_in_segment_no_interpolation():
-    init_logging(10)
-    # Distacne 2d: ~1000m
     track = PyTrack([(0, 0), (0.0089933, 0)], None, None)
 
     track.interpolate_points_in_segment(spacing=2000)
@@ -142,8 +141,6 @@ def test_interpolate_linear_points_in_segment_no_interpolation():
 
 
 def test_interpolate_linear_points_in_segment_lat_lng_ele():
-    init_logging(10)
-    # Distacne 2d: ~1000m
     track = PyTrack([(0, 0), (0.0089933, 0)], [100, 200], None)
 
     track.interpolate_points_in_segment(spacing=200)
@@ -155,7 +152,6 @@ def test_interpolate_linear_points_in_segment_lat_lng_ele():
 
 
 def test_interpolate_linear_points_in_segment_lat_lng_ele_time():
-    init_logging(10)
     # Distacne 2d: ~1000m
     track = PyTrack(
         [(0, 0), (0.0089933, 0)],
@@ -179,10 +175,57 @@ def test_interpolate_linear_points_in_segment_lat_lng_ele_time():
     ],
 )
 def test_interpolate_linear_points_in_segment_multiple_points(points, n_exp):
-    init_logging(10)
     # Distacne 2d: ~1000m
     track = PyTrack(points, None, None)
 
     track.interpolate_points_in_segment(spacing=200)
 
     assert len(track.track.segments[0].points) == n_exp
+
+
+@pytest.mark.parametrize(
+    ("coords", "eles", "times"),
+    [
+        ([(1, 1), (2, 2)], None, None),
+        ([(1, 1), (2, 2)], [100, 200], None),
+        (
+            [(1, 1), (2, 2)],
+            [100, 200],
+            [datetime(2023, 1, 1, 10), datetime(2023, 1, 1, 10, 30)],
+        ),
+    ],
+)
+def test_get_point_data_in_segmnet(coords, eles, times):
+    track = PyTrack(coords, eles, times)
+
+    ret_coords, ret_eles, ret_times = track.get_point_data_in_segmnet(0)
+
+    assert ret_coords == coords
+    assert ret_eles == eles
+    assert ret_times == times
+
+
+def test_get_point_data_in_segment_exception_ele():
+    track = PyTrack(
+        [(1, 1), (2, 2)],
+        [100, 200],
+        [datetime(2023, 1, 1, 10), datetime(2023, 1, 1, 10, 30)],
+    )
+
+    track.track.segments[0].points[1].elevation = None
+
+    with pytest.raises(TrackTransformationException):
+        track.get_point_data_in_segmnet()
+
+
+def test_get_point_data_in_segment_exception_time():
+    track = PyTrack(
+        [(1, 1), (2, 2)],
+        [100, 200],
+        [datetime(2023, 1, 1, 10), datetime(2023, 1, 1, 10, 30)],
+    )
+
+    track.track.segments[0].points[1].time = None
+
+    with pytest.raises(TrackTransformationException):
+        track.get_point_data_in_segmnet()

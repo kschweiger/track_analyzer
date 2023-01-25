@@ -8,7 +8,10 @@ import numpy as np
 import pandas as pd
 from gpxpy.gpx import GPX, GPXTrack, GPXTrackPoint, GPXTrackSegment
 
-from gpx_track_analyzer.exceptions import TrackInitializationException
+from gpx_track_analyzer.exceptions import (
+    TrackInitializationException,
+    TrackTransformationException,
+)
 from gpx_track_analyzer.model import Position3D, SegmentOverview
 from gpx_track_analyzer.utils import calc_elevation_metrics, interpolate_linear
 
@@ -147,6 +150,36 @@ class Track(ABC):
             else:
                 new_segment_points.extend(new_points[1:])
         self.track.segments[n_segment].points = new_segment_points
+
+    def get_point_data_in_segmnet(
+        self, n_segment: int = 0
+    ) -> Tuple[List[Tuple[float, float]], Optional[float], Optional[datetime]]:
+
+        coords = []
+        elevations = []
+        times = []
+
+        for point in self.track.segments[n_segment].points:
+            coords.append((point.latitude, point.longitude))
+            if point.elevation is not None:
+                elevations.append(point.elevation)
+            if point.time is not None:
+                times.append(point.time)
+
+        if not elevations:
+            elevations = None
+        elif len(coords) != len(elevations):
+            raise TrackTransformationException(
+                "Elevation is not set for all points. This is not supported"
+            )
+        if not times:
+            times = None
+        elif len(coords) != len(times):
+            raise TrackTransformationException(
+                "Elevation is not set for all points. This is not supported"
+            )
+
+        return coords, elevations, times
 
     def _apply_outlier_cleaning(self, data: pd.DataFrame) -> pd.DataFrame:
 
