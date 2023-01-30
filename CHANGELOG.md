@@ -1,3 +1,24 @@
+##  (2023-01-30)
+
+
+
+
+## <small>0.0.2 (2023-01-30)</small>
+
+* Bump version: 0.0.1 → 0.0.2 ([75a94b3](https://github.com/kschweiger/track_analyzer/commit/75a94b3))
+* feat(enhancer): Added enhancer factory; Renamed Exception; Added inplace option to enhance_track met ([47e6054](https://github.com/kschweiger/track_analyzer/commit/47e6054))
+* feat(plot_track_2d): Added optional POIs to the plot; Color can be passed as arguement; Updated requ ([3679319](https://github.com/kschweiger/track_analyzer/commit/3679319))
+* feat(PyTrack): Added a Track that is initialized with python objects for points, elevation and time ([2c27312](https://github.com/kschweiger/track_analyzer/commit/2c27312))
+* feat(Track): Added linear interpolation method ([23f6d95](https://github.com/kschweiger/track_analyzer/commit/23f6d95))
+* feat(Track): Added method for retrieving coordinates, elevations and times of the points in a segmen ([be38442](https://github.com/kschweiger/track_analyzer/commit/be38442))
+* feat(Track): Added to_xml method ([10af4e9](https://github.com/kschweiger/track_analyzer/commit/10af4e9))
+* refactor(OpenTopoElevationEnhancer): Added skip_checks argument ([194f5cb](https://github.com/kschweiger/track_analyzer/commit/194f5cb))
+* refactor(Track): Changed default value of the moving in segment data w/o times ([9924113](https://github.com/kschweiger/track_analyzer/commit/9924113))
+* refactor(Track): Setting cum_distance_moving equal to cum_distance as all points are considered movi ([fda1957](https://github.com/kschweiger/track_analyzer/commit/fda1957))
+* doc: Updated CHANGELOG.md ([2666ae2](https://github.com/kschweiger/track_analyzer/commit/2666ae2))
+
+
+
 ##  (2022-09-09)
 
 
