@@ -39,6 +39,15 @@ class Track(ABC):
     def n_segments(self) -> int:
         return len(self.track.segments)
 
+    def get_xml(self, name: Optional[str] = None, email: Optional[str] = None) -> str:
+        gpx = GPX()
+
+        gpx.tracks = [self.track]
+        gpx.author_name = name
+        gpx.author_email = email
+
+        return gpx.to_xml()
+
     def get_segment_overview(self, n_segment: int = 0) -> SegmentOverview:
         """
         Get overall metrics for a segment
