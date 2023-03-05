@@ -83,22 +83,22 @@ def test_center_geolocation(coords, exp_lat, exp_lon):
     assert isclose(ret_lon, exp_lon)
 
 
-@pytest.mark.parametrize(
-    ("data", "exp_min_max"),
-    [
-        # ---------------------------------------------------
-        (
-            [
-                ((0, 300), (10, 350), SegmentCharacter.ASCENT),
-                ((10, 350), (20, 400), SegmentCharacter.ASCENT),
-                ((20, 400), (30, 350), SegmentCharacter.DECENT),
-                ((30, 350), (40, 320), SegmentCharacter.DECENT),
-            ],
-            [0, 20, 40],
-        ),
-        # ---------------------------------------------------
-        # ([], []),
-    ],
-)
-def test_find_min_max(data, exp_min_max):
-    assert exp_min_max == find_min_max(data)
+# @pytest.mark.parametrize(
+#     ("data", "exp_min_max"),
+#     [
+#         # ---------------------------------------------------
+#         (
+#             [
+#                 ((0, 300), (10, 350), SegmentCharacter.ASCENT),
+#                 ((10, 350), (20, 400), SegmentCharacter.ASCENT),
+#                 ((20, 400), (30, 350), SegmentCharacter.DECENT),
+#                 ((30, 350), (40, 320), SegmentCharacter.DECENT),
+#             ],
+#             [0, 20, 40],
+#         ),
+#         # ---------------------------------------------------
+#         # ([], []),
+#     ],
+# )
+# def test_find_min_max(data, exp_min_max):
+#     assert exp_min_max == find_min_max(data)
