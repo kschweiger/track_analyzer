@@ -49,6 +49,8 @@ def calc_elevation_metrics(
     downhill = 0.0
     slopes = [0.0]  # Pad with slope 0 so len(slopes) == len(positions)
     for prev_pos, curr_pos in zip(positions, positions[1::]):
+        if curr_pos == prev_pos:
+            continue
         pp_elevation = curr_pos.elevation - prev_pos.elevation
         pp_distance = distance(prev_pos, curr_pos)
 
