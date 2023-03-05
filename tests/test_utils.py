@@ -2,8 +2,8 @@ from math import asin, degrees, isclose
 
 import numpy as np
 import pytest
-from enums import SegmentCharacter
 
+from gpx_track_analyzer.enums import SegmentCharacter
 from gpx_track_analyzer.model import Position2D, Position3D
 from gpx_track_analyzer.utils import (
     calc_elevation_metrics,

@@ -1,21 +1,20 @@
 import logging
 from abc import ABC, abstractmethod
-from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Union
 from collections import defaultdict
 from copy import deepcopy
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import gpxpy
 import numpy as np
 import pandas as pd
 from gpxpy.gpx import GPX, GPXTrack, GPXTrackPoint, GPXTrackSegment
 
+from gpx_track_analyzer.enums import SegmentCharacter
 from gpx_track_analyzer.exceptions import (
     TrackInitializationException,
     TrackTransformationException,
 )
-from gpx_track_analyzer.utils import calc_elevation_metrics, interpolate_linear
-from gpx_track_analyzer.enums import SegmentCharacter
 from gpx_track_analyzer.find_line_segments import (
     MergedStepResult,
     StepResult,
@@ -24,6 +23,7 @@ from gpx_track_analyzer.find_line_segments import (
     merge_step_result,
 )
 from gpx_track_analyzer.model import Chunk, Position3D, SegmentOverview
+from gpx_track_analyzer.utils import calc_elevation_metrics, interpolate_linear
 
 logger = logging.getLogger(__name__)
 
@@ -428,7 +428,9 @@ class Track(ABC):
 
                 cum_distance += point_distance
                 data["cum_distance"].append(cum_distance)
+                data["cum_distance_2d"].append(cum_distance)
                 data["cum_distance_moving"].append(cum_distance)
+                data["cum_distance_moving_2d"].append(cum_distance)
                 data["cum_distance_stopped"].append(None)
                 data["speed"].append(None)
                 data["moving"].append(True)
