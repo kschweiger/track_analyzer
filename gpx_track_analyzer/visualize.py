@@ -162,12 +162,13 @@ def plot_track_2d(
     if width is not None:
         fig.update_layout(width=width)
 
-    fig.update_xaxes(
-        range=[
-            data_for_plot.iloc[0].cum_distance_moving,
-            data_for_plot.iloc[-1].cum_distance_moving,
-        ]
-    )
+    if not idx_x_axis:
+        fig.update_xaxes(
+            range=[
+                data_for_plot.iloc[0].cum_distance_moving,
+                data_for_plot.iloc[-1].cum_distance_moving,
+            ]
+        )
 
     if color_elevation is not None:
         fig.data[0].marker.color = color_elevation

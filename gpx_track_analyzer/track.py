@@ -576,7 +576,10 @@ class Track(ABC):
                         # mc_character, _ = Counter(
                         #     [segments[j].character for j in segments_2_merge]
                         # ).most_common(1)[0]
-                        if segment.character == mc_character:
+                        if (
+                            segment.character == mc_character
+                            or len(final_segments_indices) == 0
+                        ):
                             final_segments_indices.append(segments_2_merge + [i])
                         else:
                             final_segments_indices[-1].extend(segments_2_merge)
@@ -650,7 +653,7 @@ class Track(ABC):
             chunks.append(Chunk(merge_to_chunk, chunk_len, prev_character))
 
         for chunk in chunks:
-            if chunk.length > 1500:
+            if chunk.length > 1000:
                 if chunk.character == SegmentCharacter.ASCENT:
                     self.ascent_chunks[n_segment].append(chunk)
                     self.ascent_boundaries[n_segment].append(
