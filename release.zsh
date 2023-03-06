@@ -1,10 +1,10 @@
 #!/bin/zsh
 
 echo "Bumping Version"
-bump2version $1
+poetry version --short $1
 if [[ $? != 0 ]]
 then
-  echo "bump2version failed. Exiting..."
+  echo "poetry version failed. Exiting..."
   exit 1
 fi
 echo "Updating changelog"
