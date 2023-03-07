@@ -217,7 +217,10 @@ def plot_track_with_slope(
     data["elevation_diff"] = diff_elevation
 
     def calc_slope(row: pd.Series) -> int:
-        slope = round((row.elevation_diff / row.distance) * 100)
+        try:
+            slope = round((row.elevation_diff / row.distance) * 100)
+        except ZeroDivisionError:
+            slope = 0
 
         if slope > max_slope:
             slope = max_slope
