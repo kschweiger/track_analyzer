@@ -1,5 +1,29 @@
 ##  (2023-03-07)
 
+* build: Bumped version to 0.0.6 :bookmark: ([3e0bccb](https://github.com/kschweiger/track_analyzer/commit/3e0bccb))
+* fix: Added tag creation to release.zsh ([817d3a5](https://github.com/kschweiger/track_analyzer/commit/817d3a5))
+
+
+
+## <small>0.0.5 (2023-03-07)</small>
+
+* doc: Updated CHANGELOG.md ([8b80b58](https://github.com/kschweiger/track_analyzer/commit/8b80b58))
+* doc: Updated CHANGELOG.md ([c7db048](https://github.com/kschweiger/track_analyzer/commit/c7db048))
+* doc: Updated CHANGELOG.md :memo: ([4086349](https://github.com/kschweiger/track_analyzer/commit/4086349))
+* doc: Updated CHANGELOG.md :memo: ([9e2f770](https://github.com/kschweiger/track_analyzer/commit/9e2f770))
+* build: Bumped version to 0.0.4 :bookmark: ([658f520](https://github.com/kschweiger/track_analyzer/commit/658f520))
+* build: Bumped version to 0.0.5 :bookmark: ([ef926b6](https://github.com/kschweiger/track_analyzer/commit/ef926b6))
+* build: Migrated to poetry ([7ecdad0](https://github.com/kschweiger/track_analyzer/commit/7ecdad0))
+* build: Moved release script to poetry ([67e443c](https://github.com/kschweiger/track_analyzer/commit/67e443c))
+* build: Updated release script ([4e20eaf](https://github.com/kschweiger/track_analyzer/commit/4e20eaf))
+* feat: Adding function for plotting the elevation profile of a track with slopes (#1) ([e6b54ec](https://github.com/kschweiger/track_analyzer/commit/e6b54ec)), closes [#1](https://github.com/kschweiger/track_analyzer/issues/1)
+* ci: Updated test config ([2dd06ee](https://github.com/kschweiger/track_analyzer/commit/2dd06ee))
+* fix(calc_elevation_metrics): Fixed possibility for zero division error ([908446a](https://github.com/kschweiger/track_analyzer/commit/908446a))
+
+
+
+##  (2023-03-07)
+
 * build: Bumped version to 0.0.4 :bookmark: ([658f520](https://github.com/kschweiger/track_analyzer/commit/658f520))
 * build: Bumped version to 0.0.5 :bookmark: ([ef926b6](https://github.com/kschweiger/track_analyzer/commit/ef926b6))
 * build: Migrated to poetry ([7ecdad0](https://github.com/kschweiger/track_analyzer/commit/7ecdad0))
