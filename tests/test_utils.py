@@ -8,6 +8,8 @@ from gpx_track_analyzer.utils import (
     calc_elevation_metrics,
     center_geolocation,
     distance,
+    get_color_gradient,
+    hex_to_RGB,
 )
 
 
@@ -79,3 +81,24 @@ def test_center_geolocation(coords, exp_lat, exp_lon):
     ret_lat, ret_lon = center_geolocation(coords)
     assert isclose(ret_lat, exp_lat)
     assert isclose(ret_lon, exp_lon)
+
+
+@pytest.mark.parametrize(
+    ("in_str", "exp_out"),
+    [
+        ("#FFFFFF", (255, 255, 255)),  # White
+        ("#000000", (0, 0, 0)),  # Black
+        ("#00FF00", (0, 255, 0)),  # Green
+        ("#FF0000", (255, 0, 0)),  # Red
+        ("#0000FF", (0, 0, 255)),  # Blue
+    ],
+)
+def test_hex_to_RGB(in_str, exp_out):
+    assert hex_to_RGB(in_str) == exp_out
+
+
+def test_get_color_gradient():
+    gradient = get_color_gradient("#FFFFFF", "#000000", 5)
+    assert len(gradient) == 5
+    assert gradient[0] == "#FFFFFF"
+    assert gradient[-1] == "#000000"
