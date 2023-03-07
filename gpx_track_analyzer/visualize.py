@@ -273,8 +273,10 @@ def plot_track_with_slope(
     fig.update_yaxes(
         showspikes=True,
         spikemode="across",
-        range=[min(data.elevation) * 0.9, max(data.elevation) * 1.1],
+        range=[min(data.elevation) * 0.95, max(data.elevation) * 1.05],
+        title_text="Elevation [m]",
     )
+    fig.update_xaxes(title_text="Distance [m]")
 
     return fig
 
