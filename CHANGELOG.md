@@ -1,5 +1,20 @@
 ##  (2023-03-07)
 
+* build: Bumped version to 0.0.7 :bookmark: ([8e3f518](https://github.com/kschweiger/track_analyzer/commit/8e3f518))
+* fix: Fixed axis titles in elevation plot with slope ([b62547d](https://github.com/kschweiger/track_analyzer/commit/b62547d))
+
+
+
+## <small>0.0.6 (2023-03-07)</small>
+
+* doc: Updated CHANGELOG.md :memo: ([24cd42f](https://github.com/kschweiger/track_analyzer/commit/24cd42f))
+* build: Bumped version to 0.0.6 :bookmark: ([3e0bccb](https://github.com/kschweiger/track_analyzer/commit/3e0bccb))
+* fix: Added tag creation to release.zsh ([817d3a5](https://github.com/kschweiger/track_analyzer/commit/817d3a5))
+
+
+
+##  (2023-03-07)
+
 * build: Bumped version to 0.0.6 :bookmark: ([3e0bccb](https://github.com/kschweiger/track_analyzer/commit/3e0bccb))
 * fix: Added tag creation to release.zsh ([817d3a5](https://github.com/kschweiger/track_analyzer/commit/817d3a5))
 
