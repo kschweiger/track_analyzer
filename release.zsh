@@ -20,6 +20,8 @@ fi
 git add CHANGELOG.md
 git commit -n -m "doc: Updated CHANGELOG.md :memo:"
 
+git tag ${VERSION}
+
 echo "Pushing"
 git push
 
