@@ -49,6 +49,7 @@ def plot_track_2d(
     color_elevation: Optional[str] = None,
     color_velocity: Optional[str] = None,
     color_poi: Optional[str] = None,
+    slider: bool = False,
 ) -> Figure:
     mask = data.moving
     if strict_data_selection:
@@ -135,6 +136,13 @@ def plot_track_2d(
         ]
     )
 
+    if slider:
+        fig.update_layout(
+            xaxis=dict(
+                rangeslider=dict(visible=True),
+            )
+        )
+
     if color_elevation is not None:
         fig.data[0].marker.color = color_elevation
     if color_velocity is not None and include_velocity:
@@ -190,6 +198,7 @@ def plot_track_with_slope(
     max_slope: int = 18,
     height: Optional[int] = 600,
     width: Optional[int] = 1800,
+    slider: bool = False,
 ) -> Optional[Figure]:
     slope_color_map = get_slope_colors(
         *slope_gradient_color, max_slope=max_slope, min_slope=min_slope
@@ -208,6 +217,8 @@ def plot_track_with_slope(
         segement.reduce_points(intervals)
 
     _, _, _, _, data = get_processed_segment_data(segement)
+
+    data = data[data.moving]
 
     elevations = data.elevation.to_list()
     diff_elevation = [0]
@@ -243,6 +254,13 @@ def plot_track_with_slope(
         )
     )
 
+    if slider:
+        fig.update_layout(
+            xaxis=dict(
+                rangeslider=dict(visible=True),
+            )
+        )
+
     for i in range(len(data)):
         this_data = data.iloc[i : i + 2]
         if len(this_data) == 1:
@@ -266,6 +284,7 @@ def plot_track_with_slope(
     fig.update_layout(
         showlegend=False, autosize=False, margin={"r": 0, "t": 0, "l": 0, "b": 0}
     )
+
     if height is not None:
         fig.update_layout(height=height)
     if width is not None:
