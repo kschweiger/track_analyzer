@@ -1,3 +1,18 @@
+##  (2023-03-11)
+
+* build: Bumped version to 0.0.8 :bookmark: ([935e168](https://github.com/kschweiger/track_analyzer/commit/935e168))
+* feat(visualize): Added option to add a x-axis slider to the 2d plots ([34febac](https://github.com/kschweiger/track_analyzer/commit/34febac))
+
+
+
+## <small>0.0.7 (2023-03-07)</small>
+
+* doc: Updated CHANGELOG.md :memo: ([fc007c2](https://github.com/kschweiger/track_analyzer/commit/fc007c2))
+* build: Bumped version to 0.0.7 :bookmark: ([8e3f518](https://github.com/kschweiger/track_analyzer/commit/8e3f518))
+* fix: Fixed axis titles in elevation plot with slope ([b62547d](https://github.com/kschweiger/track_analyzer/commit/b62547d))
+
+
+
 ##  (2023-03-07)
 
 * build: Bumped version to 0.0.7 :bookmark: ([8e3f518](https://github.com/kschweiger/track_analyzer/commit/8e3f518))
