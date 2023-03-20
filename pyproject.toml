@@ -23,6 +23,8 @@ black = "^23.1.0"
 flake8 = "^6.0.0"
 mypy = "^1.0.1"
 types-requests = "^2.28.11.15"
+ruff = "^0.0.257"
+ipython = "^8.11.0"
 
 
 [tool.poetry.group.test.dependencies]
@@ -37,5 +39,5 @@ build-backend = "poetry.core.masonry.api"
 [tool.pytest]
 testpaths = "tests"
 
-[tool.isort]
-profile = "black"
+[tool.ruff]
+select = ["E", "F", "I"]
