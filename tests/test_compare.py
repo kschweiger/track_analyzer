@@ -1,7 +1,11 @@
 import numpy as np
 import pytest
 
-from gpx_track_analyzer.compare import check_segment_bound_overlap, get_distances
+from gpx_track_analyzer.compare import (
+    check_segment_bound_overlap,
+    derive_plate_bins,
+    get_distances,
+)
 from gpx_track_analyzer.model import Position2D
 from gpx_track_analyzer.track import PyTrack
 from gpx_track_analyzer.utils import distance
@@ -77,3 +81,42 @@ def test_get_distance_computation():
     )
 
     assert (indiv_values == distances_full).all()
+
+
+def test_derive_plate_bins():
+    width = 100
+    bounds_min_latitude = 47.99
+    bounds_min_longitude = 7.85
+    bounds_max_latitude = 48
+    bounds_max_longitude = 7.87
+    bins_lat, bins_long = derive_plate_bins(
+        width,
+        bounds_min_latitude,
+        bounds_min_longitude,
+        bounds_max_latitude,
+        bounds_max_longitude,
+    )
+
+    assert bins_lat[-1][0] > bounds_max_latitude
+    assert bins_lat[0][0] < bounds_min_latitude
+
+    assert bins_long[-1][1] > bounds_max_longitude
+    assert bins_long[0][1] < bounds_min_longitude
+
+    assert (
+        width * 0.999
+        <= distance(
+            Position2D(bins_lat[0][0], bins_lat[0][1]),
+            Position2D(bins_lat[1][0], bins_lat[1][1]),
+        )
+        < width * 1.001
+    )
+
+    assert (
+        width
+        <= distance(
+            Position2D(bins_long[0][0], bins_long[0][1]),
+            Position2D(bins_long[1][0], bins_long[1][1]),
+        )
+        < 2 * width
+    )
