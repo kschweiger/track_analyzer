@@ -4,11 +4,15 @@ import numpy as np
 import pytest
 
 from gpx_track_analyzer.model import Position2D, Position3D
+from gpx_track_analyzer.track import PyTrack
 from gpx_track_analyzer.utils import (
     calc_elevation_metrics,
     center_geolocation,
     distance,
     get_color_gradient,
+    get_latitude_at_distance,
+    get_longitude_at_distance,
+    get_segment_base_area,
     hex_to_RGB,
 )
 
@@ -102,3 +106,77 @@ def test_get_color_gradient():
     assert len(gradient) == 5
     assert gradient[0] == "#FFFFFF"
     assert gradient[-1] == "#000000"
+
+
+def test_get_segment_base_area():
+    points = [
+        (48.86104740612081, 2.3356136263202165),
+        (48.861134753323505, 2.335389661859064),
+    ]
+    area = get_segment_base_area(
+        PyTrack(
+            points,
+            len(points) * [None],
+            len(points) * [None],
+        ).track.segments[0]
+    )
+
+    assert area > 0
+
+
+def test_get_segment_base_area_long_line():
+    points = [
+        (48.86104740612081, 2.3356136263202165),
+        (48.861134753323505, 2.3356136263202165),
+    ]
+    assert (
+        get_segment_base_area(
+            PyTrack(
+                points,
+                len(points) * [None],
+                len(points) * [None],
+            ).track.segments[0]
+        )
+        == 0
+    )
+
+
+def test_get_segment_base_area_lat_line():
+    points = [
+        (48.86104740612081, 2.3356136263202165),
+        (48.86104740612081, 2.335389661859064),
+    ]
+    assert (
+        get_segment_base_area(
+            PyTrack(
+                points,
+                len(points) * [None],
+                len(points) * [None],
+            ).track.segments[0]
+        )
+        == 0
+    )
+
+
+@pytest.mark.parametrize(
+    ("value", "distance", "to_east", "exp_value"),
+    [(47.996, 111.2, True, 47.997), (47.996, 111.2, False, 47.995)],
+)
+def test_get_latitude_at_distance(value, distance, to_east, exp_value):
+    assert (
+        round(get_latitude_at_distance(Position2D(value, 1), distance, to_east), 3)
+        == exp_value
+    )
+
+
+@pytest.mark.parametrize(
+    ("value", "distance", "to_north", "exp_value"),
+    [(7.854, 74.41, True, 7.855), (7.854, 74.41, False, 7.853)],
+)
+def test_get_longitude_at_distance(value, distance, to_north, exp_value):
+    assert (
+        round(
+            get_longitude_at_distance(Position2D(47.996, value), distance, to_north), 3
+        )
+        == exp_value
+    )

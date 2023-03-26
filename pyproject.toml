@@ -41,3 +41,4 @@ testpaths = "tests"
 
 [tool.ruff]
 select = ["E", "F", "I"]
+unfixable = ["F841"]

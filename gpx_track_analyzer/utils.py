@@ -1,11 +1,11 @@
 import logging
 from datetime import timedelta
-from math import asin, atan2, cos, degrees, pi, sin, sqrt
+from math import acos, asin, atan2, cos, degrees, pi, sin, sqrt
 from typing import Callable, List, Optional, Tuple, Union
 
 import coloredlogs
 import numpy as np
-from gpxpy.gpx import GPXTrackPoint
+from gpxpy.gpx import GPXTrackPoint, GPXTrackSegment
 
 from gpx_track_analyzer.model import ElevationMetrics, Position2D, Position3D
 
@@ -31,6 +31,31 @@ def distance(pos1: Position2D, pos2: Position2D) -> float:
     )
     distance_km = 12742 * asin(sqrt(a))
     return distance_km * 1000
+
+
+def get_latitude_at_distance(
+    position: Position2D, distance: float, to_east: bool
+) -> float:
+    a = pow(sin(distance / 12742000), 2)
+    b = acos(1 - 2 * a) / (pi / 180)
+    if to_east:
+        return b + position.latitude
+    else:
+        return position.latitude - b
+
+
+def get_longitude_at_distance(
+    position: Position2D, distance: float, to_north: bool
+) -> float:
+    p = pi / 180
+    a = pow(sin(distance / 12742000), 2)
+    b = pow(cos(position.latitude * p), 2) / 2
+    c = acos(1 - (a / b)) / p
+
+    if to_north:
+        return c + position.longitude
+    else:
+        return position.longitude - c
 
 
 def calc_elevation_metrics(
@@ -224,3 +249,20 @@ def get_color_gradient(c1: str, c2: str, n: int):
         ("#" + "".join([format(int(round(val * 255)), "02x") for val in item])).upper()
         for item in rgb_colors
     ]
+
+
+def get_segment_base_area(segment: GPXTrackSegment):
+    """Caculate the area enclodes by the bounds in m^2"""
+    bounds = segment.get_bounds()
+
+    latitude_distance = distance(
+        Position2D(bounds.max_latitude, bounds.min_longitude),
+        Position2D(bounds.min_latitude, bounds.min_longitude),
+    )
+
+    longitude_distance = distance(
+        Position2D(bounds.min_latitude, bounds.max_longitude),
+        Position2D(bounds.min_latitude, bounds.min_longitude),
+    )
+
+    return latitude_distance * longitude_distance
