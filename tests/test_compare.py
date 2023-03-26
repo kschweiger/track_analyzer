@@ -3,6 +3,7 @@ import pytest
 
 from gpx_track_analyzer.compare import (
     check_segment_bound_overlap,
+    convert_segment_to_plate,
     derive_plate_bins,
     get_distances,
 )
@@ -120,3 +121,48 @@ def test_derive_plate_bins():
         )
         < 2 * width
     )
+
+
+@pytest.mark.parametrize(
+    ("points", "patch_bins", "normalize", "exp_plate"),
+    [
+        (
+            [(1, 1), (2, 2), (3, 3)],
+            ([(0, 0), (1, 0), (2, 0), (3, 0)], [(0, 0), (0, 1), (0, 2), (0, 3)]),
+            False,
+            np.array([[0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 0]]),
+        ),
+        (
+            [(1, 1), (1.5, 1.5), (2, 2), (3, 3)],
+            ([(0, 0), (1, 0), (2, 0), (3, 0)], [(0, 0), (0, 1), (0, 2), (0, 3)]),
+            False,
+            np.array([[0, 0, 0, 1], [0, 0, 1, 0], [0, 2, 0, 0], [0, 0, 0, 0]]),
+        ),
+        (
+            [(1, 1), (1.5, 1.5), (2, 2), (3, 3)],
+            ([(0, 0), (1, 0), (2, 0), (3, 0)], [(0, 0), (0, 1), (0, 2), (0, 3)]),
+            True,
+            np.array([[0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 0]]),
+        ),
+    ],
+)
+def test_convert_segment_to_plate(mocker, points, patch_bins, normalize, exp_plate):
+    mocker.patch(
+        "gpx_track_analyzer.compare.derive_plate_bins", return_value=patch_bins
+    )
+
+    grid_width = 100
+    track = PyTrack(points, len(points) * [None], len(points) * [None])
+    bounds = track.track.segments[0].get_bounds()
+    plate = convert_segment_to_plate(
+        track.track.segments[0],
+        grid_width,
+        bounds.min_latitude,
+        bounds.min_longitude,
+        bounds.max_latitude,
+        bounds.max_longitude,
+        normalize=normalize,
+    )
+
+    assert isinstance(plate, np.ndarray)
+    assert (plate == exp_plate).all()

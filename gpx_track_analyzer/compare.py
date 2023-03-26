@@ -111,5 +111,45 @@ def derive_plate_bins(
     return (bins_latitude, bins_longitude)
 
 
+def convert_segment_to_plate(
+    segment: GPXTrackSegment,
+    gird_width: float,
+    bounds_min_latitude: float,
+    bounds_min_longitude: float,
+    bounds_max_latitude: float,
+    bounds_max_longitude: float,
+    normalize: bool = False,
+):
+    bins_latitude, bins_longitude = derive_plate_bins(
+        gird_width,
+        bounds_min_latitude,
+        bounds_min_longitude,
+        bounds_max_latitude,
+        bounds_max_longitude,
+    )
+
+    _lat_bins = np.array([b[0] for b in bins_latitude])
+    _long_bins = np.array([b[1] for b in bins_longitude])
+
+    lats, longs = [], []
+    for point in segment.points:
+        lats.append(point.latitude)
+        longs.append(point.longitude)
+
+    # np.digitize starts with 1. We want 0 as first bin
+    segment_lat_bins = np.digitize(lats, _lat_bins) - 1
+    segment_long_bins = np.digitize(longs, _long_bins) - 1
+
+    plate = np.zeros(shape=(len(bins_latitude), len(bins_longitude)))
+
+    for lat, long in zip(segment_lat_bins, segment_long_bins):
+        if normalize:
+            plate[lat, long] = 1
+        else:
+            plate[lat, long] += 1
+
+    return np.flip(plate, axis=0)
+
+
 def get_segment_overlap(s1: GPXTrackSegment, s2: GPXTrackSegment) -> float:
     ...
