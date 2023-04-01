@@ -266,3 +266,21 @@ def get_segment_base_area(segment: GPXTrackSegment):
     )
 
     return latitude_distance * longitude_distance
+
+
+def crop_segment_to_bounds(
+    segment: GPXTrackSegment,
+    bounds_min_latitude,
+    bounds_min_longitude,
+    bounds_max_latitude,
+    bounds_max_longitude,
+) -> GPXTrackSegment:
+
+    cropped_segment = GPXTrackSegment()
+    for point in segment.points:
+        if (bounds_min_latitude <= point.latitude <= bounds_max_latitude) and (
+            bounds_min_longitude <= point.longitude <= bounds_max_longitude
+        ):
+            cropped_segment.points.append(point)
+
+    return cropped_segment

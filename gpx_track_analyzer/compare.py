@@ -119,7 +119,7 @@ def convert_segment_to_plate(
     bounds_max_latitude: float,
     bounds_max_longitude: float,
     normalize: bool = False,
-):
+) -> np.ndarray:
     bins_latitude, bins_longitude = derive_plate_bins(
         gird_width,
         bounds_min_latitude,
@@ -151,5 +151,40 @@ def convert_segment_to_plate(
     return np.flip(plate, axis=0)
 
 
-def get_segment_overlap(s1: GPXTrackSegment, s2: GPXTrackSegment) -> float:
-    ...
+def get_segment_overlap(
+    base_segment: GPXTrackSegment, match_segment: GPXTrackSegment, grid_width: float
+) -> float:
+    bounds_base = base_segment.get_bounds()
+    bounds_match = match_segment.get_bounds()
+
+    min_lat_plate = min((bounds_base.min_latitude, bounds_match.min_latitude))
+    min_long_plate = min((bounds_base.min_longitude, bounds_match.min_longitude))
+
+    max_lat_plate = max((bounds_base.max_latitude, bounds_match.max_latitude))
+    max_long_plate = max((bounds_base.max_longitude, bounds_match.max_longitude))
+
+    plate_base = convert_segment_to_plate(
+        base_segment,
+        grid_width,
+        min_lat_plate,
+        min_long_plate,
+        max_lat_plate,
+        max_long_plate,
+        True,
+    )
+    plate_match = convert_segment_to_plate(
+        match_segment,
+        grid_width,
+        min_lat_plate,
+        min_long_plate,
+        max_lat_plate,
+        max_long_plate,
+        True,
+    )
+
+    overlap_plate = (plate_base + plate_match) / 2
+
+    overlapping_bins = np.sum(overlap_plate)
+    match_bins = np.sum(plate_match)
+
+    return overlapping_bins / match_bins

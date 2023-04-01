@@ -1,11 +1,15 @@
+from unittest.mock import MagicMock
+
 import numpy as np
 import pytest
+from gpxpy.gpx import GPXBounds
 
 from gpx_track_analyzer.compare import (
     check_segment_bound_overlap,
     convert_segment_to_plate,
     derive_plate_bins,
     get_distances,
+    get_segment_overlap,
 )
 from gpx_track_analyzer.model import Position2D
 from gpx_track_analyzer.track import PyTrack
@@ -166,3 +170,37 @@ def test_convert_segment_to_plate(mocker, points, patch_bins, normalize, exp_pla
 
     assert isinstance(plate, np.ndarray)
     assert (plate == exp_plate).all()
+
+
+@pytest.mark.parametrize(
+    ("plate_base", "plate_match", "exp_overlap"),
+    [
+        (
+            np.array([[0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 0]]),
+            np.array([[0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 0]]),
+            1,
+        ),
+        (
+            np.array([[0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 0]]),
+            np.array([[1, 0, 0, 0], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 0]]),
+            0.75,
+        ),
+        (
+            np.array([[0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 0]]),
+            np.array([[1, 0, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]),
+            0,
+        ),
+    ],
+)
+def test_get_segment_overlap(mocker, plate_base, plate_match, exp_overlap):
+    mocker.patch(
+        "gpx_track_analyzer.compare.convert_segment_to_plate",
+        side_effect=[plate_base, plate_match],
+    )
+
+    base_segment = MagicMock()
+    base_segment.get_bounds = lambda: GPXBounds(1, 1, 1, 1)
+    match_segment = MagicMock()
+    match_segment.get_bounds = lambda: GPXBounds(1, 1, 1, 1)
+
+    assert get_segment_overlap(base_segment, match_segment, 100)

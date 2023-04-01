@@ -40,5 +40,5 @@ build-backend = "poetry.core.masonry.api"
 testpaths = "tests"
 
 [tool.ruff]
-select = ["E", "F", "I"]
+select = ["E", "F", "I", "PD","PT", "NPY", "N", "W"]
 unfixable = ["F841"]
