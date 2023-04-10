@@ -1,3 +1,5 @@
+import logging
+from functools import lru_cache
 from math import pi
 from typing import Tuple
 
@@ -11,6 +13,8 @@ from gpx_track_analyzer.utils import (
     get_latitude_at_distance,
     get_longitude_at_distance,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def check_segment_bound_overlap(
@@ -60,6 +64,7 @@ def get_distances(v1: npt.NDArray, v2: npt.NDArray):
     return dp_km * 1000
 
 
+@lru_cache(100)
 def derive_plate_bins(
     gird_width: float,
     bounds_min_latitude: float,
@@ -108,6 +113,16 @@ def derive_plate_bins(
             )
         )
 
+    logger.debug(
+        "Derived %s bins in latitude direction and %s in longitude direction",
+        len(bins_latitude),
+        len(bins_longitude),
+    )
+    logger.debug("  latitude direction: %s to %s", bins_latitude[0], bins_latitude[-1])
+    logger.debug(
+        "  longitude direction: %s to %s", bins_longitude[0], bins_longitude[-1]
+    )
+
     return (bins_latitude, bins_longitude)
 
 
@@ -153,7 +168,7 @@ def convert_segment_to_plate(
 
 def get_segment_overlap(
     base_segment: GPXTrackSegment, match_segment: GPXTrackSegment, grid_width: float
-) -> float:
+) -> Tuple[np.ndarray, float]:
     bounds_base = base_segment.get_bounds()
     bounds_match = match_segment.get_bounds()
 
@@ -182,9 +197,19 @@ def get_segment_overlap(
         True,
     )
 
-    overlap_plate = (plate_base + plate_match) / 2
+    overlap_plate = plate_base + plate_match
 
-    overlapping_bins = np.sum(overlap_plate)
+    overlap_plate_ = np.digitize(overlap_plate, np.array([0, 2, 3])) - 1
+
+    overlapping_bins = np.sum(overlap_plate_)
     match_bins = np.sum(plate_match)
 
-    return overlapping_bins / match_bins
+    logger.debug(
+        "%s overlapping bins and %s bins in match segment", overlapping_bins, match_bins
+    )
+
+    overlap = overlapping_bins / match_bins
+
+    logger.debug("Overlap: %s", overlap)
+
+    return overlap_plate, overlap
