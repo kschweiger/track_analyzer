@@ -72,6 +72,23 @@ def derive_plate_bins(
     bounds_max_latitude: float,
     bounds_max_longitude: float,
 ) -> Tuple[list[Tuple[float, float]], list[Tuple[float, float]]]:
+    """
+    Derive the lat/long bins based on the min/max lat/long values and the target
+    bin width.
+
+    :param gird_width:  Lengths (in m) each bin will have in latitude and longitude
+                        direction
+    :param bounds_min_longitude: Minimum longitude of the grid
+    :param bounds_max_latitude: Maximum latitude of the gtid. Bins may end with larger
+                                values than passed here dependeing on the grid width
+    :param bounds_max_longitude: Maximum longitude of the grid. Bins may end with
+                                 larger values than passed here dependeing on the
+                                 grid width
+    :return: Tuple with lists let/long values for the bin is latitude and longitude
+             direction.
+    """
+    # Find the total distance in latitude and longitude directrons to find the number of
+    # bins that need be generated bas ed on the pass gridwidth
     distance_latitude_total = gird_width + distance(
         Position2D(bounds_min_latitude, bounds_min_longitude),
         Position2D(bounds_max_latitude, bounds_min_longitude),
@@ -84,6 +101,9 @@ def derive_plate_bins(
     n_bins_latitude = int(round(distance_latitude_total / gird_width))
     n_bins_longitude = int(round(distance_longitude_total / gird_width))
 
+    # The point at the lower bounds should be in the middle of the first bin. So
+    # the edge of these bends need to be half the grid width from the original
+    # lower left bound
     lower_edge_latitude = get_latitude_at_distance(
         Position2D(bounds_min_latitude, bounds_min_longitude), gird_width / 2, False
     )
@@ -91,6 +111,8 @@ def derive_plate_bins(
         Position2D(bounds_min_latitude, bounds_min_longitude), gird_width / 2, False
     )
 
+    # Generate the bin edges by starting from the lower left edge and adding new
+    # points with distance gid_width
     bins_latitude = [(lower_edge_latitude, lower_edge_longitude)]
     for _ in range(n_bins_latitude):
         bins_latitude.append(
@@ -135,6 +157,22 @@ def convert_segment_to_plate(
     bounds_max_longitude: float,
     normalize: bool = False,
 ) -> np.ndarray:
+    """
+    Takes a GPXSegement and fills bins of a 2D array (called plate) with the passed
+    bin width. Bins will start at the min latitude and longited values.
+
+    :param segment: The GPXPoints of the Segment will be filled into the plate
+    :param gird_width: Width (in meters) of the grid
+    :param bounds_min_latitude: Minimum latitude of the grid
+    :param bounds_min_longitude: Minimum longitude of the grid
+    :param bounds_max_latitude: Maximum latitude of the gtid. Bins may end with larger
+                                values than passed here dependeing on the grid width
+    :param bounds_max_longitude: Maximum longitude of the grid. Bins may end with larger
+                                values than passed here dependeing on the grid width
+    :param normalize: If True, the maximum bin value will be 1 no matter how many
+                      PGXPoints fall into the bin, defaults to False
+    :return: 2DArray representing the plate.
+    """
     bins_latitude, bins_longitude = derive_plate_bins(
         gird_width,
         bounds_min_latitude,
@@ -169,6 +207,14 @@ def convert_segment_to_plate(
 def get_segment_overlap(
     base_segment: GPXTrackSegment, match_segment: GPXTrackSegment, grid_width: float
 ) -> Tuple[np.ndarray, float]:
+    """Compare the tracks of two segements and caclulate the overlap.
+
+    :param base_segment: Base segement in which the match segment should be found
+    :param match_segment: Other segmeent that should be found in the base segement
+    :param grid_width: Width (in meters) of the grid that will be filled to estimate
+                       the overalp.
+    :return: Overlap plate (2D Array, 0 no overlap, 1 overlap), overlap value in [0, 1]
+    """
     bounds_base = base_segment.get_bounds()
     bounds_match = match_segment.get_bounds()
 
