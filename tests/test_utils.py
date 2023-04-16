@@ -10,10 +10,11 @@ from gpx_track_analyzer.utils import (
     center_geolocation,
     distance,
     get_color_gradient,
+    get_distances,
     get_latitude_at_distance,
     get_longitude_at_distance,
     get_segment_base_area,
-    hex_to_RGB,
+    hex_to_rgb,
 )
 
 
@@ -97,8 +98,8 @@ def test_center_geolocation(coords, exp_lat, exp_lon):
         ("#0000FF", (0, 0, 255)),  # Blue
     ],
 )
-def test_hex_to_RGB(in_str, exp_out):
-    assert hex_to_RGB(in_str) == exp_out
+def test_hex_to_rgb(in_str, exp_out):
+    assert hex_to_rgb(in_str) == exp_out
 
 
 def test_get_color_gradient():
@@ -180,3 +181,48 @@ def test_get_longitude_at_distance(value, distance, to_north, exp_value):
         )
         == exp_value
     )
+
+
+@pytest.mark.parametrize(
+    ("v1_point", "v2_points", "exp_shape"),
+    [
+        ([[0, 1], [1, 1], [2, 2]], [[1, 1], [2, 2]], (3, 2)),
+        ([[0, 1], [1, 1], [2, 2]], [[1, 1]], (3, 1)),
+    ],
+)
+def test_get_distance(v1_point, v2_points, exp_shape):
+    distances = get_distances(np.array(v1_point), np.array(v2_points))
+
+    assert isinstance(distances, np.ndarray)
+    assert distances.shape == exp_shape
+
+
+def test_get_distance_computation():
+    v1_points = [[0, 1], [1, 1], [2, 2]]
+    v2_points = [[1, 1], [2, 2]]
+
+    distances_full = get_distances(np.array(v1_points), np.array(v2_points))
+    distances_v2_first = get_distances(np.array(v1_points), np.array([v2_points[0]]))
+    distances_v2_second = get_distances(np.array(v1_points), np.array([v2_points[1]]))
+
+    assert (distances_full[:, 0] == distances_v2_first[:, 0]).all()
+    assert (distances_full[:, 1] == distances_v2_second[:, 0]).all()
+
+    indiv_values = np.array(
+        [
+            [
+                distance(Position2D(*v1_points[0]), Position2D(*v2_points[0])),
+                distance(Position2D(*v1_points[0]), Position2D(*v2_points[1])),
+            ],
+            [
+                distance(Position2D(*v1_points[1]), Position2D(*v2_points[0])),
+                distance(Position2D(*v1_points[1]), Position2D(*v2_points[1])),
+            ],
+            [
+                distance(Position2D(*v1_points[2]), Position2D(*v2_points[0])),
+                distance(Position2D(*v1_points[2]), Position2D(*v2_points[1])),
+            ],
+        ]
+    )
+
+    assert (indiv_values == distances_full).all()

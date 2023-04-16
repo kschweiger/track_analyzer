@@ -1,7 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import gpxpy
 import numpy as np
@@ -14,7 +14,11 @@ from gpx_track_analyzer.exceptions import (
 )
 from gpx_track_analyzer.model import Position3D, SegmentOverview
 from gpx_track_analyzer.processing import get_processed_segment_data
-from gpx_track_analyzer.utils import calc_elevation_metrics, interpolate_linear
+from gpx_track_analyzer.utils import (
+    calc_elevation_metrics,
+    get_point_distance_in_segment,
+    interpolate_linear,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +34,10 @@ class Track(ABC):
 
         self.stopped_speed_threshold = stopped_speed_threshold
         self.max_speed_percentile = max_speed_percentile
+
+        self.processed_segment_data: Dict[
+            int, Tuple[float, float, float, float, pd.DataFrame]
+        ] = {}
 
     @property
     @abstractmethod
@@ -64,9 +72,7 @@ class Track(ABC):
             stopped_time,
             stopped_distance,
             data,
-        ) = get_processed_segment_data(
-            self.track.segments[n_segment], self.stopped_speed_threshold
-        )
+        ) = self._get_processed_segment_data(n_segment)
 
         total_time = time + stopped_time
         total_distance = distance + stopped_distance
@@ -75,8 +81,6 @@ class Track(ABC):
         avg_speed = None
 
         if self.track.segments[n_segment].has_times():
-            data = self._apply_outlier_cleaning(data)
-
             max_speed = data.speed[data.in_speed_percentile].max()
             avg_speed = data.speed[data.in_speed_percentile].mean()
 
@@ -114,26 +118,61 @@ class Track(ABC):
 
         return overview
 
-    def get_avg_pp_distance_in_segment(
-        self, n_segment: int = 0, threshold: float = 10
+    def get_closest_point(
+        self, n_segment: int, latitude: float, longitude: float
+    ) -> Tuple[GPXTrackPoint, float, int]:
+        return get_point_distance_in_segment(
+            self.track.segments[n_segment], latitude, longitude
+        )
+
+    def _get_aggregated_pp_distance_in_segmeent(
+        self, agg: str, n_segment: int, threshold: float
     ) -> float:
         data = self.get_segment_data(n_segment=n_segment)
 
-        return data[data.distance >= threshold].distance.agg("average")
+        return data[data.distance >= threshold].distance.agg(agg)
 
-    def get_segment_data(self, n_segment: int = 0) -> pd.DataFrame:
-        (
-            time,
-            distance,
-            stopped_time,
-            stopped_distance,
-            data,
-        ) = get_processed_segment_data(
-            self.track.segments[n_segment], self.stopped_speed_threshold
+    def get_avg_pp_distance_in_segment(
+        self, n_segment: int = 0, threshold: float = 10
+    ) -> float:
+        return self._get_aggregated_pp_distance_in_segmeent(
+            "average", n_segment, threshold
         )
 
-        if self.track.segments[n_segment].has_times():
-            data = self._apply_outlier_cleaning(data)
+    def get_max_pp_distance_in_segment(
+        self, n_segment: int = 0, threshold: float = 10
+    ) -> float:
+        return self._get_aggregated_pp_distance_in_segmeent("max", n_segment, threshold)
+
+    def _get_processed_segment_data(
+        self, n_segment: int = 0
+    ) -> Tuple[float, float, float, float, pd.DataFrame]:
+        if n_segment not in self.processed_segment_data:
+            (
+                time,
+                distance,
+                stopped_time,
+                stopped_distance,
+                data,
+            ) = get_processed_segment_data(
+                self.track.segments[n_segment], self.stopped_speed_threshold
+            )
+
+            if self.track.segments[n_segment].has_times():
+                data = self._apply_outlier_cleaning(data)
+
+            self.processed_segment_data[n_segment] = (
+                time,
+                distance,
+                stopped_time,
+                stopped_distance,
+                data,
+            )
+
+        return self.processed_segment_data[n_segment]
+
+    def get_segment_data(self, n_segment: int = 0) -> pd.DataFrame:
+        _, _, _, _, data = self._get_processed_segment_data(n_segment)
 
         return data
 
@@ -168,12 +207,18 @@ class Track(ABC):
                 new_segment_points.extend(new_points[1:])
         self.track.segments[n_segment].points = new_segment_points
 
+        # Reset saved processed data
+        if n_segment in self.processed_segment_data:
+            logger.debug(
+                "Deleting saved processed segment data for segment %s", n_segment
+            )
+            self.processed_segment_data.pop(n_segment)
+
     def get_point_data_in_segmnet(
         self, n_segment: int = 0
     ) -> Tuple[
         List[Tuple[float, float]], Optional[List[float]], Optional[List[datetime]]
     ]:
-
         coords = []
         elevations = []
         times = []
@@ -201,7 +246,6 @@ class Track(ABC):
         return coords, elevations, times
 
     def _apply_outlier_cleaning(self, data: pd.DataFrame) -> pd.DataFrame:
-
         speed_percentile = np.percentile(
             [s for s in data.speed[data.speed.notna()].to_list()],
             self.max_speed_percentile,

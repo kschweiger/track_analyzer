@@ -2,13 +2,12 @@ from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
-from gpxpy.gpx import GPXBounds
+from gpxpy.gpx import GPXBounds, GPXTrackPoint
 
 from gpx_track_analyzer.compare import (
     check_segment_bound_overlap,
     convert_segment_to_plate,
     derive_plate_bins,
-    get_distances,
     get_segment_overlap,
 )
 from gpx_track_analyzer.model import Position2D
@@ -41,51 +40,6 @@ def test_check_segment_bound_overlap(compare_points, result):
     ).track.segments[0]
 
     assert check_segment_bound_overlap(reference_segment, [check_track]) == [result]
-
-
-@pytest.mark.parametrize(
-    ("v1_point", "v2_points", "exp_shape"),
-    [
-        ([[0, 1], [1, 1], [2, 2]], [[1, 1], [2, 2]], (3, 2)),
-        ([[0, 1], [1, 1], [2, 2]], [[1, 1]], (3, 1)),
-    ],
-)
-def test_get_distance(v1_point, v2_points, exp_shape):
-    distances = get_distances(np.array(v1_point), np.array(v2_points))
-
-    assert isinstance(distances, np.ndarray)
-    assert distances.shape == exp_shape
-
-
-def test_get_distance_computation():
-    v1_points = [[0, 1], [1, 1], [2, 2]]
-    v2_points = [[1, 1], [2, 2]]
-
-    distances_full = get_distances(np.array(v1_points), np.array(v2_points))
-    distances_v2_first = get_distances(np.array(v1_points), np.array([v2_points[0]]))
-    distances_v2_second = get_distances(np.array(v1_points), np.array([v2_points[1]]))
-
-    assert (distances_full[:, 0] == distances_v2_first[:, 0]).all()
-    assert (distances_full[:, 1] == distances_v2_second[:, 0]).all()
-
-    indiv_values = np.array(
-        [
-            [
-                distance(Position2D(*v1_points[0]), Position2D(*v2_points[0])),
-                distance(Position2D(*v1_points[0]), Position2D(*v2_points[1])),
-            ],
-            [
-                distance(Position2D(*v1_points[1]), Position2D(*v2_points[0])),
-                distance(Position2D(*v1_points[1]), Position2D(*v2_points[1])),
-            ],
-            [
-                distance(Position2D(*v1_points[2]), Position2D(*v2_points[0])),
-                distance(Position2D(*v1_points[2]), Position2D(*v2_points[1])),
-            ],
-        ]
-    )
-
-    assert (indiv_values == distances_full).all()
 
 
 def test_derive_plate_bins():
@@ -183,7 +137,7 @@ def test_convert_segment_to_plate(mocker, points, patch_bins, normalize, exp_pla
         (
             np.array([[0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 0]]),
             np.array([[1, 0, 0, 0], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 0]]),
-            0.75,
+            2 / 3,
         ),
         (
             np.array([[0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 0]]),
@@ -198,9 +152,17 @@ def test_get_segment_overlap(mocker, plate_base, plate_match, exp_overlap):
         side_effect=[plate_base, plate_match],
     )
 
+    mocker.patch(
+        "gpx_track_analyzer.compare.get_point_distance_in_segment",
+        side_effect=[(GPXTrackPoint(1, 1), 10, 0), (GPXTrackPoint(2, 2), 10, 3)],
+    )
+
     base_segment = MagicMock()
     base_segment.get_bounds = lambda: GPXBounds(1, 1, 1, 1)
     match_segment = MagicMock()
     match_segment.get_bounds = lambda: GPXBounds(1, 1, 1, 1)
+    match_segment.points = [GPXTrackPoint(1, 1), GPXTrackPoint(2, 2)]
 
-    assert get_segment_overlap(base_segment, match_segment, 100)
+    plate, overlap, inverse = get_segment_overlap(base_segment, match_segment, 100)
+
+    assert overlap == exp_overlap

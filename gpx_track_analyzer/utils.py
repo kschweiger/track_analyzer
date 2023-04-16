@@ -5,6 +5,7 @@ from typing import Callable, List, Optional, Tuple, Union
 
 import coloredlogs
 import numpy as np
+import numpy.typing as npt
 from gpxpy.gpx import GPXTrackPoint, GPXTrackSegment
 
 from gpx_track_analyzer.model import ElevationMetrics, Position2D, Position3D
@@ -223,7 +224,7 @@ def interpolate_linear(
     return ret_points
 
 
-def hex_to_RGB(hex: str):
+def hex_to_rgb(hex: str):
     """
     Pass a hex color name (as string) and get the RGB value
 
@@ -241,8 +242,8 @@ def get_color_gradient(c1: str, c2: str, n: int):
     Source: https://medium.com/@BrendanArtley/matplotlib-color-gradients-21374910584b
     """
     assert n > 1
-    c1_rgb = np.array(hex_to_RGB(c1)) / 255
-    c2_rgb = np.array(hex_to_RGB(c2)) / 255
+    c1_rgb = np.array(hex_to_rgb(c1)) / 255
+    c2_rgb = np.array(hex_to_rgb(c2)) / 255
     mix_pcts = [x / (n - 1) for x in range(n)]
     rgb_colors = [((1 - mix) * c1_rgb + (mix * c2_rgb)) for mix in mix_pcts]
     return [
@@ -275,7 +276,6 @@ def crop_segment_to_bounds(
     bounds_max_latitude,
     bounds_max_longitude,
 ) -> GPXTrackSegment:
-
     cropped_segment = GPXTrackSegment()
     for point in segment.points:
         if (bounds_min_latitude <= point.latitude <= bounds_max_latitude) and (
@@ -284,3 +284,46 @@ def crop_segment_to_bounds(
             cropped_segment.points.append(point)
 
     return cropped_segment
+
+
+def get_distances(v1: npt.NDArray, v2: npt.NDArray):
+    v1_lats, v1_longs = v1[:, 0], v1[:, 1]
+    v2_lats, v2_longs = v2[:, 0], v2[:, 1]
+
+    v1_lats = np.reshape(v1_lats, (v1_lats.shape[0], 1))
+    v2_lats = np.reshape(v2_lats, (1, v2_lats.shape[0]))
+
+    v1_longs = np.reshape(v1_longs, (v1_longs.shape[0], 1))
+    v2_longs = np.reshape(v2_longs, (1, v2_longs.shape[0]))
+
+    # pi vec
+    v_pi = np.reshape(np.ones(v1_lats.shape[0]) * (pi / 180), (v1_lats.shape[0], 1))
+
+    dp = (
+        0.5
+        - np.cos((v2_lats - v1_lats) * v_pi) / 2
+        + np.cos(v1_lats * v_pi)
+        * np.cos(v2_lats * v_pi)
+        * (1 - np.cos((v2_longs - v1_longs) * v_pi))
+        / 2
+    )
+
+    dp_km = 12742 * np.arcsin(np.sqrt(dp))
+
+    return dp_km * 1000
+
+
+def get_point_distance_in_segment(
+    segment: GPXTrackSegment, latitude: float, longitude: float
+) -> Tuple[GPXTrackPoint, float, int]:
+    points = []
+    for point in segment.points:
+        points.append([point.latitude, point.longitude])
+
+    distances = get_distances(np.array(points), np.array([[latitude, longitude]]))
+
+    min_idx = int(distances.argmin())
+    min_distance = float(distances.min())
+    min_point = segment.points[min_idx]
+
+    return min_point, min_distance, min_idx

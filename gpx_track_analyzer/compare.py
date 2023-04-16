@@ -1,17 +1,18 @@
 import logging
+from collections import deque
 from functools import lru_cache
-from math import pi
 from typing import Tuple
 
 import numpy as np
-import numpy.typing as npt
 from gpxpy.gpx import GPXTrackSegment
 
 from gpx_track_analyzer.model import Position2D
 from gpx_track_analyzer.utils import (
+    crop_segment_to_bounds,
     distance,
     get_latitude_at_distance,
     get_longitude_at_distance,
+    get_point_distance_in_segment,
 )
 
 logger = logging.getLogger(__name__)
@@ -35,33 +36,6 @@ def check_segment_bound_overlap(
         )
 
     return res
-
-
-def get_distances(v1: npt.NDArray, v2: npt.NDArray):
-    v1_lats, v1_longs = v1[:, 0], v1[:, 1]
-    v2_lats, v2_longs = v2[:, 0], v2[:, 1]
-
-    v1_lats = np.reshape(v1_lats, (v1_lats.shape[0], 1))
-    v2_lats = np.reshape(v2_lats, (1, v2_lats.shape[0]))
-
-    v1_longs = np.reshape(v1_longs, (v1_longs.shape[0], 1))
-    v2_longs = np.reshape(v2_longs, (1, v2_longs.shape[0]))
-
-    # pi vec
-    v_pi = np.reshape(np.ones(v1_lats.shape[0]) * (pi / 180), (v1_lats.shape[0], 1))
-
-    dp = (
-        0.5
-        - np.cos((v2_lats - v1_lats) * v_pi) / 2
-        + np.cos(v1_lats * v_pi)
-        * np.cos(v2_lats * v_pi)
-        * (1 - np.cos((v2_longs - v1_longs) * v_pi))
-        / 2
-    )
-
-    dp_km = 12742 * np.arcsin(np.sqrt(dp))
-
-    return dp_km * 1000
 
 
 @lru_cache(100)
@@ -156,6 +130,7 @@ def convert_segment_to_plate(
     bounds_max_latitude: float,
     bounds_max_longitude: float,
     normalize: bool = False,
+    max_queue_normalize: int = 5,
 ) -> np.ndarray:
     """
     Takes a GPXSegement and fills bins of a 2D array (called plate) with the passed
@@ -169,8 +144,14 @@ def convert_segment_to_plate(
                                 values than passed here dependeing on the grid width
     :param bounds_max_longitude: Maximum longitude of the grid. Bins may end with larger
                                 values than passed here dependeing on the grid width
-    :param normalize: If True, the maximum bin value will be 1 no matter how many
-                      PGXPoints fall into the bin, defaults to False
+    :param normalize: If True, successive points (defined by the max_queue_normalize)
+                      will not change the values in a bin. This means that each bin
+                      values should have the value 1 except there is overlap with
+                      points later in the track. To decide this the previous
+                      max_queue_normalize points will be considered. So this value
+                      dependes on the chosen gridwidth.
+    :param max_queue_normalize: Number of previous bins considered when normalize is
+                                set to true.
     :return: 2DArray representing the plate.
     """
     bins_latitude, bins_longitude = derive_plate_bins(
@@ -195,9 +176,14 @@ def convert_segment_to_plate(
 
     plate = np.zeros(shape=(len(bins_latitude), len(bins_longitude)))
 
+    prev_bins = deque(maxlen=max_queue_normalize)  # type: ignore
+
     for lat, long in zip(segment_lat_bins, segment_long_bins):
         if normalize:
-            plate[lat, long] = 1
+            if any((lat, long) == prev_bin for prev_bin in prev_bins):
+                continue
+            prev_bins.append((lat, long))
+            plate[lat, long] += 1
         else:
             plate[lat, long] += 1
 
@@ -205,42 +191,67 @@ def convert_segment_to_plate(
 
 
 def get_segment_overlap(
-    base_segment: GPXTrackSegment, match_segment: GPXTrackSegment, grid_width: float
-) -> Tuple[np.ndarray, float]:
+    base_segment: GPXTrackSegment,
+    match_segment: GPXTrackSegment,
+    grid_width: float,
+    max_queue_normalize: int = 5,
+) -> Tuple[np.ndarray, float, bool]:
     """Compare the tracks of two segements and caclulate the overlap.
 
     :param base_segment: Base segement in which the match segment should be found
     :param match_segment: Other segmeent that should be found in the base segement
     :param grid_width: Width (in meters) of the grid that will be filled to estimate
                        the overalp.
+    :param max_queue_normalize: Minimum number of successive points in the segment
+                                between to points falling into same plate bin.
     :return: Overlap plate (2D Array, 0 no overlap, 1 overlap), overlap value in [0, 1]
     """
-    bounds_base = base_segment.get_bounds()
     bounds_match = match_segment.get_bounds()
 
-    min_lat_plate = min((bounds_base.min_latitude, bounds_match.min_latitude))
-    min_long_plate = min((bounds_base.min_longitude, bounds_match.min_longitude))
-
-    max_lat_plate = max((bounds_base.max_latitude, bounds_match.max_latitude))
-    max_long_plate = max((bounds_base.max_longitude, bounds_match.max_longitude))
+    cropped_base_segment = crop_segment_to_bounds(
+        base_segment,
+        bounds_match.min_latitude,
+        bounds_match.min_longitude,
+        bounds_match.max_latitude,
+        bounds_match.max_longitude,
+    )
 
     plate_base = convert_segment_to_plate(
-        base_segment,
+        cropped_base_segment,
         grid_width,
-        min_lat_plate,
-        min_long_plate,
-        max_lat_plate,
-        max_long_plate,
+        bounds_match.min_latitude,
+        bounds_match.min_longitude,
+        bounds_match.max_latitude,
+        bounds_match.max_longitude,
         True,
+        max_queue_normalize,
     )
+
+    # Check if the match segment appears muzltiple times in the base segemnt
+    if plate_base.max() > 1:
+        logger.debug(
+            "Multiple occurances of points within match bounds in base segment"
+        )
+        raise NotImplementedError("Multiple matches in base segement are not supported")
+        # TODO: Split base_segement after first point exiting bounds and recursively
+        # TODO: call this function as long as this block is entered.
+
+    # TEMP
+    # import plotly.express as px
+
+    # fig = px.imshow(plate_base)
+    # fig.show()
+    # TEMP
+
     plate_match = convert_segment_to_plate(
         match_segment,
         grid_width,
-        min_lat_plate,
-        min_long_plate,
-        max_lat_plate,
-        max_long_plate,
+        bounds_match.min_latitude,
+        bounds_match.min_longitude,
+        bounds_match.max_latitude,
+        bounds_match.max_longitude,
         True,
+        max_queue_normalize,
     )
 
     overlap_plate = plate_base + plate_match
@@ -258,4 +269,28 @@ def get_segment_overlap(
 
     logger.debug("Overlap: %s", overlap)
 
-    return overlap_plate, overlap
+    # Determine if the direction in the base segmeent matched the direction
+    # in the match segement
+    first_point_match, last_point_match = (
+        match_segment.points[0],
+        match_segment.points[-1],
+    )
+
+    # TODO: Decide if the first/last id's of the base segment per match should
+    # TODO: be returned
+    first_point_base, first_distance, first_idx = get_point_distance_in_segment(
+        base_segment, first_point_match.latitude, first_point_match.longitude
+    )
+
+    last_point_base, last_distance, last_idx = get_point_distance_in_segment(
+        base_segment, last_point_match.latitude, last_point_match.longitude
+    )
+
+    if last_idx > first_idx:
+        logger.debug("Match direction: Same")
+        inverse = False
+    else:
+        logger.debug("Match direction: Iverse")
+        inverse = True
+
+    return overlap_plate, overlap, inverse
