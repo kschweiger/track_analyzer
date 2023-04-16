@@ -6,7 +6,7 @@ from typing import Tuple
 import numpy as np
 from gpxpy.gpx import GPXTrackSegment
 
-from gpx_track_analyzer.model import Position2D
+from gpx_track_analyzer.model import Position2D, SegmentOverlap
 from gpx_track_analyzer.utils import (
     crop_segment_to_bounds,
     distance,
@@ -195,7 +195,7 @@ def get_segment_overlap(
     match_segment: GPXTrackSegment,
     grid_width: float,
     max_queue_normalize: int = 5,
-) -> Tuple[np.ndarray, float, bool]:
+) -> SegmentOverlap:
     """Compare the tracks of two segements and caclulate the overlap.
 
     :param base_segment: Base segement in which the match segment should be found
@@ -289,8 +289,20 @@ def get_segment_overlap(
     if last_idx > first_idx:
         logger.debug("Match direction: Same")
         inverse = False
+        start_point, start_idx = first_point_base, first_idx
+        end_point, end_idx = last_point_base, last_idx
     else:
         logger.debug("Match direction: Iverse")
         inverse = True
+        end_point, end_idx = first_point_base, first_idx
+        start_point, start_idx = last_point_base, last_idx
 
-    return overlap_plate, overlap, inverse
+    return SegmentOverlap(
+        overlap=overlap,
+        inverse=inverse,
+        plate=overlap_plate,
+        start_point=start_point,
+        start_idx=start_idx,
+        end_point=end_point,
+        end_idx=end_idx,
+    )
