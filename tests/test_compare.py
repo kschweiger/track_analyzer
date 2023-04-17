@@ -10,7 +10,7 @@ from gpx_track_analyzer.compare import (
     derive_plate_bins,
     get_segment_overlap,
 )
-from gpx_track_analyzer.model import Position2D
+from gpx_track_analyzer.model import Position2D, SegmentOverlap
 from gpx_track_analyzer.track import PyTrack
 from gpx_track_analyzer.utils import distance
 
@@ -163,6 +163,10 @@ def test_get_segment_overlap(mocker, plate_base, plate_match, exp_overlap):
     match_segment.get_bounds = lambda: GPXBounds(1, 1, 1, 1)
     match_segment.points = [GPXTrackPoint(1, 1), GPXTrackPoint(2, 2)]
 
-    plate, overlap, inverse = get_segment_overlap(base_segment, match_segment, 100)
+    overlap_datas = get_segment_overlap(
+        base_segment, match_segment, 100, overlap_threshold=0.0
+    )
 
-    assert overlap == exp_overlap
+    assert isinstance(overlap_datas[0], SegmentOverlap)
+
+    assert overlap_datas[0].overlap == exp_overlap

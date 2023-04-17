@@ -1,7 +1,7 @@
 import logging
 from collections import deque
 from functools import lru_cache
-from typing import Tuple
+from typing import List, Tuple
 
 import numpy as np
 from gpxpy.gpx import GPXTrackSegment
@@ -13,6 +13,8 @@ from gpx_track_analyzer.utils import (
     get_latitude_at_distance,
     get_longitude_at_distance,
     get_point_distance_in_segment,
+    get_points_inside_bounds,
+    split_segment_by_id,
 )
 
 logger = logging.getLogger(__name__)
@@ -195,7 +197,8 @@ def get_segment_overlap(
     match_segment: GPXTrackSegment,
     grid_width: float,
     max_queue_normalize: int = 5,
-) -> SegmentOverlap:
+    overlap_threshold: float = 0.75,
+) -> List[SegmentOverlap]:
     """Compare the tracks of two segements and caclulate the overlap.
 
     :param base_segment: Base segement in which the match segment should be found
@@ -204,7 +207,8 @@ def get_segment_overlap(
                        the overalp.
     :param max_queue_normalize: Minimum number of successive points in the segment
                                 between to points falling into same plate bin.
-    :return: Overlap plate (2D Array, 0 no overlap, 1 overlap), overlap value in [0, 1]
+    :param overlap_threshold: Minimum overlap required to return the overlap data.
+    :return: List of SegmentOverlap objects.
     """
     bounds_match = match_segment.get_bounds()
 
@@ -227,22 +231,6 @@ def get_segment_overlap(
         max_queue_normalize,
     )
 
-    # Check if the match segment appears muzltiple times in the base segemnt
-    if plate_base.max() > 1:
-        logger.debug(
-            "Multiple occurances of points within match bounds in base segment"
-        )
-        raise NotImplementedError("Multiple matches in base segement are not supported")
-        # TODO: Split base_segement after first point exiting bounds and recursively
-        # TODO: call this function as long as this block is entered.
-
-    # TEMP
-    # import plotly.express as px
-
-    # fig = px.imshow(plate_base)
-    # fig.show()
-    # TEMP
-
     plate_match = convert_segment_to_plate(
         match_segment,
         grid_width,
@@ -254,6 +242,82 @@ def get_segment_overlap(
         max_queue_normalize,
     )
 
+    # Check if the match segment appears muzltiple times in the base segemnt
+    if plate_base.max() > 1:
+        logger.debug(
+            "Multiple occurances of points within match bounds in base segment"
+        )
+        base_points_in_bounds = get_points_inside_bounds(
+            base_segment,
+            bounds_match.min_latitude,
+            bounds_match.min_longitude,
+            bounds_match.max_latitude,
+            bounds_match.max_longitude,
+        )
+        id_ranges_in_bounds: List[Tuple[int, int]] = []
+
+        found_range = False
+        in_bound_range_start = -1
+        for idx, in_bounds in base_points_in_bounds:
+            if in_bounds and not found_range:
+                # Start of in_bound_points
+                found_range = True
+                in_bound_range_start = idx
+            if not in_bounds and found_range:
+                # End of in_bound_points
+                found_range = False
+                id_ranges_in_bounds.append((in_bound_range_start, idx - 1))
+
+        sub_segments = split_segment_by_id(base_segment, id_ranges_in_bounds)
+        sub_segment_overlaps = []
+        for i_sub_segment, (sub_segment, id_sub_segment) in enumerate(
+            zip(sub_segments, id_ranges_in_bounds)
+        ):
+            logger.debug(
+                "Processing overlap in sub-plate %s/%s",
+                i_sub_segment + 1,
+                len(sub_segments),
+            )
+            sub_plate = convert_segment_to_plate(
+                sub_segment,
+                grid_width,
+                bounds_match.min_latitude,
+                bounds_match.min_longitude,
+                bounds_match.max_latitude,
+                bounds_match.max_longitude,
+                True,
+                max_queue_normalize,
+            )
+            sub_segment_overlap = _calc_plate_overlap(
+                base_segment=sub_segment,
+                plate_base=sub_plate,
+                match_segment=match_segment,
+                plate_match=plate_match,
+            )
+
+            subseg_start, _ = id_sub_segment
+            sub_segment_overlap.start_idx += subseg_start
+            sub_segment_overlap.end_idx += subseg_start
+
+            if sub_segment_overlap.overlap >= overlap_threshold:
+                sub_segment_overlaps.append(sub_segment_overlap)
+
+        return sorted(sub_segment_overlaps, key=lambda x: x.overlap, reverse=True)
+    else:
+        logger.debug("Processing overlap in plate")
+        segment_overlap = _calc_plate_overlap(
+            base_segment=base_segment,
+            plate_base=plate_base,
+            match_segment=match_segment,
+            plate_match=plate_match,
+        )
+        if segment_overlap.overlap >= overlap_threshold:
+            return [segment_overlap]
+        else:
+            return []
+
+
+def _calc_plate_overlap(base_segment, plate_base, match_segment, plate_match):
     overlap_plate = plate_base + plate_match
 
     overlap_plate_ = np.digitize(overlap_plate, np.array([0, 2, 3])) - 1
@@ -276,8 +340,6 @@ def get_segment_overlap(
         match_segment.points[-1],
     )
 
-    # TODO: Decide if the first/last id's of the base segment per match should
-    # TODO: be returned
     first_point_base, first_distance, first_idx = get_point_distance_in_segment(
         base_segment, first_point_match.latitude, first_point_match.longitude
     )

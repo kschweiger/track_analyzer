@@ -2,6 +2,7 @@ from math import asin, degrees, isclose
 
 import numpy as np
 import pytest
+from gpxpy.gpx import GPXTrackPoint, GPXTrackSegment
 
 from gpx_track_analyzer.model import Position2D, Position3D
 from gpx_track_analyzer.track import PyTrack
@@ -13,8 +14,10 @@ from gpx_track_analyzer.utils import (
     get_distances,
     get_latitude_at_distance,
     get_longitude_at_distance,
+    get_points_inside_bounds,
     get_segment_base_area,
     hex_to_rgb,
+    split_segment_by_id,
 )
 
 
@@ -226,3 +229,77 @@ def test_get_distance_computation():
     )
 
     assert (indiv_values == distances_full).all()
+
+
+@pytest.mark.parametrize(
+    ("points", "bounds", "exp_array"),
+    [
+        (
+            [(1, 1), (2, 2), (3, 3), (4, 4), (5, 5)],
+            (2.9, 2.9, 4.1, 4.1),
+            [(0, False), (1, False), (2, True), (3, True), (4, False)],
+        ),
+        (
+            [(1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (4, 4), (3, 3), (1, 1)],
+            (2.9, 2.9, 4.1, 4.1),
+            [
+                (0, False),
+                (1, False),
+                (2, True),
+                (3, True),
+                (4, False),
+                (5, True),
+                (6, True),
+                (7, False),
+            ],
+        ),
+    ],
+)
+def test_get_points_inside_bounds(points, bounds, exp_array):
+    test_segment = GPXTrackSegment()
+    for lat, lng in points:
+        test_segment.points.append(GPXTrackPoint(lat, lng))
+
+    assert get_points_inside_bounds(test_segment, *bounds) == exp_array
+
+
+def test_split_segment_by_id():
+    in_segment = GPXTrackSegment()
+    in_segment.points = [
+        GPXTrackPoint(1, 1),
+        GPXTrackPoint(2, 2),
+        GPXTrackPoint(3, 3),
+        GPXTrackPoint(4, 4),
+        GPXTrackPoint(5, 5),
+        GPXTrackPoint(6, 6),
+        GPXTrackPoint(7, 7),
+        GPXTrackPoint(8, 8),
+        GPXTrackPoint(9, 9),
+        GPXTrackPoint(10, 10),
+    ]
+
+    ret_segments = split_segment_by_id(in_segment, [(1, 4), (6, 8)])
+
+    assert len(ret_segments) == 2
+    for ret_point, exp_point in zip(
+        ret_segments[0].points,
+        [
+            GPXTrackPoint(2, 2),
+            GPXTrackPoint(3, 3),
+            GPXTrackPoint(4, 4),
+            GPXTrackPoint(5, 5),
+        ],
+    ):
+        assert ret_point.latitude == exp_point.latitude
+        assert ret_point.longitude == exp_point.longitude
+
+    for ret_point, exp_point in zip(
+        ret_segments[1].points,
+        [
+            GPXTrackPoint(7, 7),
+            GPXTrackPoint(8, 8),
+            GPXTrackPoint(9, 9),
+        ],
+    ):
+        assert ret_point.latitude == exp_point.latitude
+        assert ret_point.longitude == exp_point.longitude

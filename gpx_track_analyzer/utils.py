@@ -327,3 +327,46 @@ def get_point_distance_in_segment(
     min_point = segment.points[min_idx]
 
     return min_point, min_distance, min_idx
+
+
+def get_points_inside_bounds(
+    segment: GPXTrackSegment,
+    bounds_min_latitude: float,
+    bounds_min_longitude: float,
+    bounds_max_latitude: float,
+    bounds_max_longitude: float,
+) -> List[Tuple[int, bool]]:
+    ret_list = []
+    for idx, point in enumerate(segment.points):
+        inside_bounds = (
+            bounds_min_latitude <= point.latitude <= bounds_max_latitude
+        ) and (bounds_min_longitude <= point.longitude <= bounds_max_longitude)
+        ret_list.append((idx, inside_bounds))
+
+    return ret_list
+
+
+def split_segment_by_id(
+    segment: GPXTrackSegment, index_ranges: List[Tuple[int, int]]
+) -> List[GPXTrackSegment]:
+    ret_segments = []
+
+    indv_idx = []
+    range_classifiers = []
+    for range_ in index_ranges:
+        indv_idx.extend(list(range_))
+        range_classifiers.append(lambda i, le=range_[0], re=range_[1]: le <= i <= re)
+        ret_segments.append(GPXTrackSegment())
+
+    min_idx = min(indv_idx)
+    max_idx = max(indv_idx)
+
+    for idx, point in enumerate(segment.points):
+        if idx < min_idx or idx > max_idx:
+            continue
+
+        for i_class, func in enumerate(range_classifiers):
+            if func(idx):
+                ret_segments[i_class].points.append(point)
+
+    return ret_segments
