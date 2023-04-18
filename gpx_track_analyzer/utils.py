@@ -224,6 +224,34 @@ def interpolate_linear(
     return ret_points
 
 
+def interpolate_segment(segment: GPXTrackSegment, spacing: float) -> GPXTrackSegment:
+    init_points = segment.points
+
+    new_segment_points = []
+    for i, (start, end) in enumerate(zip(init_points[:-1], init_points[1:])):
+        new_points = interpolate_linear(
+            start=start,
+            end=end,
+            spacing=spacing,
+        )
+
+        if new_points is None:
+            if i == 0:
+                new_segment_points.extend([start, end])
+            else:
+                new_segment_points.extend([end])
+            continue
+
+        if i == 0:
+            new_segment_points.extend(new_points)
+        else:
+            new_segment_points.extend(new_points[1:])
+
+    interpolated_segment = GPXTrackSegment()
+    interpolated_segment.points = new_segment_points
+    return interpolated_segment
+
+
 def hex_to_rgb(hex: str):
     """
     Pass a hex color name (as string) and get the RGB value

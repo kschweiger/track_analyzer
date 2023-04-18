@@ -17,7 +17,7 @@ from gpx_track_analyzer.processing import get_processed_segment_data
 from gpx_track_analyzer.utils import (
     calc_elevation_metrics,
     get_point_distance_in_segment,
-    interpolate_linear,
+    interpolate_segment,
 )
 
 logger = logging.getLogger(__name__)
@@ -184,28 +184,9 @@ class Track(ABC):
         :param spacing: Minimum distance between points added by the interpolation
         :param n_segment: segment in the track to use, defaults to 0
         """
-        init_points = self.track.segments[n_segment].points
-
-        new_segment_points = []
-        for i, (start, end) in enumerate(zip(init_points[:-1], init_points[1:])):
-            new_points = interpolate_linear(
-                start=start,
-                end=end,
-                spacing=spacing,
-            )
-
-            if new_points is None:
-                if i == 0:
-                    new_segment_points.extend([start, end])
-                else:
-                    new_segment_points.extend([end])
-                continue
-
-            if i == 0:
-                new_segment_points.extend(new_points)
-            else:
-                new_segment_points.extend(new_points[1:])
-        self.track.segments[n_segment].points = new_segment_points
+        self.track.segments[n_segment] = interpolate_segment(
+            self.track.segments[n_segment], spacing
+        )
 
         # Reset saved processed data
         if n_segment in self.processed_segment_data:
