@@ -1,3 +1,19 @@
+##  (2023-04-18)
+
+* build: Bumped version to 0.1.0 :bookmark: ([64e24b1](https://github.com/kschweiger/track_analyzer/commit/64e24b1))
+* chore: Removed setup.py (only contained flake8 configuration) ([64d1295](https://github.com/kschweiger/track_analyzer/commit/64d1295))
+* feat: Implement methods for finding overlapping subsegments in tracks (#2) ([237b481](https://github.com/kschweiger/track_analyzer/commit/237b481)), closes [#2](https://github.com/kschweiger/track_analyzer/issues/2)
+
+
+
+## <small>0.0.8 (2023-03-11)</small>
+
+* doc: Updated CHANGELOG.md :memo: ([6066453](https://github.com/kschweiger/track_analyzer/commit/6066453))
+* build: Bumped version to 0.0.8 :bookmark: ([935e168](https://github.com/kschweiger/track_analyzer/commit/935e168))
+* feat(visualize): Added option to add a x-axis slider to the 2d plots ([34febac](https://github.com/kschweiger/track_analyzer/commit/34febac))
+
+
+
 ##  (2023-03-11)
 
 * build: Bumped version to 0.0.8 :bookmark: ([935e168](https://github.com/kschweiger/track_analyzer/commit/935e168))
