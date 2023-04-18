@@ -1,6 +1,9 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
 
+import numpy as np
+from gpxpy.gpx import GPXTrackPoint
+
 
 @dataclass
 class Position2D:
@@ -67,7 +70,6 @@ class SegmentOverview:
     avg_velocity_kmh: Optional[float] = field(init=False)
 
     def __post_init__(self):
-
         self.moving_distance_km = self.moving_distance / 1000
         self.total_distance_km = self.total_distance / 1000
         self.max_velocity_kmh = (
@@ -76,3 +78,26 @@ class SegmentOverview:
         self.avg_velocity_kmh = (
             None if self.avg_velocity is None else 3.6 * self.avg_velocity
         )
+
+
+@dataclass
+class SegmentOverlap:
+    overlap: float
+    inverse: bool
+    plate: np.ndarray
+    start_point: GPXTrackPoint
+    start_idx: int
+    end_point: GPXTrackPoint
+    end_idx: int
+
+    def __repr__(self) -> str:
+        ret_str = f"Overlap {self.overlap*100:.2f}%, Inverse: {self.inverse},"
+        ret_str += f" Plate: {self.plate.shape}, Points: "
+        point_strs = []
+        for point, idx in zip(
+            [self.start_point, self.end_point], [self.start_idx, self.end_idx]
+        ):
+            point_strs.append(f"({point.latitude},{point.longitude}) at id {idx}")
+        ret_str += " to ".join(point_strs)
+
+        return ret_str

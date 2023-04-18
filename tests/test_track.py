@@ -1,17 +1,19 @@
+import importlib.resources
 from datetime import datetime
 from unittest.mock import MagicMock
 
 import gpxpy
 import pandas as pd
 import pytest
-from gpxpy.gpx import GPXTrack
+from gpxpy.gpx import GPXTrack, GPXTrackPoint
 
 from gpx_track_analyzer.exceptions import (
     TrackInitializationException,
     TrackTransformationException,
 )
 from gpx_track_analyzer.model import SegmentOverview
-from gpx_track_analyzer.track import FileTrack, PyTrack
+from gpx_track_analyzer.track import ByteTrack, FileTrack, PyTrack, Track
+from tests import resources
 
 
 @pytest.fixture()
@@ -39,7 +41,6 @@ def generate_mock_track():
     ]
 
     for lat, long, ele, isotime in point_values:
-
         gpx_segment.points.append(
             gpxpy.gpx.GPXTrackPoint(
                 lat,
@@ -53,7 +54,7 @@ def generate_mock_track():
 
 
 def test_track(mocker, generate_mock_track):
-    MockedFileTrack = FileTrack
+    MockedFileTrack = FileTrack  # noqa: N806
     MockedFileTrack._get_pgx = MagicMock()
     MockedFileTrack._get_pgx.return_value = generate_mock_track
 
@@ -229,3 +230,45 @@ def test_get_point_data_in_segment_exception_time():
 
     with pytest.raises(TrackTransformationException):
         track.get_point_data_in_segmnet()
+
+
+def test_get_closest_point():
+    track = PyTrack(
+        [(1, 1), (2, 2)],
+        [100, 200],
+        [datetime(2023, 1, 1, 10), datetime(2023, 1, 1, 10, 30)],
+    )
+
+    point, distance, idx = track.get_closest_point(0, 1.1, 1.1)
+
+    assert isinstance(point, GPXTrackPoint)
+    assert isinstance(distance, float)
+    assert isinstance(idx, int)
+
+    assert idx == 0
+    assert point.latitude == 1
+    assert point.longitude == 1
+    assert point.elevation == 100
+    assert point.time == datetime(2023, 1, 1, 10, 0)
+
+
+def test_overlap():
+    resource_files = importlib.resources.files(resources)
+
+    track = ByteTrack(
+        (resource_files / "Freiburger_Münster_nach_Schau_Ins_Land.gpx").read_bytes()
+    )
+
+    match_track = ByteTrack(
+        (resource_files / "Teilstueck_Schau_ins_land.gpx").read_bytes()
+    )
+
+    overlap_tracks = track.find_overlap_with_segment(0, match_track)
+
+    assert len(overlap_tracks) == 1
+
+    overlap_track, overlap_frac, inverse = overlap_tracks[0]
+
+    assert isinstance(overlap_track, Track)
+    assert overlap_frac == 1.0
+    assert not inverse
