@@ -1,13 +1,16 @@
+from __future__ import annotations
+
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Sequence, Tuple
 
 import gpxpy
 import numpy as np
 import pandas as pd
 from gpxpy.gpx import GPX, GPXTrack, GPXTrackPoint, GPXTrackSegment
 
+from gpx_track_analyzer.compare import get_segment_overlap
 from gpx_track_analyzer.exceptions import (
     TrackInitializationException,
     TrackTransformationException,
@@ -240,6 +243,54 @@ class Track(ABC):
 
         return data_
 
+    def find_overlap_with_segment(
+        self,
+        n_segment: int,
+        match_track: Track,
+        match_track_segment: int = 0,
+        width: float = 50,
+        overlap_thrshold: float = 0.75,
+        max_queue_normalize: int = 5,
+    ) -> Sequence[Tuple[Track, float, bool]]:
+        max_distance_self = self.get_max_pp_distance_in_segment(n_segment)
+
+        segment_self = self.track.segments[n_segment]
+        if max_distance_self > width:
+            segment_self = interpolate_segment(segment_self, width / 2)
+
+        max_distance_match = match_track.get_max_pp_distance_in_segment(
+            match_track_segment
+        )
+        segment_match = match_track.track.segments[match_track_segment]
+        if max_distance_match > width:
+            segment_match = interpolate_segment(segment_match, width / 2)
+
+        logger.info("Looking for overlapping segments")
+        segment_overlaps = get_segment_overlap(
+            segment_self, segment_match, width, max_queue_normalize, overlap_thrshold
+        )
+
+        matched_tracks: List[Tuple[Track, float, bool]] = []
+        for overlap in segment_overlaps:
+            logger.info("Found: %s", overlap)
+            matched_segment = GPXTrackSegment()
+            # TODO: Might need to go up to overlap.end_idx + 1?
+            matched_segment.points = self.track.segments[n_segment].points[
+                overlap.start_idx : overlap.end_idx
+            ]
+            matched_tracks.append(
+                (
+                    SegmentTrack(
+                        matched_segment,
+                        stopped_speed_threshold=self.stopped_speed_threshold,
+                        max_speed_percentile=self.max_speed_percentile,
+                    ),
+                    overlap.overlap,
+                    overlap.inverse,
+                )
+            )
+        return matched_tracks
+
 
 class FileTrack(Track):
     def __init__(self, gpx_file: str, n_track: int = 0, **kwargs):
@@ -288,7 +339,7 @@ class PyTrack(Track):
         points: List[Tuple[float, float]],
         elevations: List[Optional[float]],
         times: List[Optional[datetime]],
-        **kwargs
+        **kwargs,
     ):
         super().__init__(**kwargs)
 
@@ -320,6 +371,23 @@ class PyTrack(Track):
 
         for (lat, lng), ele, time in zip(points, elevations_, times_):
             gpx_segment.points.append(GPXTrackPoint(lat, lng, elevation=ele, time=time))
+
+        self._track = gpx.tracks[0]
+
+    @property
+    def track(self) -> GPXTrack:
+        return self._track
+
+
+class SegmentTrack(Track):
+    def __init__(self, segment: GPXTrackSegment, **kwargs):
+        super().__init__(**kwargs)
+        gpx = GPX()
+
+        gpx_track = GPXTrack()
+        gpx.tracks.append(gpx_track)
+
+        gpx_track.segments.append(segment)
 
         self._track = gpx.tracks[0]
 

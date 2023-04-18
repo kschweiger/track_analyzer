@@ -1,3 +1,4 @@
+import importlib.resources
 from datetime import datetime
 from unittest.mock import MagicMock
 
@@ -11,7 +12,8 @@ from gpx_track_analyzer.exceptions import (
     TrackTransformationException,
 )
 from gpx_track_analyzer.model import SegmentOverview
-from gpx_track_analyzer.track import FileTrack, PyTrack
+from gpx_track_analyzer.track import ByteTrack, FileTrack, PyTrack, Track
+from tests import resources
 
 
 @pytest.fixture()
@@ -248,3 +250,25 @@ def test_get_closest_point():
     assert point.longitude == 1
     assert point.elevation == 100
     assert point.time == datetime(2023, 1, 1, 10, 0)
+
+
+def test_overlap():
+    resource_files = importlib.resources.files(resources)
+
+    track = ByteTrack(
+        (resource_files / "Freiburger_Münster_nach_Schau_Ins_Land.gpx").read_bytes()
+    )
+
+    match_track = ByteTrack(
+        (resource_files / "Teilstueck_Schau_ins_land.gpx").read_bytes()
+    )
+
+    overlap_tracks = track.find_overlap_with_segment(0, match_track)
+
+    assert len(overlap_tracks) == 1
+
+    overlap_track, overlap_frac, inverse = overlap_tracks[0]
+
+    assert isinstance(overlap_track, Track)
+    assert overlap_frac == 1.0
+    assert not inverse

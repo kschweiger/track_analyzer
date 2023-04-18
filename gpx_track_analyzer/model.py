@@ -97,7 +97,7 @@ class SegmentOverlap:
         for point, idx in zip(
             [self.start_point, self.end_point], [self.start_idx, self.end_idx]
         ):
-            point_strs.append(f"({point.latitude},{point.longitude}) at id {idx} ")
-        ret_str += "to".join(point_strs)
+            point_strs.append(f"({point.latitude},{point.longitude}) at id {idx}")
+        ret_str += " to ".join(point_strs)
 
         return ret_str
