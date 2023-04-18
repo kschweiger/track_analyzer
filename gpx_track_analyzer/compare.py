@@ -267,6 +267,8 @@ def get_segment_overlap(
                 # End of in_bound_points
                 found_range = False
                 id_ranges_in_bounds.append((in_bound_range_start, idx - 1))
+        if found_range:
+            id_ranges_in_bounds.append((in_bound_range_start, idx))
 
         sub_segments = split_segment_by_id(base_segment, id_ranges_in_bounds)
         sub_segment_overlaps = []

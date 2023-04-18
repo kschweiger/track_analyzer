@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
-from gpxpy.gpx import GPXBounds, GPXTrackPoint
+from gpxpy.gpx import GPXBounds, GPXTrackPoint, GPXTrackSegment
 
 from gpx_track_analyzer.compare import (
     check_segment_bound_overlap,
@@ -132,17 +132,17 @@ def test_convert_segment_to_plate(mocker, points, patch_bins, normalize, exp_pla
         (
             np.array([[0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 0]]),
             np.array([[0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 0]]),
-            1,
+            [1],
         ),
         (
             np.array([[0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 0]]),
             np.array([[1, 0, 0, 0], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 0]]),
-            2 / 3,
+            [2 / 3],
         ),
         (
             np.array([[0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 0]]),
             np.array([[1, 0, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]),
-            0,
+            [0],
         ),
     ],
 )
@@ -168,5 +168,44 @@ def test_get_segment_overlap(mocker, plate_base, plate_match, exp_overlap):
     )
 
     assert isinstance(overlap_datas[0], SegmentOverlap)
+    assert len(overlap_datas) == len(exp_overlap)
 
-    assert overlap_datas[0].overlap == exp_overlap
+    for data, overlap in zip(overlap_datas, exp_overlap):
+        assert data.overlap == overlap
+
+
+def test_get_segment_overlap_multi():
+    base_segment = GPXTrackSegment()
+    base_segment.points = [
+        GPXTrackPoint(1, 1),
+        GPXTrackPoint(1, 2),
+        GPXTrackPoint(1, 3),
+        GPXTrackPoint(1, 4),
+        GPXTrackPoint(1, 5),
+        GPXTrackPoint(1, 6),
+        GPXTrackPoint(2, 6),
+        GPXTrackPoint(2, 5),
+        GPXTrackPoint(1, 5),
+        GPXTrackPoint(1, 4),
+        GPXTrackPoint(1, 3),
+        GPXTrackPoint(1, 2),
+    ]
+
+    match_segment = GPXTrackSegment()
+    match_segment.points = [
+        GPXTrackPoint(1, 1),
+        GPXTrackPoint(1, 2),
+        GPXTrackPoint(1, 3),
+    ]
+
+    data = get_segment_overlap(
+        base_segment,
+        match_segment,
+        distance(Position2D(1, 1), Position2D(1, 2)),
+        1,
+        0.0,
+    )
+
+    assert len(data) == 2
+    data[0].overlap = 1
+    data[1].overlap = 2 / 3
