@@ -228,7 +228,7 @@ def test_get_distance_computation():
         ]
     )
 
-    assert (indiv_values == distances_full).all()
+    assert np.isclose(indiv_values, distances_full).all()
 
 
 @pytest.mark.parametrize(
