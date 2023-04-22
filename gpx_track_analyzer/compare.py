@@ -192,11 +192,45 @@ def convert_segment_to_plate(
     return np.flip(plate, axis=0)
 
 
+def _extract_ranges(
+    base_points_in_bounds: List[Tuple[int, bool]], allow_points_outside_bounds: int
+) -> List[Tuple[int, int]]:
+    """Extract point ranges from a list of indices and boolan flags"""
+    id_ranges_in_bounds: List[Tuple[int, int]] = []
+    found_range = False
+    in_bound_range_start = -1
+    points_since_last_range = 0
+    for idx, in_bounds in base_points_in_bounds:
+        if in_bounds and not found_range:
+            # Start of in_bound_points
+            found_range = True
+            if (
+                points_since_last_range <= allow_points_outside_bounds
+                and id_ranges_in_bounds
+            ):
+                prev_range_start, _ = id_ranges_in_bounds.pop()
+                in_bound_range_start = prev_range_start
+            else:
+                in_bound_range_start = idx
+        if not in_bounds:
+            if found_range:
+                # End of in_bound_points
+                found_range = False
+                id_ranges_in_bounds.append((in_bound_range_start, idx - 1))
+                points_since_last_range = 0
+            points_since_last_range += 1
+    if found_range:
+        id_ranges_in_bounds.append((in_bound_range_start, idx))
+
+    return id_ranges_in_bounds
+
+
 def get_segment_overlap(
     base_segment: GPXTrackSegment,
     match_segment: GPXTrackSegment,
     grid_width: float,
     max_queue_normalize: int = 5,
+    allow_points_outside_bounds: int = 5,
     overlap_threshold: float = 0.75,
 ) -> List[SegmentOverlap]:
     """Compare the tracks of two segements and caclulate the overlap.
@@ -207,6 +241,8 @@ def get_segment_overlap(
                        the overalp.
     :param max_queue_normalize: Minimum number of successive points in the segment
                                 between to points falling into same plate bin.
+    :param allow_points_outside_bounds: Number of points between sub segments allowed
+                                        for merging the segments.
     :param overlap_threshold: Minimum overlap required to return the overlap data.
     :return: List of SegmentOverlap objects.
     """
@@ -254,21 +290,10 @@ def get_segment_overlap(
             bounds_match.max_latitude,
             bounds_match.max_longitude,
         )
-        id_ranges_in_bounds: List[Tuple[int, int]] = []
 
-        found_range = False
-        in_bound_range_start = -1
-        for idx, in_bounds in base_points_in_bounds:
-            if in_bounds and not found_range:
-                # Start of in_bound_points
-                found_range = True
-                in_bound_range_start = idx
-            if not in_bounds and found_range:
-                # End of in_bound_points
-                found_range = False
-                id_ranges_in_bounds.append((in_bound_range_start, idx - 1))
-        if found_range:
-            id_ranges_in_bounds.append((in_bound_range_start, idx))
+        id_ranges_in_bounds = _extract_ranges(
+            base_points_in_bounds, allow_points_outside_bounds
+        )
 
         sub_segments = split_segment_by_id(base_segment, id_ranges_in_bounds)
         sub_segment_overlaps = []

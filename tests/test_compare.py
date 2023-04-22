@@ -5,6 +5,7 @@ import pytest
 from gpxpy.gpx import GPXBounds, GPXTrackPoint, GPXTrackSegment
 
 from gpx_track_analyzer.compare import (
+    _extract_ranges,
     check_segment_bound_overlap,
     convert_segment_to_plate,
     derive_plate_bins,
@@ -203,9 +204,64 @@ def test_get_segment_overlap_multi():
         match_segment,
         distance(Position2D(1, 1), Position2D(1, 2)),
         1,
+        0,
         0.0,
     )
 
     assert len(data) == 2
     data[0].overlap = 1
     data[1].overlap = 2 / 3
+
+
+@pytest.mark.parametrize(
+    ("points", "allow_points", "exp"),
+    [
+        (
+            [
+                (0, True),
+                (1, True),
+                (2, True),
+                (3, False),
+                (4, False),
+                (5, True),
+                (6, True),
+            ],
+            0,
+            [(0, 2), (5, 6)],
+        ),
+        (
+            [
+                (0, True),
+                (1, True),
+                (2, True),
+                (3, False),
+                (4, False),
+                (5, True),
+                (6, True),
+            ],
+            3,
+            [(0, 6)],
+        ),
+        (
+            [
+                (0, True),
+                (1, True),
+                (2, True),
+                (3, False),
+                (4, False),
+                (5, True),
+                (6, True),
+                (7, False),
+                (8, False),
+                (9, False),
+                (10, False),
+                (11, True),
+                (12, True),
+            ],
+            3,
+            [(0, 6), (11, 12)],
+        ),
+    ],
+)
+def test_extract_ranges(points, allow_points, exp):
+    assert _extract_ranges(points, allow_points) == exp

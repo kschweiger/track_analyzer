@@ -249,8 +249,9 @@ class Track(ABC):
         match_track: Track,
         match_track_segment: int = 0,
         width: float = 50,
-        overlap_thrshold: float = 0.75,
+        overlap_threshold: float = 0.75,
         max_queue_normalize: int = 5,
+        merge_subsegments: int = 5,
     ) -> Sequence[Tuple[Track, float, bool]]:
         max_distance_self = self.get_max_pp_distance_in_segment(n_segment)
 
@@ -267,7 +268,12 @@ class Track(ABC):
 
         logger.info("Looking for overlapping segments")
         segment_overlaps = get_segment_overlap(
-            segment_self, segment_match, width, max_queue_normalize, overlap_thrshold
+            segment_self,
+            segment_match,
+            width,
+            max_queue_normalize,
+            merge_subsegments,
+            overlap_threshold,
         )
 
         matched_tracks: List[Tuple[Track, float, bool]] = []
