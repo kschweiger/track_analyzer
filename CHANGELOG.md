@@ -1,3 +1,19 @@
+##  (2023-04-22)
+
+* build: Bumped version to 0.1.1 :bookmark: ([bf837c9](https://github.com/kschweiger/track_analyzer/commit/bf837c9))
+* feat(get_segment_overlap): Subsegments are merged if spearated by few points ([a33a3bc](https://github.com/kschweiger/track_analyzer/commit/a33a3bc))
+
+
+
+## 0.1.0 (2023-04-18)
+
+* doc: Updated CHANGELOG.md :memo: ([6aad6a4](https://github.com/kschweiger/track_analyzer/commit/6aad6a4))
+* build: Bumped version to 0.1.0 :bookmark: ([64e24b1](https://github.com/kschweiger/track_analyzer/commit/64e24b1))
+* chore: Removed setup.py (only contained flake8 configuration) ([64d1295](https://github.com/kschweiger/track_analyzer/commit/64d1295))
+* feat: Implement methods for finding overlapping subsegments in tracks (#2) ([237b481](https://github.com/kschweiger/track_analyzer/commit/237b481)), closes [#2](https://github.com/kschweiger/track_analyzer/issues/2)
+
+
+
 ##  (2023-04-18)
 
 * build: Bumped version to 0.1.0 :bookmark: ([64e24b1](https://github.com/kschweiger/track_analyzer/commit/64e24b1))
