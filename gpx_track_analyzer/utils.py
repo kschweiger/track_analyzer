@@ -87,8 +87,10 @@ def calc_elevation_metrics(
             uphill += pp_elevation
         else:
             downhill += pp_elevation
-
-        o_by_h = pp_elevation / pp_distance
+        try:
+            o_by_h = pp_elevation / pp_distance
+        except ZeroDivisionError:
+            o_by_h = 0
         # Addressing **ValueError: math domain error**
         if o_by_h > 1 or o_by_h < -1:
             slopes.append(np.NaN)
