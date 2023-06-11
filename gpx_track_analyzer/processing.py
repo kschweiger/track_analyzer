@@ -55,7 +55,6 @@ def get_processed_segment_data(
 def get_processed_data_w_time(
     segment: GPXTrackSegment, data: Dict[str, List[Any]], threshold_ms: float
 ) -> Tuple[float, float, float, float, Dict[str, List[Any]]]:
-
     time = 0.0
     stopped_time = 0.0
 
@@ -78,7 +77,6 @@ def get_processed_data_w_time(
             seconds = timedelta.total_seconds()
             if seconds > 0 and point_distance is not None:
                 if point_distance:
-
                     is_stopped = (
                         True if (point_distance / seconds) <= threshold_ms else False
                     )

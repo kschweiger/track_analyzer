@@ -8,6 +8,7 @@ from typing import Dict, List, Optional, Sequence, Tuple
 import gpxpy
 import numpy as np
 import pandas as pd
+from fitparse import FitFile, StandardUnitsDataProcessor
 from gpxpy.gpx import GPX, GPXTrack, GPXTrackPoint, GPXTrackSegment
 
 from gpx_track_analyzer.compare import get_segment_overlap
@@ -41,6 +42,8 @@ class Track(ABC):
         self.processed_segment_data: Dict[
             int, Tuple[float, float, float, float, pd.DataFrame]
         ] = {}
+
+        self.session_data: Dict[str, str | int | float] = {}
 
     @property
     @abstractmethod
@@ -394,6 +397,78 @@ class SegmentTrack(Track):
         gpx.tracks.append(gpx_track)
 
         gpx_track.segments.append(segment)
+
+        self._track = gpx.tracks[0]
+
+    @property
+    def track(self) -> GPXTrack:
+        return self._track
+
+
+class FITTrack(Track):
+    def __init__(self, fit_file: str, **kwargs):
+        """
+        Load a .fit file and extract the data into a Track object.
+        NOTE: Tested with Wahoo devices only
+        """
+        super().__init__(**kwargs)
+
+        logger.info("Loading gpx track from file %s", fit_file)
+
+        fit_data = FitFile(
+            fit_file,
+            data_processor=StandardUnitsDataProcessor(),
+        )
+
+        points, elevations, times = [], [], []
+
+        for record in fit_data.get_messages("record"):
+            lat = record.get_value("position_lat")
+            long = record.get_value("position_long")
+            ele = record.get_value("enhanced_altitude")
+            ts = record.get_value("timestamp")
+
+            if any([v is None for v in [lat, long, ele, ts]]):
+                logger.debug(
+                    "Found records with None value in lat/long/elevation/timestamp "
+                    " - %s/%s/%s/%s",
+                    lat,
+                    long,
+                    ele,
+                    ts,
+                )
+                continue
+
+            points.append((lat, long))
+            elevations.append(ele)
+            times.append(ts)
+
+        try:
+            session_data = list(fit_data.get_messages("session"))[-1]
+        except IndexError:
+            logger.debug("Could not load session data from fit file")
+        else:
+            self.session_data = {
+                "start_time": session_data.get_value("start_time"),
+                "ride_time": session_data.get_value("total_timer_time"),
+                "total_time": session_data.get_value("total_elapsed_time"),
+                "distance": session_data.get_value("total_distance"),
+                "ascent": session_data.get_value("total_ascent"),
+                "descent": session_data.get_value("total_descent"),
+                "avg_velocity": session_data.get_value("avg_speed"),
+                "max_velocity": session_data.get_value("max_speed"),
+            }
+
+        gpx = GPX()
+
+        gpx_track = GPXTrack()
+        gpx.tracks.append(gpx_track)
+
+        gpx_segment = GPXTrackSegment()
+        gpx_track.segments.append(gpx_segment)
+
+        for (lat, lng), ele, time in zip(points, elevations, times):
+            gpx_segment.points.append(GPXTrackPoint(lat, lng, elevation=ele, time=time))
 
         self._track = gpx.tracks[0]
 
