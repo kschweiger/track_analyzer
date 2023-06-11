@@ -1,3 +1,19 @@
+##  (2023-06-11)
+
+* build: Bumped version to 0.1.2 :bookmark: ([3b7f01d](https://github.com/kschweiger/track_analyzer/commit/3b7f01d))
+* feat: Added basic support for fit file ([2563996](https://github.com/kschweiger/track_analyzer/commit/2563996))
+* fix(calc_elevation_metrics): Deal with ZeroDivisionError ([8f66763](https://github.com/kschweiger/track_analyzer/commit/8f66763))
+
+
+
+## <small>0.1.1 (2023-04-22)</small>
+
+* doc: Updated CHANGELOG.md :memo: ([d1139a8](https://github.com/kschweiger/track_analyzer/commit/d1139a8))
+* build: Bumped version to 0.1.1 :bookmark: ([bf837c9](https://github.com/kschweiger/track_analyzer/commit/bf837c9))
+* feat(get_segment_overlap): Subsegments are merged if spearated by few points ([a33a3bc](https://github.com/kschweiger/track_analyzer/commit/a33a3bc))
+
+
+
 ##  (2023-04-22)
 
 * build: Bumped version to 0.1.1 :bookmark: ([bf837c9](https://github.com/kschweiger/track_analyzer/commit/bf837c9))
