@@ -1,7 +1,7 @@
 import logging
 from datetime import timedelta
 from math import acos, asin, atan2, cos, degrees, pi, sin, sqrt
-from typing import Callable, List, Optional, Tuple, Union
+from typing import Callable, Union
 
 import coloredlogs
 import numpy as np
@@ -61,7 +61,7 @@ def get_longitude_at_distance(
 
 
 def calc_elevation_metrics(
-    positions: List[Position3D],
+    positions: list[Position3D],
 ) -> ElevationMetrics:
     """
     Calculate elevation related metrics for the passed list of Position3D objects
@@ -101,7 +101,7 @@ def calc_elevation_metrics(
     return ElevationMetrics(uphill, abs(downhill), slopes)
 
 
-def parse_level(this_level: Union[int, str]) -> Tuple[int, Callable]:
+def parse_level(this_level: Union[int, str]) -> tuple[int, Callable]:
     if this_level == 20 or this_level == "INFO":
         return logging.INFO, logging.info
     elif this_level == 10 or this_level == "DEBUG":
@@ -124,7 +124,7 @@ def init_logging(this_level: Union[int, str]) -> bool:
     return True
 
 
-def center_geolocation(geolocations: List[Tuple[float, float]]):
+def center_geolocation(geolocations: list[tuple[float, float]]):
     """
     Calculate an estimated (based on the assumption the earth is a perfect sphere) given
     a list of latitude, longitude pairs in degree.
@@ -132,7 +132,7 @@ def center_geolocation(geolocations: List[Tuple[float, float]]):
     Based on: https://gist.github.com/amites/3718961
 
     Args:
-        geolocations: List of latitude, longitude pairs in degree
+        geolocations: list of latitude, longitude pairs in degree
 
     Returns: Estimate center latitude, longitude pair in degree
     """
@@ -156,7 +156,7 @@ def center_geolocation(geolocations: List[Tuple[float, float]]):
 
 def interpolate_linear(
     start: GPXTrackPoint, end: GPXTrackPoint, spacing: float
-) -> Optional[List[GPXTrackPoint]]:
+) -> None | list[GPXTrackPoint]:
     """
     Simple linear interpolation between GPXTrackPoint. Supports latitude, longitude
     (required), elevation (optional), and time (optional)
@@ -352,7 +352,7 @@ def get_distances(v1: npt.NDArray, v2: npt.NDArray):
 
 def get_point_distance_in_segment(
     segment: GPXTrackSegment, latitude: float, longitude: float
-) -> Tuple[GPXTrackPoint, float, int]:
+) -> tuple[GPXTrackPoint, float, int]:
     points = []
     for point in segment.points:
         points.append([point.latitude, point.longitude])
@@ -372,7 +372,7 @@ def get_points_inside_bounds(
     bounds_min_longitude: float,
     bounds_max_latitude: float,
     bounds_max_longitude: float,
-) -> List[Tuple[int, bool]]:
+) -> list[tuple[int, bool]]:
     ret_list = []
     for idx, point in enumerate(segment.points):
         inside_bounds = (
@@ -384,11 +384,11 @@ def get_points_inside_bounds(
 
 
 def split_segment_by_id(
-    segment: GPXTrackSegment, index_ranges: List[Tuple[int, int]]
-) -> List[GPXTrackSegment]:
+    segment: GPXTrackSegment, index_ranges: list[tuple[int, int]]
+) -> list[GPXTrackSegment]:
     ret_segments = []
 
-    indv_idx: List[int] = []
+    indv_idx: list[int] = []
     range_classifiers = []
     for range_ in index_ranges:
         indv_idx.extend(list(range_))
@@ -409,7 +409,7 @@ def split_segment_by_id(
     return ret_segments
 
 
-def check_bounds(bounds: Optional[GPXBounds]) -> None:
+def check_bounds(bounds: None | GPXBounds) -> None:
     if bounds is None:
         raise InvalidBoundsError("Bounds %s are invalid", bounds)
 

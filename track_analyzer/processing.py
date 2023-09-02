@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Union
 
 import pandas as pd
 from gpxpy.gpx import GPXTrackSegment
@@ -6,7 +6,7 @@ from gpxpy.gpx import GPXTrackSegment
 
 def get_processed_segment_data(
     segment: GPXTrackSegment, stopped_speed_threshold: float = 1
-) -> Tuple[float, float, float, float, pd.DataFrame]:
+) -> tuple[float, float, float, float, pd.DataFrame]:
     """
     Calculate the speed and distance from point to point for a segment. This follows
     the implementation of the get_moving_data method in the implementation of
@@ -23,7 +23,7 @@ def get_processed_segment_data(
 
     threshold_ms = stopped_speed_threshold / 3.6
 
-    data: Dict[str, List[Optional[Union[float, bool]]]] = {
+    data: Dict[str, list[None | Union[float, bool]]] = {
         "latitude": [],
         "longitude": [],
         "elevation": [],
@@ -53,8 +53,8 @@ def get_processed_segment_data(
 
 
 def get_processed_data_w_time(
-    segment: GPXTrackSegment, data: Dict[str, List[Any]], threshold_ms: float
-) -> Tuple[float, float, float, float, Dict[str, List[Any]]]:
+    segment: GPXTrackSegment, data: Dict[str, list[Any]], threshold_ms: float
+) -> tuple[float, float, float, float, Dict[str, list[Any]]]:
     time = 0.0
     stopped_time = 0.0
 
@@ -116,8 +116,8 @@ def get_processed_data_w_time(
 
 
 def get_processed_data_wo_time(
-    segment: GPXTrackSegment, data: Dict[str, List[Any]]
-) -> Tuple[float, Dict[str, List[Any]]]:
+    segment: GPXTrackSegment, data: Dict[str, list[Any]]
+) -> tuple[float, Dict[str, list[Any]]]:
     cum_distance = 0
     distance = 0.0
     for previous, point in zip(segment.points, segment.points[1:]):

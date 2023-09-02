@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, Sequence
 
 import gpxpy
 import numpy as np
@@ -40,7 +40,7 @@ class Track(ABC):
         self.max_speed_percentile = max_speed_percentile
 
         self.processed_segment_data: Dict[
-            int, Tuple[float, float, float, float, pd.DataFrame]
+            int, tuple[float, float, float, float, pd.DataFrame]
         ] = {}
 
         self.session_data: Dict[str, str | int | float] = {}
@@ -54,7 +54,7 @@ class Track(ABC):
     def n_segments(self) -> int:
         return len(self.track.segments)
 
-    def get_xml(self, name: Optional[str] = None, email: Optional[str] = None) -> str:
+    def get_xml(self, name: None | str = None, email: None | str = None) -> str:
         gpx = GPX()
 
         gpx.tracks = [self.track]
@@ -126,7 +126,7 @@ class Track(ABC):
 
     def get_closest_point(
         self, n_segment: int, latitude: float, longitude: float
-    ) -> Tuple[GPXTrackPoint, float, int]:
+    ) -> tuple[GPXTrackPoint, float, int]:
         return get_point_distance_in_segment(
             self.track.segments[n_segment], latitude, longitude
         )
@@ -152,7 +152,7 @@ class Track(ABC):
 
     def _get_processed_segment_data(
         self, n_segment: int = 0
-    ) -> Tuple[float, float, float, float, pd.DataFrame]:
+    ) -> tuple[float, float, float, float, pd.DataFrame]:
         if n_segment not in self.processed_segment_data:
             (
                 time,
@@ -203,9 +203,7 @@ class Track(ABC):
 
     def get_point_data_in_segmnet(
         self, n_segment: int = 0
-    ) -> Tuple[
-        List[Tuple[float, float]], Optional[List[float]], Optional[List[datetime]]
-    ]:
+    ) -> tuple[list[tuple[float, float]], None | list[float], None | list[datetime]]:
         coords = []
         elevations = []
         times = []
@@ -255,7 +253,7 @@ class Track(ABC):
         overlap_threshold: float = 0.75,
         max_queue_normalize: int = 5,
         merge_subsegments: int = 5,
-    ) -> Sequence[Tuple[Track, float, bool]]:
+    ) -> Sequence[tuple[Track, float, bool]]:
         max_distance_self = self.get_max_pp_distance_in_segment(n_segment)
 
         segment_self = self.track.segments[n_segment]
@@ -279,7 +277,7 @@ class Track(ABC):
             overlap_threshold,
         )
 
-        matched_tracks: List[Tuple[Track, float, bool]] = []
+        matched_tracks: list[tuple[Track, float, bool]] = []
         for overlap in segment_overlaps:
             logger.info("Found: %s", overlap)
             matched_segment = GPXTrackSegment()
@@ -345,9 +343,9 @@ class ByteTrack(Track):
 class PyTrack(Track):
     def __init__(
         self,
-        points: List[Tuple[float, float]],
-        elevations: List[Optional[float]],
-        times: List[Optional[datetime]],
+        points: list[tuple[float, float]],
+        elevations: list[None | float],
+        times: list[None | datetime],
         **kwargs,
     ):
         super().__init__(**kwargs)

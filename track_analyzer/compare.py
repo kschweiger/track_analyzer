@@ -1,7 +1,6 @@
 import logging
 from collections import deque
 from functools import lru_cache
-from typing import List, Tuple
 
 import numpy as np
 from gpxpy.gpx import GPXTrackSegment
@@ -52,7 +51,7 @@ def derive_plate_bins(
     bounds_min_longitude: float,
     bounds_max_latitude: float,
     bounds_max_longitude: float,
-) -> Tuple[list[Tuple[float, float]], list[Tuple[float, float]]]:
+) -> tuple[list[tuple[float, float]], list[tuple[float, float]]]:
     """
     Derive the lat/long bins based on the min/max lat/long values and the target
     bin width.
@@ -65,7 +64,7 @@ def derive_plate_bins(
     :param bounds_max_longitude: Maximum longitude of the grid. Bins may end with
                                  larger values than passed here dependeing on the
                                  grid width
-    :return: Tuple with lists let/long values for the bin is latitude and longitude
+    :return: tuple with lists let/long values for the bin is latitude and longitude
              direction.
     """
     # Find the total distance in latitude and longitude directrons to find the number of
@@ -198,10 +197,10 @@ def convert_segment_to_plate(
 
 
 def _extract_ranges(
-    base_points_in_bounds: List[Tuple[int, bool]], allow_points_outside_bounds: int
-) -> List[Tuple[int, int]]:
+    base_points_in_bounds: list[tuple[int, bool]], allow_points_outside_bounds: int
+) -> list[tuple[int, int]]:
     """Extract point ranges from a list of indices and boolan flags"""
-    id_ranges_in_bounds: List[Tuple[int, int]] = []
+    id_ranges_in_bounds: list[tuple[int, int]] = []
     found_range = False
     in_bound_range_start = -1
     points_since_last_range = 0
@@ -238,7 +237,7 @@ def get_segment_overlap(
     max_queue_normalize: int = 5,
     allow_points_outside_bounds: int = 5,
     overlap_threshold: float = 0.75,
-) -> List[SegmentOverlap]:
+) -> list[SegmentOverlap]:
     """Compare the tracks of two segements and caclulate the overlap.
 
     :param base_segment: Base segement in which the match segment should be found
@@ -250,7 +249,7 @@ def get_segment_overlap(
     :param allow_points_outside_bounds: Number of points between sub segments allowed
                                         for merging the segments.
     :param overlap_threshold: Minimum overlap required to return the overlap data.
-    :return: List of SegmentOverlap objects.
+    :return: list of SegmentOverlap objects.
     """
     bounds_match = match_segment.get_bounds()
 

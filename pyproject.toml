@@ -1,14 +1,14 @@
 [tool.poetry]
-name = "gpx-track-analyzer"
+name = "track-analyzer"
 version = "0.1.2"
-description = "Analyze GPX tracks"
+description = "Analyze geospacial data tracks"
 authors = ["Korbinian Schweiger <korbinian.schweiger@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "gpx_track_analyzer"}]
+packages = [{ include = "track_analyzer" }]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 numpy = "^1.24.2"
 gpxpy = "^1.5.0"
 coloredlogs = "^15.0.1"
@@ -45,5 +45,5 @@ build-backend = "poetry.core.masonry.api"
 testpaths = "tests"
 
 [tool.ruff]
-select = ["E", "F", "I", "PD","PT", "NPY", "N", "W"]
+select = ["E", "F", "I", "PD", "PT", "NPY", "N", "W"]
 unfixable = ["F841"]

@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
 
 import numpy as np
 from gpxpy.gpx import GPXTrackPoint
@@ -13,14 +12,14 @@ class Position2D:
 
 @dataclass
 class Position3D(Position2D):
-    elevation: Optional[float]
+    elevation: None | float
 
 
 @dataclass
 class ElevationMetrics:
     uphill: float
     downhill: float
-    slopes: List[float]
+    slopes: list[float]
 
 
 @dataclass
@@ -54,20 +53,20 @@ class SegmentOverview:
     moving_distance: float
     total_distance: float
 
-    max_velocity: Optional[float]
-    avg_velocity: Optional[float]
+    max_velocity: None | float
+    avg_velocity: None | float
 
-    max_elevation: Optional[float]
-    min_elevation: Optional[float]
+    max_elevation: None | float
+    min_elevation: None | float
 
-    uphill_elevation: Optional[float]
-    downhill_elevation: Optional[float]
+    uphill_elevation: None | float
+    downhill_elevation: None | float
 
     # Attributes that will be calculated from primary attributes
-    moving_distance_km: Optional[float] = field(init=False)
-    total_distance_km: Optional[float] = field(init=False)
-    max_velocity_kmh: Optional[float] = field(init=False)
-    avg_velocity_kmh: Optional[float] = field(init=False)
+    moving_distance_km: None | float = field(init=False)
+    total_distance_km: None | float = field(init=False)
+    max_velocity_kmh: None | float = field(init=False)
+    avg_velocity_kmh: None | float = field(init=False)
 
     def __post_init__(self):
         self.moving_distance_km = self.moving_distance / 1000

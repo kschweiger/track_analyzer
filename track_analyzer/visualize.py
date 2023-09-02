@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import Dict
 
 import pandas as pd
 import plotly.express as px
@@ -43,12 +43,12 @@ def plot_track_2d(
     data: pd.DataFrame,
     include_velocity: bool = False,
     strict_data_selection: bool = False,
-    height: Optional[int] = 600,
-    width: Optional[int] = 1800,
-    pois: Optional[List[Tuple[float, float]]] = None,
-    color_elevation: Optional[str] = None,
-    color_velocity: Optional[str] = None,
-    color_poi: Optional[str] = None,
+    height: None | int = 600,
+    width: None | int = 1800,
+    pois: None | list[tuple[float, float]] = None,
+    color_elevation: None | str = None,
+    color_velocity: None | str = None,
+    color_poi: None | str = None,
     slider: bool = False,
 ) -> Figure:
     mask = data.moving
@@ -166,8 +166,8 @@ def plot_track_3d(data: pd.DataFrame, strict_data_selection: bool = False) -> Fi
 def plot_track_on_map(
     data: pd.DataFrame,
     zoom: int = 13,
-    height: Optional[int] = None,
-    width: Optional[int] = None,
+    height: None | int = None,
+    width: None | int = None,
 ) -> Figure:
     mask = data.moving
 
@@ -196,10 +196,10 @@ def plot_track_with_slope(
     slope_gradient_color: tuple[str, str, str] = ("#0000FF", "#00FF00", "#FF0000"),
     min_slope: int = -18,
     max_slope: int = 18,
-    height: Optional[int] = 600,
-    width: Optional[int] = 1800,
+    height: None | int = 600,
+    width: None | int = 1800,
     slider: bool = False,
-) -> Optional[Figure]:
+) -> None | Figure:
     slope_color_map = get_slope_colors(
         *slope_gradient_color, max_slope=max_slope, min_slope=min_slope
     )

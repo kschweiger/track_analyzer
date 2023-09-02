@@ -1,5 +1,3 @@
-from typing import Optional
-
 import click
 
 from track_analyzer.track import FITTrack
@@ -13,7 +11,7 @@ from track_analyzer.track import FITTrack
 @click.option(
     "--email", help="Optinally set the eMail property in the output file", default=None
 )
-def main(filename: str, name: Optional[str], email: Optional[str]):
+def main(filename: str, name: None | str, email: None | str):
     """
     Extract the track information for FILENAME file in fit format and
     save to regular gpx file

@@ -4,7 +4,7 @@ Enhance gpx tracks with external data. E.g. elevation data
 import json
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Tuple, Type
+from typing import Dict, Type
 
 import requests
 from gpxpy.gpx import GPXTrack
@@ -58,8 +58,8 @@ class ElevationEnhancer(Enhancer):
 
     @abstractmethod
     def get_elevation_data(
-        self, input_coordinates: List[Tuple[float, float]]
-    ) -> List[float]:
+        self, input_coordinates: list[tuple[float, float]]
+    ) -> list[float]:
         pass
 
 
@@ -94,9 +94,9 @@ class OpenTopoElevationEnhancer(ElevationEnhancer):
 
     def get_elevation_data(
         self,
-        input_coordinates: List[Tuple[float, float]],
-        split_requests: Optional[int] = None,
-    ) -> List[float]:
+        input_coordinates: list[tuple[float, float]],
+        split_requests: None | int = None,
+    ) -> list[float]:
         logger.debug("Getting elevation data")
         if split_requests is None:
             split_input_coord = [input_coordinates]
@@ -150,16 +150,16 @@ class OpenElevationEnhancer(ElevationEnhancer):
         self.headers["Content-Type"] = "application/json"
 
     def get_elevation_data(
-        self, input_coordinates: List[Tuple[float, float]]
-    ) -> List[float]:
+        self, input_coordinates: list[tuple[float, float]]
+    ) -> list[float]:
         """
         Send a POST request to the Open-Elevation API specified in the init.
 
         Args:
-            input_coordinates: List of latitude, longitude tuples for which the
+            input_coordinates: list of latitude, longitude tuples for which the
                                elevation should be determined.
 
-        Returns: A List of Elevations for the passed coordinates.
+        Returns: A list of Elevations for the passed coordinates.
         """
         data: Dict = {"locations": []}
         for latitude, longitude in input_coordinates:
