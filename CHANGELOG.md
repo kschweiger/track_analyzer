@@ -1,3 +1,23 @@
+##  (2023-09-02)
+
+* build: Bumped version to 0.2.0 :bookmark: ([f09cb6c](https://github.com/kschweiger/track_analyzer/commit/f09cb6c))
+* feat: Adding heartrate, cadence, and power Track and segment data processing ([dbf02b9](https://github.com/kschweiger/track_analyzer/commit/dbf02b9))
+* refactor: Removed 3.9 support and moved to now typing style ([64dd42f](https://github.com/kschweiger/track_analyzer/commit/64dd42f))
+* refactor: Renamed package to track_analyzer ([f6db3bc](https://github.com/kschweiger/track_analyzer/commit/f6db3bc))
+* chore: Changes to solve type checking errors ([b7aeb99](https://github.com/kschweiger/track_analyzer/commit/b7aeb99))
+* chore: Updated deps ([9b80fed](https://github.com/kschweiger/track_analyzer/commit/9b80fed))
+
+
+
+## <small>0.1.2 (2023-06-11)</small>
+
+* doc: Updated CHANGELOG.md :memo: ([4240670](https://github.com/kschweiger/track_analyzer/commit/4240670))
+* build: Bumped version to 0.1.2 :bookmark: ([3b7f01d](https://github.com/kschweiger/track_analyzer/commit/3b7f01d))
+* feat: Added basic support for fit file ([2563996](https://github.com/kschweiger/track_analyzer/commit/2563996))
+* fix(calc_elevation_metrics): Deal with ZeroDivisionError ([8f66763](https://github.com/kschweiger/track_analyzer/commit/8f66763))
+
+
+
 ##  (2023-06-11)
 
 * build: Bumped version to 0.1.2 :bookmark: ([3b7f01d](https://github.com/kschweiger/track_analyzer/commit/3b7f01d))
