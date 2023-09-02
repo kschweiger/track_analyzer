@@ -8,6 +8,7 @@ from gpxpy.gpx import GPXTrackSegment
 
 from track_analyzer.model import Position2D, SegmentOverlap
 from track_analyzer.utils import (
+    check_bounds,
     crop_segment_to_bounds,
     distance,
     get_latitude_at_distance,
@@ -25,16 +26,20 @@ def check_segment_bound_overlap(
 ) -> list[bool]:
     reference_bounds = reference_segments.get_bounds()
 
+    check_bounds(reference_bounds)
+
     res = []
 
     for segment in segments:
         bounds = segment.get_bounds()
 
+        check_bounds(bounds)
+
         res.append(
-            bounds.min_latitude < reference_bounds.max_latitude
-            and bounds.min_longitude < reference_bounds.max_latitude
-            and bounds.max_latitude > reference_bounds.min_latitude
-            and bounds.max_longitude > reference_bounds.min_longitude
+            bounds.min_latitude < reference_bounds.max_latitude  # type: ignore
+            and bounds.min_longitude < reference_bounds.max_latitude  # type: ignore
+            and bounds.max_latitude > reference_bounds.min_latitude  # type: ignore
+            and bounds.max_longitude > reference_bounds.min_longitude  # type: ignore
         )
 
     return res
@@ -200,6 +205,7 @@ def _extract_ranges(
     found_range = False
     in_bound_range_start = -1
     points_since_last_range = 0
+    idx = 0
     for idx, in_bounds in base_points_in_bounds:
         if in_bounds and not found_range:
             # Start of in_bound_points
@@ -248,21 +254,23 @@ def get_segment_overlap(
     """
     bounds_match = match_segment.get_bounds()
 
+    check_bounds(bounds_match)
+
     cropped_base_segment = crop_segment_to_bounds(
         base_segment,
-        bounds_match.min_latitude,
-        bounds_match.min_longitude,
-        bounds_match.max_latitude,
-        bounds_match.max_longitude,
+        bounds_match.min_latitude,  # type: ignore
+        bounds_match.min_longitude,  # type: ignore
+        bounds_match.max_latitude,  # type: ignore
+        bounds_match.max_longitude,  # type: ignore
     )
 
     plate_base = convert_segment_to_plate(
         cropped_base_segment,
         grid_width,
-        bounds_match.min_latitude,
-        bounds_match.min_longitude,
-        bounds_match.max_latitude,
-        bounds_match.max_longitude,
+        bounds_match.min_latitude,  # type: ignore
+        bounds_match.min_longitude,  # type: ignore
+        bounds_match.max_latitude,  # type: ignore
+        bounds_match.max_longitude,  # type: ignore
         True,
         max_queue_normalize,
     )
@@ -270,10 +278,10 @@ def get_segment_overlap(
     plate_match = convert_segment_to_plate(
         match_segment,
         grid_width,
-        bounds_match.min_latitude,
-        bounds_match.min_longitude,
-        bounds_match.max_latitude,
-        bounds_match.max_longitude,
+        bounds_match.min_latitude,  # type: ignore
+        bounds_match.min_longitude,  # type: ignore
+        bounds_match.max_latitude,  # type: ignore
+        bounds_match.max_longitude,  # type: ignore
         True,
         max_queue_normalize,
     )
@@ -285,10 +293,10 @@ def get_segment_overlap(
         )
         base_points_in_bounds = get_points_inside_bounds(
             base_segment,
-            bounds_match.min_latitude,
-            bounds_match.min_longitude,
-            bounds_match.max_latitude,
-            bounds_match.max_longitude,
+            bounds_match.min_latitude,  # type: ignore
+            bounds_match.min_longitude,  # type: ignore
+            bounds_match.max_latitude,  # type: ignore
+            bounds_match.max_longitude,  # type: ignore
         )
 
         id_ranges_in_bounds = _extract_ranges(
@@ -308,10 +316,10 @@ def get_segment_overlap(
             sub_plate = convert_segment_to_plate(
                 sub_segment,
                 grid_width,
-                bounds_match.min_latitude,
-                bounds_match.min_longitude,
-                bounds_match.max_latitude,
-                bounds_match.max_longitude,
+                bounds_match.min_latitude,  # type: ignore
+                bounds_match.min_longitude,  # type: ignore
+                bounds_match.max_latitude,  # type: ignore
+                bounds_match.max_longitude,  # type: ignore
                 True,
                 max_queue_normalize,
             )

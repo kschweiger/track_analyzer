@@ -137,3 +137,4 @@ dmypy.json
 .idea
 .vscode
 experiments
+.ruff_cache

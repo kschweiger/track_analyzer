@@ -8,7 +8,7 @@ from typing import Dict, List, Optional, Sequence, Tuple
 import gpxpy
 import numpy as np
 import pandas as pd
-from fitparse import FitFile, StandardUnitsDataProcessor
+from fitparse import DataMessage, FitFile, StandardUnitsDataProcessor
 from gpxpy.gpx import GPX, GPXTrack, GPXTrackPoint, GPXTrackSegment
 
 from track_analyzer.compare import get_segment_overlap
@@ -422,7 +422,8 @@ class FITTrack(Track):
 
         points, elevations, times = [], [], []
 
-        for record in fit_data.get_messages("record"):
+        for record in fit_data.get_messages("record"):  # type: ignore
+            record: DataMessage  # type: ignore
             lat = record.get_value("position_lat")
             long = record.get_value("position_long")
             ele = record.get_value("enhanced_altitude")
@@ -444,11 +445,13 @@ class FITTrack(Track):
             times.append(ts)
 
         try:
-            session_data = list(fit_data.get_messages("session"))[-1]
+            session_data: DataMessage = list(fit_data.get_messages("session"))[
+                -1
+            ]  # type: ignore
         except IndexError:
             logger.debug("Could not load session data from fit file")
         else:
-            self.session_data = {
+            self.session_data = {  # type: ignore
                 "start_time": session_data.get_value("start_time"),
                 "ride_time": session_data.get_value("total_timer_time"),
                 "total_time": session_data.get_value("total_elapsed_time"),

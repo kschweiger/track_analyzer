@@ -6,8 +6,9 @@ from typing import Callable, List, Optional, Tuple, Union
 import coloredlogs
 import numpy as np
 import numpy.typing as npt
-from gpxpy.gpx import GPXTrackPoint, GPXTrackSegment
+from gpxpy.gpx import GPXBounds, GPXTrackPoint, GPXTrackSegment
 
+from track_analyzer.exceptions import InvalidBoundsError
 from track_analyzer.model import ElevationMetrics, Position2D, Position3D
 
 logger = logging.getLogger(__name__)
@@ -286,14 +287,20 @@ def get_segment_base_area(segment: GPXTrackSegment):
     """Caculate the area enclodes by the bounds in m^2"""
     bounds = segment.get_bounds()
 
+    try:
+        check_bounds(bounds)
+    except InvalidBoundsError:
+        return 0
+
+    # After check_bounds this always works
     latitude_distance = distance(
-        Position2D(bounds.max_latitude, bounds.min_longitude),
-        Position2D(bounds.min_latitude, bounds.min_longitude),
+        Position2D(bounds.max_latitude, bounds.min_longitude),  # type: ignore
+        Position2D(bounds.min_latitude, bounds.min_longitude),  # type: ignore
     )
 
     longitude_distance = distance(
-        Position2D(bounds.min_latitude, bounds.max_longitude),
-        Position2D(bounds.min_latitude, bounds.min_longitude),
+        Position2D(bounds.min_latitude, bounds.max_longitude),  # type: ignore
+        Position2D(bounds.min_latitude, bounds.min_longitude),  # type: ignore
     )
 
     return latitude_distance * longitude_distance
@@ -331,10 +338,10 @@ def get_distances(v1: npt.NDArray, v2: npt.NDArray):
 
     dp = (
         0.5
-        - np.cos((v2_lats - v1_lats) * v_pi) / 2
-        + np.cos(v1_lats * v_pi)
-        * np.cos(v2_lats * v_pi)
-        * (1 - np.cos((v2_longs - v1_longs) * v_pi))
+        - np.cos((v2_lats - v1_lats) * v_pi) / 2  # type: ignore
+        + np.cos(v1_lats * v_pi)  # type: ignore
+        * np.cos(v2_lats * v_pi)  # type: ignore
+        * (1 - np.cos((v2_longs - v1_longs) * v_pi))  # type: ignore
         / 2
     )
 
@@ -381,7 +388,7 @@ def split_segment_by_id(
 ) -> List[GPXTrackSegment]:
     ret_segments = []
 
-    indv_idx = []
+    indv_idx: List[int] = []
     range_classifiers = []
     for range_ in index_ranges:
         indv_idx.extend(list(range_))
@@ -400,3 +407,16 @@ def split_segment_by_id(
                 ret_segments[i_class].points.append(point)
 
     return ret_segments
+
+
+def check_bounds(bounds: Optional[GPXBounds]) -> None:
+    if bounds is None:
+        raise InvalidBoundsError("Bounds %s are invalid", bounds)
+
+    if (
+        bounds.min_latitude is None
+        or bounds.max_latitude is None
+        or bounds.min_longitude is None
+        or bounds.max_longitude is None
+    ):
+        raise InvalidBoundsError("Bounds %s are invalid", bounds)

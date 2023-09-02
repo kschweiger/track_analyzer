@@ -144,9 +144,9 @@ def plot_track_2d(
         )
 
     if color_elevation is not None:
-        fig.data[0].marker.color = color_elevation
+        fig.data[0].marker.color = color_elevation  # type: ignore
     if color_velocity is not None and include_velocity:
-        fig.data[1].marker.color = color_velocity
+        fig.data[1].marker.color = color_velocity  # type: ignore
 
     return fig
 
@@ -269,12 +269,13 @@ def plot_track_with_slope(
         slope_val = this_data.iloc[1].slope
 
         color = slope_color_map[slope_val]
+        max_distance: float = max(this_data.cum_distance_moving)
         fig.add_trace(
             go.Scatter(
                 x=this_data.cum_distance_moving,
                 y=this_data.elevation,
                 mode="lines",
-                name=f"Distance {max(this_data.cum_distance_moving)/1000:.1f} km",
+                name=f"Distance {max_distance/1000:.1f} km",
                 fill="tozeroy",
                 marker_color=color,
                 hovertemplate=f"Slope: {slope_val} %",
@@ -289,10 +290,13 @@ def plot_track_with_slope(
         fig.update_layout(height=height)
     if width is not None:
         fig.update_layout(width=width)
+
+    min_elevation: float = min(data.elevation)
+    max_elevation: float = max(data.elevation)
     fig.update_yaxes(
         showspikes=True,
         spikemode="across",
-        range=[min(data.elevation) * 0.95, max(data.elevation) * 1.05],
+        range=[min_elevation * 0.95, max_elevation * 1.05],
         title_text="Elevation [m]",
     )
     fig.update_xaxes(title_text="Distance [m]")

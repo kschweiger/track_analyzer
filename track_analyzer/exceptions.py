@@ -16,3 +16,7 @@ class TrackInitializationError(Exception):
 
 class TrackTransformationError(Exception):
     pass
+
+
+class InvalidBoundsError(Exception):
+    pass
