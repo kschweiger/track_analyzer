@@ -20,3 +20,7 @@ class TrackTransformationError(Exception):
 
 class InvalidBoundsError(Exception):
     pass
+
+
+class GPXPointExtensionError(Exception):
+    pass

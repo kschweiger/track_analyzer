@@ -3,6 +3,9 @@ from typing import Any, Dict, Union
 import pandas as pd
 from gpxpy.gpx import GPXTrackSegment
 
+from track_analyzer.exceptions import GPXPointExtensionError
+from track_analyzer.utils import get_extension_value
+
 
 def get_processed_segment_data(
     segment: GPXTrackSegment, stopped_speed_threshold: float = 1
@@ -29,6 +32,9 @@ def get_processed_segment_data(
         "elevation": [],
         "speed": [],
         "distance": [],
+        "heartrate": [],
+        "cadence": [],
+        "power": [],
         "cum_distance": [],
         "cum_distance_moving": [],
         "cum_distance_stopped": [],
@@ -112,6 +118,12 @@ def get_processed_data_w_time(
                         data["latitude"].append(None)
                         data["longitude"].append(None)
                         data["elevation"].append(None)
+                    for key in ["heartrate", "cadence", "power"]:
+                        try:
+                            data[key].append(float(get_extension_value(point, key)))
+                        except GPXPointExtensionError:
+                            data[key].append(None)
+
     return time, distance, stopped_time, stopped_distance, data
 
 
@@ -142,5 +154,11 @@ def get_processed_data_wo_time(
             data["cum_distance_stopped"].append(None)
             data["speed"].append(None)
             data["moving"].append(True)
+
+            for key in ["heartrate", "cadence", "power"]:
+                try:
+                    data[key].append(float(get_extension_value(point, key)))
+                except GPXPointExtensionError:
+                    data[key].append(None)
 
     return distance, data

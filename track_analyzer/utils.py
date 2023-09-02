@@ -1,17 +1,24 @@
 import logging
-from datetime import timedelta
+from datetime import datetime, timedelta
 from math import acos, asin, atan2, cos, degrees, pi, sin, sqrt
-from typing import Callable, Union
+from typing import Callable, Dict, Union
+from xml.etree.ElementTree import Element
 
 import coloredlogs
 import numpy as np
 import numpy.typing as npt
 from gpxpy.gpx import GPXBounds, GPXTrackPoint, GPXTrackSegment
 
-from track_analyzer.exceptions import InvalidBoundsError
+from track_analyzer.exceptions import GPXPointExtensionError, InvalidBoundsError
 from track_analyzer.model import ElevationMetrics, Position2D, Position3D
 
 logger = logging.getLogger(__name__)
+
+
+class ExtensionFieldElement(Element):
+    def __init__(self, name: str, text: str):
+        super().__init__(name)
+        self.text = text
 
 
 def distance(pos1: Position2D, pos2: Position2D) -> float:
@@ -420,3 +427,27 @@ def check_bounds(bounds: None | GPXBounds) -> None:
         or bounds.max_longitude is None
     ):
         raise InvalidBoundsError("Bounds %s are invalid", bounds)
+
+
+def get_extension_value(point: GPXTrackPoint, key: str) -> str:
+    for ext in point.extensions:
+        if ext.tag == key:
+            if ext.text is None:
+                GPXPointExtensionError("Key %s was not initilized with a value" % key)
+            return ext.text  # type: ignore
+
+    raise GPXPointExtensionError("Key %s could not be found" % key)
+
+
+def get_extended_track_point(
+    lat: float,
+    lng: float,
+    ele: None | float,
+    timestamp: None | datetime,
+    extensions: Dict[str, Union[str, float, int]],
+) -> GPXTrackPoint:
+    this_point = GPXTrackPoint(lat, lng, elevation=ele, time=timestamp)
+    for key, value in extensions.items():
+        this_point.extensions.append(ExtensionFieldElement(name=key, text=str(value)))
+
+    return this_point

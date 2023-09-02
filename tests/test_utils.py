@@ -7,11 +7,13 @@ from gpxpy.gpx import GPXTrackPoint, GPXTrackSegment
 from track_analyzer.model import Position2D, Position3D
 from track_analyzer.track import PyTrack
 from track_analyzer.utils import (
+    ExtensionFieldElement,
     calc_elevation_metrics,
     center_geolocation,
     distance,
     get_color_gradient,
     get_distances,
+    get_extension_value,
     get_latitude_at_distance,
     get_longitude_at_distance,
     get_points_inside_bounds,
@@ -303,3 +305,11 @@ def test_split_segment_by_id():
     ):
         assert ret_point.latitude == exp_point.latitude
         assert ret_point.longitude == exp_point.longitude
+
+
+def test_get_extension_value():
+    point = GPXTrackPoint(latitude=1, longitude=1)
+    elem = ExtensionFieldElement("some_key", "some_value")
+    point.extensions.append(elem)
+
+    assert get_extension_value(point, "some_key") == "some_value"

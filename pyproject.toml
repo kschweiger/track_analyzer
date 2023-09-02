@@ -35,7 +35,7 @@ pytest-cov = "^4.0.0"
 pytest-mock = "^3.10.0"
 
 [tool.poetry.scripts]
-extract_fit_track = 'gpx_track_analyzer.cli.extract_track:main'
+extract_fit_track = 'track_analyzer.cli.extract_track:main'
 
 [build-system]
 requires = ["poetry-core"]

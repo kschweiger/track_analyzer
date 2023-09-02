@@ -14,6 +14,7 @@ from track_analyzer.exceptions import (
 )
 from track_analyzer.model import SegmentOverview
 from track_analyzer.track import ByteTrack, FileTrack, PyTrack, Track
+from track_analyzer.utils import get_extension_value
 
 
 @pytest.fixture()
@@ -272,3 +273,20 @@ def test_overlap():
     assert isinstance(overlap_track, Track)
     assert overlap_frac == 1.0
     assert not inverse
+
+
+def test_pytrack_extensions():
+    track = PyTrack(
+        [(1, 1)],
+        [100],
+        [datetime(2023, 1, 1, 10)],
+        heartrate=[100],
+        cadence=[80],
+        power=[200],
+    )
+
+    point = track.track.segments[0].points[0]
+
+    assert get_extension_value(point, "heartrate") == "100"
+    assert get_extension_value(point, "cadence") == "80"
+    assert get_extension_value(point, "power") == "200"

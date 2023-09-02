@@ -20,6 +20,7 @@ from track_analyzer.model import Position3D, SegmentOverview
 from track_analyzer.processing import get_processed_segment_data
 from track_analyzer.utils import (
     calc_elevation_metrics,
+    get_extended_track_point,
     get_point_distance_in_segment,
     interpolate_segment,
 )
@@ -344,11 +345,31 @@ class PyTrack(Track):
     def __init__(
         self,
         points: list[tuple[float, float]],
-        elevations: list[None | float],
-        times: list[None | datetime],
+        elevations: None | list[float],
+        times: None | list[datetime],
+        heartrate: None | list[int] = None,
+        cadence: None | list[int] = None,
+        power: None | list[int] = None,
         **kwargs,
     ):
+        """A geospacial data track initialized from python objects
+
+        :param points: List of Latitude/Longitude tuples
+        :param elevations: Optional list of elevation for each point
+        :param times: Optional list of times for each point
+        :param heartrate: Optional list of heartrate values for each point
+        :param cadence: Optional list of cadence values for each point
+        :param power: Optional list of power values for each point
+        :raises TrackInitializationError: Raised if number of elevation, time, heatrate,
+                                          or cadence values do not match passed points
+        """
         super().__init__(**kwargs)
+
+        elevations_: list[None] | list[float]
+        times_: list[None] | list[datetime]
+        heartrate_: list[None] | list[int]
+        cadence_: list[None] | list[int]
+        power_: list[None] | list[int]
 
         if elevations is not None:
             if len(points) != len(elevations):
@@ -368,6 +389,33 @@ class PyTrack(Track):
         else:
             times_ = len(points) * [None]
 
+        if heartrate is not None:
+            if len(points) != len(heartrate):
+                raise TrackInitializationError(
+                    "Different number of points and heartrate was passed"
+                )
+            heartrate_ = heartrate
+        else:
+            heartrate_ = len(points) * [None]
+
+        if cadence is not None:
+            if len(points) != len(cadence):
+                raise TrackInitializationError(
+                    "Different number of points and cadence was passed"
+                )
+            cadence_ = cadence
+        else:
+            cadence_ = len(points) * [None]
+
+        if power is not None:
+            if len(points) != len(power):
+                raise TrackInitializationError(
+                    "Different number of points and cadence was passed"
+                )
+            power_ = power
+        else:
+            power_ = len(points) * [None]
+
         gpx = GPX()
 
         gpx_track = GPXTrack()
@@ -376,8 +424,19 @@ class PyTrack(Track):
         gpx_segment = GPXTrackSegment()
         gpx_track.segments.append(gpx_segment)
 
-        for (lat, lng), ele, time in zip(points, elevations_, times_):
-            gpx_segment.points.append(GPXTrackPoint(lat, lng, elevation=ele, time=time))
+        for (lat, lng), ele, time, hr, cad, pw in zip(
+            points, elevations_, times_, heartrate_, cadence_, power_
+        ):
+            this_extensions = {}
+            if hr is not None:
+                this_extensions["heartrate"] = hr
+            if cad is not None:
+                this_extensions["cadence"] = cad
+            if pw is not None:
+                this_extensions["power"] = pw
+            this_point = get_extended_track_point(lat, lng, ele, time, this_extensions)
+
+            gpx_segment.points.append(this_point)
 
         self._track = gpx.tracks[0]
 
@@ -419,6 +478,7 @@ class FITTrack(Track):
         )
 
         points, elevations, times = [], [], []
+        heartrates, cadences, powers = [], [], []
 
         for record in fit_data.get_messages("record"):  # type: ignore
             record: DataMessage  # type: ignore
@@ -426,6 +486,10 @@ class FITTrack(Track):
             long = record.get_value("position_long")
             ele = record.get_value("enhanced_altitude")
             ts = record.get_value("timestamp")
+
+            hr = record.get_value("heart_rate")
+            cad = record.get_value("cadence")
+            pw = record.get_value("power")
 
             if any([v is None for v in [lat, long, ele, ts]]):
                 logger.debug(
@@ -441,6 +505,10 @@ class FITTrack(Track):
             points.append((lat, long))
             elevations.append(ele)
             times.append(ts)
+
+            heartrates.append(hr)
+            cadences.append(cad)
+            powers.append(pw)
 
         try:
             session_data: DataMessage = list(fit_data.get_messages("session"))[
@@ -468,8 +536,19 @@ class FITTrack(Track):
         gpx_segment = GPXTrackSegment()
         gpx_track.segments.append(gpx_segment)
 
-        for (lat, lng), ele, time in zip(points, elevations, times):
-            gpx_segment.points.append(GPXTrackPoint(lat, lng, elevation=ele, time=time))
+        for (lat, lng), ele, time, hr, cad, pw in zip(
+            points, elevations, times, heartrates, cadences, powers
+        ):
+            this_extensions = {}
+            if hr is not None:
+                this_extensions["heartrate"] = hr
+            if cad is not None:
+                this_extensions["cadence"] = cad
+            if pw is not None:
+                this_extensions["power"] = pw
+            this_point = get_extended_track_point(lat, lng, ele, time, this_extensions)
+
+            gpx_segment.points.append(this_point)
 
         self._track = gpx.tracks[0]
 
