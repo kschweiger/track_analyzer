@@ -8,7 +8,7 @@ import numpy as np
 import numpy.typing as npt
 from gpxpy.gpx import GPXTrackPoint, GPXTrackSegment
 
-from gpx_track_analyzer.model import ElevationMetrics, Position2D, Position3D
+from track_analyzer.model import ElevationMetrics, Position2D, Position3D
 
 logger = logging.getLogger(__name__)
 

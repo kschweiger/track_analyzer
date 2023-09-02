@@ -4,16 +4,16 @@ Enhance gpx tracks with external data. E.g. elevation data
 import json
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Type
 
 import requests
 from gpxpy.gpx import GPXTrack
 from requests.structures import CaseInsensitiveDict
 
-from gpx_track_analyzer.exceptions import (
-    APIDataNotAvailableException,
-    APIHealthCheckFailedException,
-    APIResponseException,
+from track_analyzer.exceptions import (
+    APIDataNotAvailableError,
+    APIHealthCheckFailedError,
+    APIResponseError,
 )
 
 logger = logging.getLogger(__name__)
@@ -80,17 +80,17 @@ class OpenTopoElevationEnhancer(ElevationEnhancer):
             try:
                 resp = requests.get(f"{self.base_url}/health")
             except requests.exceptions.ConnectionError as e:
-                raise APIHealthCheckFailedException(str(e))
+                raise APIHealthCheckFailedError(str(e))
             if resp.status_code != 200:
-                raise APIHealthCheckFailedException(resp.text)
+                raise APIHealthCheckFailedError(resp.text)
 
             logger.debug("Doing dataset check")
             resp = requests.get(f"{self.base_url}/datasets")
             if resp.status_code != 200:
-                raise APIHealthCheckFailedException(resp.text)
+                raise APIHealthCheckFailedError(resp.text)
             datasets = [ds["name"] for ds in resp.json()["results"]]
             if dataset not in datasets:
-                raise APIDataNotAvailableException("Dataset %s not available" % dataset)
+                raise APIDataNotAvailableError("Dataset %s not available" % dataset)
 
     def get_elevation_data(
         self,
@@ -124,11 +124,10 @@ class OpenTopoElevationEnhancer(ElevationEnhancer):
             if resp.status_code == 200:
                 result_data = resp.json()
                 for res in result_data["results"]:
-
                     ret_elevations.append(res["elevation"])
 
             else:
-                raise APIResponseException(resp.text)
+                raise APIResponseError(resp.text)
 
         return ret_elevations
 
@@ -176,10 +175,10 @@ class OpenElevationEnhancer(ElevationEnhancer):
 
             return ret_elevations
         else:
-            raise APIResponseException(resp.text)
+            raise APIResponseError(resp.text)
 
 
-def get_enhancer(name: str) -> Enhancer:
+def get_enhancer(name: str) -> Type[Enhancer]:
     if name == "OpenTopoElevation":
         return OpenTopoElevationEnhancer
     elif name == "OpenElevation":

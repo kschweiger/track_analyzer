@@ -2,7 +2,7 @@ from typing import Optional
 
 import click
 
-from gpx_track_analyzer.track import FITTrack
+from track_analyzer.track import FITTrack
 
 
 @click.command()

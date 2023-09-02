@@ -7,9 +7,9 @@ import plotly.graph_objects as go
 from plotly.graph_objs import Figure
 from plotly.subplots import make_subplots
 
-from gpx_track_analyzer.processing import get_processed_segment_data
-from gpx_track_analyzer.track import Track
-from gpx_track_analyzer.utils import center_geolocation, get_color_gradient
+from track_analyzer.processing import get_processed_segment_data
+from track_analyzer.track import Track
+from track_analyzer.utils import center_geolocation, get_color_gradient
 
 logger = logging.getLogger(__name__)
 
@@ -303,7 +303,7 @@ def plot_track_with_slope(
 if __name__ == "__main__":
     import sys
 
-    from gpx_track_analyzer.track import FileTrack
+    from track_analyzer.track import FileTrack
 
     file = sys.argv[1]
 

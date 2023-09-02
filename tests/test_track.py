@@ -7,13 +7,13 @@ import pandas as pd
 import pytest
 from gpxpy.gpx import GPXTrack, GPXTrackPoint
 
-from gpx_track_analyzer.exceptions import (
-    TrackInitializationException,
-    TrackTransformationException,
-)
-from gpx_track_analyzer.model import SegmentOverview
-from gpx_track_analyzer.track import ByteTrack, FileTrack, PyTrack, Track
 from tests import resources
+from track_analyzer.exceptions import (
+    TrackInitializationError,
+    TrackTransformationError,
+)
+from track_analyzer.model import SegmentOverview
+from track_analyzer.track import ByteTrack, FileTrack, PyTrack, Track
 
 
 @pytest.fixture()
@@ -117,7 +117,7 @@ def test_py_track(points, elevations, time):
     ],
 )
 def test_py_track_init_exceptions(points, elevations, time):
-    with pytest.raises(TrackInitializationException):
+    with pytest.raises(TrackInitializationError):
         PyTrack(points, elevations, time)
 
 
@@ -215,7 +215,7 @@ def test_get_point_data_in_segment_exception_ele():
 
     track.track.segments[0].points[1].elevation = None
 
-    with pytest.raises(TrackTransformationException):
+    with pytest.raises(TrackTransformationError):
         track.get_point_data_in_segmnet()
 
 
@@ -228,7 +228,7 @@ def test_get_point_data_in_segment_exception_time():
 
     track.track.segments[0].points[1].time = None
 
-    with pytest.raises(TrackTransformationException):
+    with pytest.raises(TrackTransformationError):
         track.get_point_data_in_segmnet()
 
 

@@ -3,8 +3,8 @@ import os
 import gpxpy
 import pytest
 
-from gpx_track_analyzer.enhancer import OpenElevationEnhancer, OpenTopoElevationEnhancer
-from gpx_track_analyzer.exceptions import APIResponseException
+from track_analyzer.enhancer import OpenElevationEnhancer, OpenTopoElevationEnhancer
+from track_analyzer.exceptions import APIResponseError
 
 
 @pytest.mark.skip("Currently not working. Also not the best option out there... ")
@@ -22,7 +22,7 @@ def test_open_elevation_enhancer():
 def test_open_elevation_enhancer_api_exceptions():
     enhancer = OpenElevationEnhancer()
 
-    with pytest.raises(APIResponseException):
+    with pytest.raises(APIResponseError):
         enhancer.get_elevation_data([])
 
 

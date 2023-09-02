@@ -11,14 +11,14 @@ import pandas as pd
 from fitparse import FitFile, StandardUnitsDataProcessor
 from gpxpy.gpx import GPX, GPXTrack, GPXTrackPoint, GPXTrackSegment
 
-from gpx_track_analyzer.compare import get_segment_overlap
-from gpx_track_analyzer.exceptions import (
-    TrackInitializationException,
-    TrackTransformationException,
+from track_analyzer.compare import get_segment_overlap
+from track_analyzer.exceptions import (
+    TrackInitializationError,
+    TrackTransformationError,
 )
-from gpx_track_analyzer.model import Position3D, SegmentOverview
-from gpx_track_analyzer.processing import get_processed_segment_data
-from gpx_track_analyzer.utils import (
+from track_analyzer.model import Position3D, SegmentOverview
+from track_analyzer.processing import get_processed_segment_data
+from track_analyzer.utils import (
     calc_elevation_metrics,
     get_point_distance_in_segment,
     interpolate_segment,
@@ -220,13 +220,13 @@ class Track(ABC):
         if not elevations:
             elevations = None  # type: ignore
         elif len(coords) != len(elevations):
-            raise TrackTransformationException(
+            raise TrackTransformationError(
                 "Elevation is not set for all points. This is not supported"
             )
         if not times:
             times = None  # type: ignore
         elif len(coords) != len(times):
-            raise TrackTransformationException(
+            raise TrackTransformationError(
                 "Elevation is not set for all points. This is not supported"
             )
 
@@ -354,7 +354,7 @@ class PyTrack(Track):
 
         if elevations is not None:
             if len(points) != len(elevations):
-                raise TrackInitializationException(
+                raise TrackInitializationError(
                     "Different number of points and elevations was passed"
                 )
             elevations_ = elevations
@@ -363,7 +363,7 @@ class PyTrack(Track):
 
         if times is not None:
             if len(points) != len(times):
-                raise TrackInitializationException(
+                raise TrackInitializationError(
                     "Different number of points and times was passed"
                 )
             times_ = times
