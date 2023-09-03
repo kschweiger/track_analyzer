@@ -1,5 +1,21 @@
 ##  (2023-09-03)
 
+* build: Bumped version to 0.3.1 :bookmark: ([e90c423](https://github.com/kschweiger/track_analyzer/commit/e90c423))
+* fix(plot_track_2d): Deal with nan values in heartrate, cadence, and power ([8620ef7](https://github.com/kschweiger/track_analyzer/commit/8620ef7))
+
+
+
+## 0.3.0 (2023-09-03)
+
+* doc: Updated CHANGELOG.md :memo: ([43f1384](https://github.com/kschweiger/track_analyzer/commit/43f1384))
+* build: Bumped version to 0.3.0 :bookmark: ([3235434](https://github.com/kschweiger/track_analyzer/commit/3235434))
+* refactor: Renamed FileTrack too GPXFileTrack and FITTrack to FITFileTrack ([3738082](https://github.com/kschweiger/track_analyzer/commit/3738082))
+* feat: Adding heartrate, cadence, and power to 2d plot ([b303fc3](https://github.com/kschweiger/track_analyzer/commit/b303fc3))
+
+
+
+##  (2023-09-03)
+
 * build: Bumped version to 0.3.0 :bookmark: ([3235434](https://github.com/kschweiger/track_analyzer/commit/3235434))
 * refactor: Renamed FileTrack too GPXFileTrack and FITTrack to FITFileTrack ([3738082](https://github.com/kschweiger/track_analyzer/commit/3738082))
 * feat: Adding heartrate, cadence, and power to 2d plot ([b303fc3](https://github.com/kschweiger/track_analyzer/commit/b303fc3))
