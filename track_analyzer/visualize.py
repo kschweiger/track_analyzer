@@ -113,7 +113,7 @@ def plot_track_2d(
                 "Requested to plot heart rate but no heart rate information available "
                 "in data"
             )
-        y_data = data_for_plot.heartrate.astype(int)
+        y_data = data_for_plot.heartrate.fillna(0).astype(int)
         title = "Heart Rate [bpm]"
         y_range = [0, y_data.max() * 1.2]
     if include_cadence:
@@ -121,7 +121,7 @@ def plot_track_2d(
             raise VisualizationSetupError(
                 "Requested to plot cadence but no cadence information available in data"
             )
-        y_data = data_for_plot.cadence.astype(int)
+        y_data = data_for_plot.cadence.fillna(0).astype(int)
         title = "Cadence [rpm]"
         mode = "markers"
         fill = None
@@ -131,7 +131,7 @@ def plot_track_2d(
             raise VisualizationSetupError(
                 "Requested to plot power but no power information available in data"
             )
-        y_data = data_for_plot.power.astype(int)
+        y_data = data_for_plot.power.fillna(0).astype(int)
         title = "Power [W]"
         y_range = [0, y_data.max() * 1.2]
 
