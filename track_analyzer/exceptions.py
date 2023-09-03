@@ -24,3 +24,7 @@ class InvalidBoundsError(Exception):
 
 class GPXPointExtensionError(Exception):
     pass
+
+
+class VisualizationSetupError(Exception):
+    pass

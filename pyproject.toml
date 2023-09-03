@@ -27,6 +27,7 @@ mypy = "^1.0.1"
 types-requests = "^2.28.11.15"
 ruff = "^0.0.257"
 ipython = "^8.11.0"
+bpython = "^0.24"
 
 
 [tool.poetry.group.test.dependencies]
@@ -41,8 +42,8 @@ extract_fit_track = 'track_analyzer.cli.extract_track:main'
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.pytest]
-testpaths = "tests"
+[tool.pytest.ini_options]
+testpaths = ["tests/"]
 
 [tool.ruff]
 select = ["E", "F", "I", "PD", "PT", "NPY", "N", "W"]

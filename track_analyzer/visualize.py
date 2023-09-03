@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 from plotly.graph_objs import Figure
 from plotly.subplots import make_subplots
 
+from track_analyzer.exceptions import VisualizationSetupError
 from track_analyzer.processing import get_processed_segment_data
 from track_analyzer.track import Track
 from track_analyzer.utils import center_geolocation, get_color_gradient
@@ -42,6 +43,9 @@ def get_slope_colors(
 def plot_track_2d(
     data: pd.DataFrame,
     include_velocity: bool = False,
+    include_heartrate: bool = False,
+    include_cadence: bool = False,
+    include_power: bool = False,
     strict_data_selection: bool = False,
     height: None | int = 600,
     width: None | int = 1800,
@@ -51,6 +55,22 @@ def plot_track_2d(
     color_poi: None | str = None,
     slider: bool = False,
 ) -> Figure:
+    if (
+        sum(
+            [
+                int(include_velocity),
+                int(include_heartrate),
+                int(include_cadence),
+                int(include_power),
+            ]
+        )
+        > 1
+    ):
+        raise VisualizationSetupError(
+            "Only one of include_velocity, include_heartrate, include_cadence, "
+            "and include_power can be set to True"
+        )
+
     mask = data.moving
     if strict_data_selection:
         mask = mask & data.in_speed_percentile
@@ -77,22 +97,59 @@ def plot_track_2d(
         ],
     )
     fig.update_xaxes(title_text="Distance [m]")
+
+    y_data = None
+    y_range = None
+    title = None
+    mode = "lines"
+    fill: None | str = "tozeroy"
     if include_velocity:
-        velocities = data_for_plot.apply(lambda c: c.speed * 3.6, axis=1)
+        y_data = data_for_plot.apply(lambda c: c.speed * 3.6, axis=1)
+        title = "Velocity [km/h]"
+        y_range = [0, y_data.max() * 2.1]
+    if include_heartrate:
+        if pd.isna(data_for_plot.heartrate).all():
+            raise VisualizationSetupError(
+                "Requested to plot heart rate but no heart rate information available "
+                "in data"
+            )
+        y_data = data_for_plot.heartrate.astype(int)
+        title = "Heart Rate [bpm]"
+        y_range = [0, y_data.max() * 1.2]
+    if include_cadence:
+        if pd.isna(data_for_plot.cadence).all():
+            raise VisualizationSetupError(
+                "Requested to plot cadence but no cadence information available in data"
+            )
+        y_data = data_for_plot.cadence.astype(int)
+        title = "Cadence [rpm]"
+        mode = "markers"
+        fill = None
+        y_range = [0, y_data.max() * 1.2]
+    if include_power:
+        if pd.isna(data_for_plot.power).all():
+            raise VisualizationSetupError(
+                "Requested to plot power but no power information available in data"
+            )
+        y_data = data_for_plot.power.astype(int)
+        title = "Power [W]"
+        y_range = [0, y_data.max() * 1.2]
+
+    if y_data is not None:
         fig.add_trace(
             go.Scatter(
                 x=data_for_plot.cum_distance_moving,
-                y=velocities,
-                mode="lines",
-                name="Speed [km/h]",
-                fill="tozeroy",
+                y=y_data,
+                mode=mode,
+                name=title,
+                fill=fill,
             ),
             secondary_y=True,
         )
         fig.update_yaxes(
-            title_text="Velocity [km/h]",
+            title_text=title,
             secondary_y=True,
-            range=[0, velocities.max() * 2.1],
+            range=y_range,
         )
 
     if pois is not None:
