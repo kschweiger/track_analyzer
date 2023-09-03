@@ -1,3 +1,23 @@
+##  (2023-09-03)
+
+* build: Bumped version to 0.3.0 :bookmark: ([3235434](https://github.com/kschweiger/track_analyzer/commit/3235434))
+* refactor: Renamed FileTrack too GPXFileTrack and FITTrack to FITFileTrack ([3738082](https://github.com/kschweiger/track_analyzer/commit/3738082))
+* feat: Adding heartrate, cadence, and power to 2d plot ([b303fc3](https://github.com/kschweiger/track_analyzer/commit/b303fc3))
+
+
+
+## 0.2.0 (2023-09-02)
+
+* doc: Updated CHANGELOG.md :memo: ([5998db2](https://github.com/kschweiger/track_analyzer/commit/5998db2))
+* build: Bumped version to 0.2.0 :bookmark: ([f09cb6c](https://github.com/kschweiger/track_analyzer/commit/f09cb6c))
+* feat: Adding heartrate, cadence, and power Track and segment data processing ([dbf02b9](https://github.com/kschweiger/track_analyzer/commit/dbf02b9))
+* refactor: Removed 3.9 support and moved to now typing style ([64dd42f](https://github.com/kschweiger/track_analyzer/commit/64dd42f))
+* refactor: Renamed package to track_analyzer ([f6db3bc](https://github.com/kschweiger/track_analyzer/commit/f6db3bc))
+* chore: Changes to solve type checking errors ([b7aeb99](https://github.com/kschweiger/track_analyzer/commit/b7aeb99))
+* chore: Updated deps ([9b80fed](https://github.com/kschweiger/track_analyzer/commit/9b80fed))
+
+
+
 ##  (2023-09-02)
 
 * build: Bumped version to 0.2.0 :bookmark: ([f09cb6c](https://github.com/kschweiger/track_analyzer/commit/f09cb6c))
