@@ -1,5 +1,20 @@
 ##  (2023-09-03)
 
+* build: Bumped version to 0.3.2 :bookmark: ([9575242](https://github.com/kschweiger/track_analyzer/commit/9575242))
+* refactor! : Color of additional trace in plot_track_2d can be changed for all. Renamed color_velocit ([00e7264](https://github.com/kschweiger/track_analyzer/commit/00e7264))
+
+
+
+## <small>0.3.1 (2023-09-03)</small>
+
+* doc: Updated CHANGELOG.md :memo: ([0a396d1](https://github.com/kschweiger/track_analyzer/commit/0a396d1))
+* build: Bumped version to 0.3.1 :bookmark: ([e90c423](https://github.com/kschweiger/track_analyzer/commit/e90c423))
+* fix(plot_track_2d): Deal with nan values in heartrate, cadence, and power ([8620ef7](https://github.com/kschweiger/track_analyzer/commit/8620ef7))
+
+
+
+##  (2023-09-03)
+
 * build: Bumped version to 0.3.1 :bookmark: ([e90c423](https://github.com/kschweiger/track_analyzer/commit/e90c423))
 * fix(plot_track_2d): Deal with nan values in heartrate, cadence, and power ([8620ef7](https://github.com/kschweiger/track_analyzer/commit/8620ef7))
 
