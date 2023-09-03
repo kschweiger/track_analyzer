@@ -300,7 +300,7 @@ class Track(ABC):
         return matched_tracks
 
 
-class FileTrack(Track):
+class GPXFileTrack(Track):
     def __init__(self, gpx_file: str, n_track: int = 0, **kwargs):
         """
         Initialize a Track object from a gpx file
@@ -462,7 +462,7 @@ class SegmentTrack(Track):
         return self._track
 
 
-class FITTrack(Track):
+class FITFileTrack(Track):
     def __init__(self, fit_file: str, **kwargs):
         """
         Load a .fit file and extract the data into a Track object.

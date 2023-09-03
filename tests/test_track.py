@@ -13,7 +13,7 @@ from track_analyzer.exceptions import (
     TrackTransformationError,
 )
 from track_analyzer.model import SegmentOverview
-from track_analyzer.track import ByteTrack, FileTrack, PyTrack, Track
+from track_analyzer.track import ByteTrack, GPXFileTrack, PyTrack, Track
 from track_analyzer.utils import get_extension_value
 
 
@@ -55,7 +55,7 @@ def generate_mock_track():
 
 
 def test_track(mocker, generate_mock_track):
-    MockedFileTrack = FileTrack  # noqa: N806
+    MockedFileTrack = GPXFileTrack  # noqa: N806
     MockedFileTrack._get_pgx = MagicMock()
     MockedFileTrack._get_pgx.return_value = generate_mock_track
 

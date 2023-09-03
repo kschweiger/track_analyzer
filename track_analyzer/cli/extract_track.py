@@ -1,6 +1,6 @@
 import click
 
-from track_analyzer.track import FITTrack
+from track_analyzer.track import FITFileTrack
 
 
 @click.command()
@@ -17,7 +17,7 @@ def main(filename: str, name: None | str, email: None | str):
     save to regular gpx file
     """
     click.echo("Extracting track from %s" % filename)
-    track = FITTrack(filename)
+    track = FITFileTrack(filename)
 
     out_file_name = filename.replace(".fit", "") + ".gpx"
     click.echo("Writing file %s" % out_file_name)

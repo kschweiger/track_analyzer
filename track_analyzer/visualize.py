@@ -364,11 +364,11 @@ def plot_track_with_slope(
 if __name__ == "__main__":
     import sys
 
-    from track_analyzer.track import FileTrack
+    from track_analyzer.track import GPXFileTrack
 
     file = sys.argv[1]
 
-    track = FileTrack(file)
+    track = GPXFileTrack(file)
     data = track.get_segment_data(0)
 
     # fig = plot_track_2d(data, True)
