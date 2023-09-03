@@ -51,7 +51,7 @@ def plot_track_2d(
     width: None | int = 1800,
     pois: None | list[tuple[float, float]] = None,
     color_elevation: None | str = None,
-    color_velocity: None | str = None,
+    color_additional_trace: None | str = None,
     color_poi: None | str = None,
     slider: bool = False,
 ) -> Figure:
@@ -202,8 +202,10 @@ def plot_track_2d(
 
     if color_elevation is not None:
         fig.data[0].marker.color = color_elevation  # type: ignore
-    if color_velocity is not None and include_velocity:
-        fig.data[1].marker.color = color_velocity  # type: ignore
+    if color_additional_trace is not None and any(
+        [include_velocity, include_heartrate, include_cadence, include_power]
+    ):
+        fig.data[1].marker.color = color_additional_trace  # type: ignore
 
     return fig
 
