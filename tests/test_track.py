@@ -290,3 +290,27 @@ def test_pytrack_extensions():
     assert get_extension_value(point, "heartrate") == "100"
     assert get_extension_value(point, "cadence") == "80"
     assert get_extension_value(point, "power") == "200"
+
+
+def test_pytrack_add_segement():
+    track = PyTrack(
+        [(1, 1)],
+        [100],
+        [datetime(2023, 1, 1, 10)],
+        heartrate=[100],
+        cadence=[80],
+        power=[200],
+    )
+
+    assert len(track.track.segments) == 1
+
+    track.add_segmeent(
+        [(2, 2)],
+        [200],
+        [datetime(2023, 2, 1, 10)],
+        heartrate=[60],
+        cadence=[20],
+        power=[100],
+    )
+
+    assert len(track.track.segments) == 2

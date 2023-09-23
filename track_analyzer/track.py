@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Dict, Sequence
+from typing import Dict, Sequence, final
 
 import gpxpy
 import numpy as np
@@ -54,6 +54,10 @@ class Track(ABC):
     @property
     def n_segments(self) -> int:
         return len(self.track.segments)
+
+    def add_segmeent(self, segment: GPXTrackSegment) -> None:
+        self.track.segments.append(segment)
+        logger.info("Added segment with postition: %s", len(self.track.segments))
 
     def get_xml(self, name: None | str = None, email: None | str = None) -> str:
         gpx = GPX()
@@ -300,6 +304,7 @@ class Track(ABC):
         return matched_tracks
 
 
+@final
 class GPXFileTrack(Track):
     def __init__(self, gpx_file: str, n_track: int = 0, **kwargs):
         """
@@ -341,6 +346,7 @@ class ByteTrack(Track):
         return self._track
 
 
+@final
 class PyTrack(Track):
     def __init__(
         self,
@@ -365,6 +371,37 @@ class PyTrack(Track):
         """
         super().__init__(**kwargs)
 
+        gpx = GPX()
+
+        gpx_track = GPXTrack()
+        gpx.tracks.append(gpx_track)
+
+        gpx_segment = self._create_segmeent(
+            points=points,
+            elevations=elevations,
+            times=times,
+            heartrate=heartrate,
+            cadence=cadence,
+            power=power,
+        )
+
+        gpx_track.segments.append(gpx_segment)
+
+        self._track = gpx.tracks[0]
+
+    @property
+    def track(self) -> GPXTrack:
+        return self._track
+
+    def _create_segmeent(
+        self,
+        points: list[tuple[float, float]],
+        elevations: None | list[float],
+        times: None | list[datetime],
+        heartrate: None | list[int] = None,
+        cadence: None | list[int] = None,
+        power: None | list[int] = None,
+    ) -> GPXTrackSegment:
         elevations_: list[None] | list[float]
         times_: list[None] | list[datetime]
         heartrate_: list[None] | list[int]
@@ -416,13 +453,7 @@ class PyTrack(Track):
         else:
             power_ = len(points) * [None]
 
-        gpx = GPX()
-
-        gpx_track = GPXTrack()
-        gpx.tracks.append(gpx_track)
-
         gpx_segment = GPXTrackSegment()
-        gpx_track.segments.append(gpx_segment)
 
         for (lat, lng), ele, time, hr, cad, pw in zip(
             points, elevations_, times_, heartrate_, cadence_, power_
@@ -438,13 +469,29 @@ class PyTrack(Track):
 
             gpx_segment.points.append(this_point)
 
-        self._track = gpx.tracks[0]
+        return gpx_segment
 
-    @property
-    def track(self) -> GPXTrack:
-        return self._track
+    def add_segmeent(  # type: ignore
+        self,
+        points: list[tuple[float, float]],
+        elevations: None | list[float],
+        times: None | list[datetime],
+        heartrate: None | list[int] = None,
+        cadence: None | list[int] = None,
+        power: None | list[int] = None,
+    ) -> None:
+        gpx_segment = self._create_segmeent(
+            points=points,
+            elevations=elevations,
+            times=times,
+            heartrate=heartrate,
+            cadence=cadence,
+            power=power,
+        )
+        super().add_segmeent(gpx_segment)
 
 
+@final
 class SegmentTrack(Track):
     def __init__(self, segment: GPXTrackSegment, **kwargs):
         super().__init__(**kwargs)
@@ -462,6 +509,7 @@ class SegmentTrack(Track):
         return self._track
 
 
+@final
 class FITFileTrack(Track):
     def __init__(self, fit_file: str, **kwargs):
         """
