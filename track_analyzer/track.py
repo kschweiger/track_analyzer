@@ -68,6 +68,57 @@ class Track(ABC):
 
         return gpx.to_xml()
 
+    def get_track_overview(self) -> SegmentOverview:
+        """
+        Get overall metrics for the track. Equivalent to the sum of all segments
+
+        :return: A SegmentOverview object containing the metrics
+        """
+        track_time: float = 0
+        track_distance: float = 0
+        track_stopped_time: float = 0
+        track_stopped_distance: float = 0
+        track_data: None | pd.DataFrame = None
+
+        track_max_speed = None
+        track_avg_speed = None
+
+        for i_segment in range(self.n_segments):
+            (
+                time,
+                distance,
+                stopped_time,
+                stopped_distance,
+                data,
+            ) = self._get_processed_segment_data(i_segment)
+
+            track_time += time
+            track_distance += distance
+            track_stopped_time += stopped_time
+            track_stopped_distance += stopped_distance
+
+            if track_data is None:
+                track_data = data
+            else:
+                track_data = pd.concat([track_data, data]).reset_index(drop=True)
+
+        if track_data is None:
+            raise RuntimeError
+
+        if self.track.segments[0].has_times():
+            track_max_speed = track_data.speed[track_data.in_speed_percentile].max()
+            track_avg_speed = track_data.speed[track_data.in_speed_percentile].mean()
+
+        return self.create_segment_overview(
+            time=track_time,
+            distance=track_distance,
+            stopped_time=track_stopped_time,
+            stopped_distance=track_stopped_distance,
+            max_speed=track_max_speed,
+            avg_speed=track_avg_speed,
+            data=track_data,
+        )
+
     def get_segment_overview(self, n_segment: int = 0) -> SegmentOverview:
         """
         Get overall metrics for a segment
@@ -85,15 +136,35 @@ class Track(ABC):
             data,
         ) = self._get_processed_segment_data(n_segment)
 
-        total_time = time + stopped_time
-        total_distance = distance + stopped_distance
-
         max_speed = None
         avg_speed = None
 
         if self.track.segments[n_segment].has_times():
             max_speed = data.speed[data.in_speed_percentile].max()
             avg_speed = data.speed[data.in_speed_percentile].mean()
+
+        return self.create_segment_overview(
+            time=time,
+            distance=distance,
+            stopped_time=stopped_time,
+            stopped_distance=stopped_distance,
+            max_speed=max_speed,
+            avg_speed=avg_speed,
+            data=data,
+        )
+
+    def create_segment_overview(
+        self,
+        time: float,
+        distance: float,
+        stopped_time: float,
+        stopped_distance: float,
+        max_speed: None | float,
+        avg_speed: None | float,
+        data: pd.DataFrame,
+    ) -> SegmentOverview:
+        total_time = time + stopped_time
+        total_distance = distance + stopped_distance
 
         max_elevation = None
         min_elevation = None

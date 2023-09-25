@@ -314,3 +314,51 @@ def test_pytrack_add_segement():
     )
 
     assert len(track.track.segments) == 2
+
+
+def test_track_overiew():
+    segment_1_points = [
+        (46.74025, 11.95624),
+        (46.74027, 11.95587),
+        (46.74013, 11.95575),
+        (46.73946, 11.95588),
+        (46.73904, 11.95627),
+        (46.73852, 11.95609),
+    ]
+    segment_1_elevations = [2248, 2247, 2244, 2245, 2252, 2256]
+    segment_1_times = [
+        datetime(2023, 8, 1, 10),
+        datetime(2023, 8, 1, 10, 2),
+        datetime(2023, 8, 1, 10, 4),
+        datetime(2023, 8, 1, 10, 8),
+        datetime(2023, 8, 1, 10, 12),
+        datetime(2023, 8, 1, 10, 16),
+    ]
+    ####
+    segment_2_points = [
+        (46.73861, 11.95697),
+        (46.73862, 11.95755),
+        (46.73878, 11.95778),
+        (46.73910, 11.95763),
+        (46.73930, 11.95715),
+        (46.74021, 11.95627),
+    ]
+
+    segment_2_elevations = [2263, 2268, 2270, 2269, 2266, 2248]
+    segment_2_times = [
+        datetime(2023, 8, 1, 10, 18),
+        datetime(2023, 8, 1, 10, 20),
+        datetime(2023, 8, 1, 10, 22),
+        datetime(2023, 8, 1, 10, 24),
+        datetime(2023, 8, 1, 10, 25),
+        datetime(2023, 8, 1, 10, 30),
+    ]
+    track = PyTrack(segment_1_points, segment_1_elevations, segment_1_times)
+
+    track_overview_pre_add = track.get_track_overview()
+    assert track.get_segment_overview(0) == track_overview_pre_add
+
+    track.add_segmeent(segment_2_points, segment_2_elevations, segment_2_times)
+
+    track_overview_post_add = track.get_track_overview()
+    assert track_overview_pre_add != track_overview_post_add
