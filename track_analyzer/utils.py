@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class ExtensionFieldElement(Element):
-    def __init__(self, name: str, text: str):
+    def __init__(self, name: str, text: str) -> None:
         super().__init__(name)
         self.text = text
 
@@ -49,8 +49,7 @@ def get_latitude_at_distance(
     b = acos(1 - 2 * a) / (pi / 180)
     if to_east:
         return b + position.latitude
-    else:
-        return position.latitude - b
+    return position.latitude - b
 
 
 def get_longitude_at_distance(
@@ -63,8 +62,7 @@ def get_longitude_at_distance(
 
     if to_north:
         return c + position.longitude
-    else:
-        return position.longitude - c
+    return position.longitude - c
 
 
 def calc_elevation_metrics(
@@ -82,7 +80,7 @@ def calc_elevation_metrics(
     uphill = 0.0
     downhill = 0.0
     slopes = [0.0]  # Pad with slope 0 so len(slopes) == len(positions)
-    for prev_pos, curr_pos in zip(positions, positions[1::]):
+    for prev_pos, curr_pos in zip(positions, positions[1::]):  # noqa: RUF007
         if curr_pos == prev_pos:
             continue
         if curr_pos.elevation is None or prev_pos.elevation is None:
@@ -131,7 +129,7 @@ def init_logging(this_level: Union[int, str]) -> bool:
     return True
 
 
-def center_geolocation(geolocations: list[tuple[float, float]]):
+def center_geolocation(geolocations: list[tuple[float, float]]) -> tuple[float, float]:
     """
     Calculate an estimated (based on the assumption the earth is a perfect sphere) given
     a list of latitude, longitude pairs in degree.
@@ -238,7 +236,9 @@ def interpolate_segment(segment: GPXTrackSegment, spacing: float) -> GPXTrackSeg
     init_points = segment.points
 
     new_segment_points = []
-    for i, (start, end) in enumerate(zip(init_points[:-1], init_points[1:])):
+    for i, (start, end) in enumerate(
+        zip(init_points[:-1], init_points[1:])  # noqa: RUF007
+    ):
         new_points = interpolate_linear(
             start=start,
             end=end,
@@ -262,7 +262,7 @@ def interpolate_segment(segment: GPXTrackSegment, spacing: float) -> GPXTrackSeg
     return interpolated_segment
 
 
-def hex_to_rgb(hex: str):
+def hex_to_rgb(hex: str) -> tuple[int, int, int]:
     """
     Pass a hex color name (as string) and get the RGB value
 
@@ -270,10 +270,10 @@ def hex_to_rgb(hex: str):
 
     >> hex_to_RGB("#FFFFFF") -> [255,255,255]
     """
-    return tuple([int(hex[i : i + 2], 16) for i in range(1, 6, 2)])
+    return tuple([int(hex[i : i + 2], 16) for i in range(1, 6, 2)])  # type: ignore
 
 
-def get_color_gradient(c1: str, c2: str, n: int):
+def get_color_gradient(c1: str, c2: str, n: int) -> list[str]:
     """
     Create a color gradient between two passed colors with N steps.
 
@@ -290,7 +290,7 @@ def get_color_gradient(c1: str, c2: str, n: int):
     ]
 
 
-def get_segment_base_area(segment: GPXTrackSegment):
+def get_segment_base_area(segment: GPXTrackSegment) -> float:
     """Caculate the area enclodes by the bounds in m^2"""
     bounds = segment.get_bounds()
 
@@ -315,10 +315,10 @@ def get_segment_base_area(segment: GPXTrackSegment):
 
 def crop_segment_to_bounds(
     segment: GPXTrackSegment,
-    bounds_min_latitude,
-    bounds_min_longitude,
-    bounds_max_latitude,
-    bounds_max_longitude,
+    bounds_min_latitude: float,
+    bounds_min_longitude: float,
+    bounds_max_latitude: float,
+    bounds_max_longitude: float,
 ) -> GPXTrackSegment:
     cropped_segment = GPXTrackSegment()
     for point in segment.points:
@@ -330,7 +330,7 @@ def crop_segment_to_bounds(
     return cropped_segment
 
 
-def get_distances(v1: npt.NDArray, v2: npt.NDArray):
+def get_distances(v1: npt.NDArray, v2: npt.NDArray) -> npt.NDArray:
     v1_lats, v1_longs = v1[:, 0], v1[:, 1]
     v2_lats, v2_longs = v2[:, 0], v2[:, 1]
 

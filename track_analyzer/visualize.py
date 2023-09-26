@@ -16,7 +16,11 @@ logger = logging.getLogger(__name__)
 
 
 def get_slope_colors(
-    color_min: str, color_neutral: str, color_max: str, min_slope=-16, max_slope=16
+    color_min: str,
+    color_neutral: str,
+    color_max: str,
+    min_slope: int = -16,
+    max_slope: int = 16,
 ) -> Dict[int, str]:
     """
     Generate a color gradient for the slope plots. The three passed colors are
@@ -217,9 +221,7 @@ def plot_track_3d(data: pd.DataFrame, strict_data_selection: bool = False) -> Fi
 
     data_for_plot = data[mask]
 
-    fig = px.line_3d(data_for_plot, x="latitude", y="longitude", z="elevation")
-
-    return fig
+    return px.line_3d(data_for_plot, x="latitude", y="longitude", z="elevation")
 
 
 def plot_track_on_map(

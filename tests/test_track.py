@@ -2,10 +2,11 @@ import importlib.resources
 from datetime import datetime
 from unittest.mock import MagicMock
 
-import gpxpy
+# import gpxpy
 import pandas as pd
 import pytest
-from gpxpy.gpx import GPXTrack, GPXTrackPoint
+from gpxpy.gpx import GPX, GPXTrack, GPXTrackPoint, GPXTrackSegment
+from pytest_mock import MockerFixture
 
 from tests import resources
 from track_analyzer.exceptions import (
@@ -64,15 +65,15 @@ def two_segment_py_data() -> tuple[tuple[list, list, list], tuple[list, list, li
 
 
 @pytest.fixture()
-def generate_mock_track():
-    gpx = gpxpy.gpx.GPX()
+def generate_mock_track() -> GPX:
+    gpx = GPX()
 
     # Create first track in our GPX:
-    gpx_track = gpxpy.gpx.GPXTrack()
+    gpx_track = GPXTrack()
     gpx.tracks.append(gpx_track)
 
     # Create first segment in our GPX track:
-    gpx_segment = gpxpy.gpx.GPXTrackSegment()
+    gpx_segment = GPXTrackSegment()
     gpx_track.segments.append(gpx_segment)
 
     # Create points:
@@ -89,7 +90,7 @@ def generate_mock_track():
 
     for lat, long, ele, isotime in point_values:
         gpx_segment.points.append(
-            gpxpy.gpx.GPXTrackPoint(
+            GPXTrackPoint(
                 lat,
                 long,
                 elevation=ele,
@@ -100,10 +101,10 @@ def generate_mock_track():
     return gpx
 
 
-def test_track(mocker, generate_mock_track):
+def test_track(generate_mock_track: GPX) -> None:
     MockedFileTrack = GPXFileTrack  # noqa: N806
-    MockedFileTrack._get_pgx = MagicMock()
-    MockedFileTrack._get_pgx.return_value = generate_mock_track
+    MockedFileTrack._get_gpx = MagicMock()
+    MockedFileTrack._get_gpx.return_value = generate_mock_track
 
     track = MockedFileTrack("bogus_file_name.gpx")
     segment_overview = track.get_segment_overview(0)
@@ -135,7 +136,11 @@ def test_track(mocker, generate_mock_track):
         ),
     ],
 )
-def test_py_track(points, elevations, time):
+def test_py_track(
+    points: list[tuple[float, float]],
+    elevations: None | list[float],
+    time: None | list[datetime],
+) -> None:
     track = PyTrack(points, elevations, time)
 
     assert isinstance(track.track, GPXTrack)
@@ -163,12 +168,16 @@ def test_py_track(points, elevations, time):
         ),
     ],
 )
-def test_py_track_init_exceptions(points, elevations, time):
+def test_py_track_init_exceptions(
+    points: list[tuple[float, float]],
+    elevations: None | list[float],
+    time: None | list[datetime],
+) -> None:
     with pytest.raises(TrackInitializationError):
         PyTrack(points, elevations, time)
 
 
-def test_interpolate_linear_points_in_segment_lat_lng_only():
+def test_interpolate_linear_points_in_segment_lat_lng_only() -> None:
     # Distacne 2d: ~1000m
     track = PyTrack([(0, 0), (0.0089933, 0)], None, None)
 
@@ -180,7 +189,7 @@ def test_interpolate_linear_points_in_segment_lat_lng_only():
         assert point.time is None
 
 
-def test_interpolate_linear_points_in_segment_no_interpolation():
+def test_interpolate_linear_points_in_segment_no_interpolation() -> None:
     track = PyTrack([(0, 0), (0.0089933, 0)], None, None)
 
     track.interpolate_points_in_segment(spacing=2000)
@@ -188,7 +197,7 @@ def test_interpolate_linear_points_in_segment_no_interpolation():
     assert len(track.track.segments[0].points) == 2
 
 
-def test_interpolate_linear_points_in_segment_lat_lng_ele():
+def test_interpolate_linear_points_in_segment_lat_lng_ele() -> None:
     track = PyTrack([(0, 0), (0.0089933, 0)], [100, 200], None)
 
     track.interpolate_points_in_segment(spacing=200)
@@ -199,7 +208,7 @@ def test_interpolate_linear_points_in_segment_lat_lng_ele():
         assert point.time is None
 
 
-def test_interpolate_linear_points_in_segment_lat_lng_ele_time():
+def test_interpolate_linear_points_in_segment_lat_lng_ele_time() -> None:
     # Distacne 2d: ~1000m
     track = PyTrack(
         [(0, 0), (0.0089933, 0)],
@@ -222,7 +231,9 @@ def test_interpolate_linear_points_in_segment_lat_lng_ele_time():
         ([(0, 0), (0.0089933, 0), (0.0010, 0), (0.0011, 0)], 11),
     ],
 )
-def test_interpolate_linear_points_in_segment_multiple_points(points, n_exp):
+def test_interpolate_linear_points_in_segment_multiple_points(
+    points: list[tuple[float, float]], n_exp: int
+) -> None:
     # Distacne 2d: ~1000m
     track = PyTrack(points, None, None)
 
@@ -243,7 +254,11 @@ def test_interpolate_linear_points_in_segment_multiple_points(points, n_exp):
         ),
     ],
 )
-def test_get_point_data_in_segmnet(coords, eles, times):
+def test_get_point_data_in_segmnet(
+    coords: list[tuple[float, float]],
+    eles: None | list[float],
+    times: None | list[datetime],
+) -> None:
     track = PyTrack(coords, eles, times)
 
     ret_coords, ret_eles, ret_times = track.get_point_data_in_segmnet(0)
@@ -253,7 +268,7 @@ def test_get_point_data_in_segmnet(coords, eles, times):
     assert ret_times == times
 
 
-def test_get_point_data_in_segment_exception_ele():
+def test_get_point_data_in_segment_exception_ele() -> None:
     track = PyTrack(
         [(1, 1), (2, 2)],
         [100, 200],
@@ -266,7 +281,7 @@ def test_get_point_data_in_segment_exception_ele():
         track.get_point_data_in_segmnet()
 
 
-def test_get_point_data_in_segment_exception_time():
+def test_get_point_data_in_segment_exception_time() -> None:
     track = PyTrack(
         [(1, 1), (2, 2)],
         [100, 200],
@@ -279,7 +294,7 @@ def test_get_point_data_in_segment_exception_time():
         track.get_point_data_in_segmnet()
 
 
-def test_get_closest_point():
+def test_get_closest_point() -> None:
     track = PyTrack(
         [(1, 1), (2, 2)],
         [100, 200],
@@ -299,7 +314,7 @@ def test_get_closest_point():
     assert point.time == datetime(2023, 1, 1, 10, 0)
 
 
-def test_overlap():
+def test_overlap() -> None:
     resource_files = importlib.resources.files(resources)
 
     track = ByteTrack(
@@ -321,7 +336,7 @@ def test_overlap():
     assert not inverse
 
 
-def test_pytrack_extensions():
+def test_pytrack_extensions() -> None:
     track = PyTrack(
         [(1, 1)],
         [100],
@@ -338,7 +353,7 @@ def test_pytrack_extensions():
     assert get_extension_value(point, "power") == "200"
 
 
-def test_pytrack_add_segement():
+def test_pytrack_add_segement() -> None:
     track = PyTrack(
         [(1, 1)],
         [100],
@@ -362,7 +377,9 @@ def test_pytrack_add_segement():
     assert len(track.track.segments) == 2
 
 
-def test_track_overiew(two_segment_py_data):
+def test_track_overiew(
+    two_segment_py_data: tuple[tuple[list, list, list], tuple[list, list, list]]
+) -> None:
     (segment_1_points, segment_1_elevations, segment_1_times), (
         segment_2_points,
         segment_2_elevations,
@@ -380,7 +397,10 @@ def test_track_overiew(two_segment_py_data):
     assert track_overview_pre_add != track_overview_post_add
 
 
-def test_track_data(mocker, two_segment_py_data):
+def test_track_data(
+    mocker: MockerFixture,
+    two_segment_py_data: tuple[tuple[list, list, list], tuple[list, list, list]],
+) -> None:
     (segment_1_points, segment_1_elevations, segment_1_times), (
         segment_2_points,
         segment_2_elevations,
@@ -392,10 +412,10 @@ def test_track_data(mocker, two_segment_py_data):
     spy_get = mocker.spy(track, "_get_processed_track_data")
     spy_set = mocker.spy(track, "_set_processed_track_data")
 
-    assert track.processed_track_data is None
+    assert track._processed_track_data is None
 
     data_track = track.get_track_data()
-    pt_segs, pt_df = track.processed_track_data
+    pt_segs, pt_df = track._processed_track_data  # type: ignore
     assert pt_segs == 1
     assert isinstance(pt_df, pd.DataFrame)
 
@@ -417,7 +437,7 @@ def test_track_data(mocker, two_segment_py_data):
     track.add_segmeent(segment_2_points, segment_2_elevations, segment_2_times)
     data_track_post_add_seg = track.get_track_data()
 
-    pt_segs, pt_df = track.processed_track_data
+    pt_segs, pt_df = track._processed_track_data  # type: ignore
     assert pt_segs == 2
     assert isinstance(pt_df, pd.DataFrame)
 

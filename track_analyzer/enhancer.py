@@ -4,7 +4,7 @@ Enhance gpx tracks with external data. E.g. elevation data
 import json
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, Type
+from typing import Dict, Mapping, Type
 
 import requests
 from gpxpy.gpx import GPXTrack
@@ -66,11 +66,11 @@ class ElevationEnhancer(Enhancer):
 class OpenTopoElevationEnhancer(ElevationEnhancer):
     def __init__(
         self,
-        url="https://api.opentopodata.org/",
-        dataset="eudem25m",
-        interpolation="cubic",
+        url: str = "https://api.opentopodata.org/",
+        dataset: str = "eudem25m",
+        interpolation: str = "cubic",
         skip_checks: bool = False,
-    ):
+    ) -> None:
         self.base_url = url
         self.url = f"{url}/v1/{dataset}"
         self.interpolation = interpolation
@@ -133,7 +133,7 @@ class OpenTopoElevationEnhancer(ElevationEnhancer):
 
 
 class OpenElevationEnhancer(ElevationEnhancer):
-    def __init__(self, url="https://api.open-elevation.com"):
+    def __init__(self, url: str = "https://api.open-elevation.com") -> None:
         """
         Use the/a OpenElevation API (https://open-elevation.com) to enhance a GPX track
         with elevation information. Alternatively, set up you own open-elevation api
@@ -145,7 +145,7 @@ class OpenElevationEnhancer(ElevationEnhancer):
         """
         self.url = f"{url}/api/v1/lookup"
 
-        self.headers = CaseInsensitiveDict()
+        self.headers: Mapping[str, str] = CaseInsensitiveDict()
         self.headers["Accept"] = "application/json"
         self.headers["Content-Type"] = "application/json"
 

@@ -30,8 +30,8 @@ logger = logging.getLogger(__name__)
 
 class Track(ABC):
     def __init__(
-        self, stopped_speed_threshold: float = 1, max_speed_percentile: int = 95
-    ):
+        self, stopped_speed_threshold: float, max_speed_percentile: int
+    ) -> None:
         logger.debug(
             "Using threshold for stopped speed: %s km/h", stopped_speed_threshold
         )
@@ -40,10 +40,10 @@ class Track(ABC):
         self.stopped_speed_threshold = stopped_speed_threshold
         self.max_speed_percentile = max_speed_percentile
 
-        self.processed_segment_data: Dict[
+        self._processed_segment_data: Dict[
             int, tuple[float, float, float, float, pd.DataFrame]
         ] = {}
-        self.processed_track_data: None | tuple[int, pd.DataFrame] = None
+        self._processed_track_data: None | tuple[int, pd.DataFrame] = None
 
         self.session_data: Dict[str, str | int | float] = {}
 
@@ -102,6 +102,10 @@ class Track(ABC):
                 track_data = data
             else:
                 track_data = pd.concat([track_data, data]).reset_index(drop=True)
+
+        # Not really possible but keeps linters happy
+        if track_data is None:
+            raise RuntimeError
 
         if self.track.segments[0].has_times():
             track_max_speed = track_data.speed[track_data.in_speed_percentile].max()
@@ -183,7 +187,7 @@ class Track(ABC):
             uphill = elevation_metrics.uphill
             downhill = elevation_metrics.downhill
 
-        overview = SegmentOverview(
+        return SegmentOverview(
             time,
             total_time,
             distance,
@@ -195,8 +199,6 @@ class Track(ABC):
             uphill,
             downhill,
         )
-
-        return overview
 
     def get_closest_point(
         self, n_segment: int, latitude: float, longitude: float
@@ -227,7 +229,7 @@ class Track(ABC):
     def _get_processed_segment_data(
         self, n_segment: int = 0
     ) -> tuple[float, float, float, float, pd.DataFrame]:
-        if n_segment not in self.processed_segment_data:
+        if n_segment not in self._processed_segment_data:
             (
                 time,
                 distance,
@@ -241,7 +243,7 @@ class Track(ABC):
             if self.track.segments[n_segment].has_times():
                 data = self._apply_outlier_cleaning(data)
 
-            self.processed_segment_data[n_segment] = (
+            self._processed_segment_data[n_segment] = (
                 time,
                 distance,
                 stopped_time,
@@ -249,7 +251,7 @@ class Track(ABC):
                 data,
             )
 
-        return self.processed_segment_data[n_segment]
+        return self._processed_segment_data[n_segment]
 
     def get_segment_data(self, n_segment: int = 0) -> pd.DataFrame:
         _, _, _, _, data = self._get_processed_segment_data(n_segment)
@@ -272,18 +274,22 @@ class Track(ABC):
             else:
                 track_data = pd.concat([track_data, data]).reset_index(drop=True)
 
+        # Not really possible but keeps linters happy
+        if track_data is None:
+            raise RuntimeError
+
         return self._set_processed_track_data(track_data)
 
     def _get_processed_track_data(self) -> None | pd.DataFrame:
-        if self.processed_track_data:
-            segments_in_data, data = self.processed_track_data
+        if self._processed_track_data:
+            segments_in_data, data = self._processed_track_data
             if segments_in_data == self.n_segments:
                 return data
 
         return None
 
     def _set_processed_track_data(self, data: pd.DataFrame) -> pd.DataFrame:
-        self.processed_track_data = (self.n_segments, data)
+        self._processed_track_data = (self.n_segments, data)
 
         return data
 
@@ -300,11 +306,11 @@ class Track(ABC):
         )
 
         # Reset saved processed data
-        if n_segment in self.processed_segment_data:
+        if n_segment in self._processed_segment_data:
             logger.debug(
                 "Deleting saved processed segment data for segment %s", n_segment
             )
-            self.processed_segment_data.pop(n_segment)
+            self._processed_segment_data.pop(n_segment)
 
     def get_point_data_in_segmnet(
         self, n_segment: int = 0
@@ -406,7 +412,13 @@ class Track(ABC):
 
 @final
 class GPXFileTrack(Track):
-    def __init__(self, gpx_file: str, n_track: int = 0, **kwargs):
+    def __init__(
+        self,
+        gpx_file: str,
+        n_track: int = 0,
+        stopped_speed_threshold: float = 1,
+        max_speed_percentile: int = 95,
+    ) -> None:
         """
         Initialize a Track object from a gpx file
 
@@ -414,28 +426,40 @@ class GPXFileTrack(Track):
             gpx_file: Path to the gpx file.
             n_track: Index of track in the gpx file.
         """
-        super().__init__(**kwargs)
+        super().__init__(
+            stopped_speed_threshold=stopped_speed_threshold,
+            max_speed_percentile=max_speed_percentile,
+        )
 
         logger.info("Loading gpx track from file %s", gpx_file)
 
-        gpx = self._get_pgx(gpx_file)
+        gpx = self._get_gpx(gpx_file)
 
         self._track = gpx.tracks[n_track]
 
     @staticmethod
-    def _get_pgx(gpx_file) -> GPX:
+    def _get_gpx(gpx_file: str) -> GPX:
         with open(gpx_file, "r") as f:
-            gpx = gpxpy.parse(f)
-        return gpx
+            return gpxpy.parse(f)
 
     @property
     def track(self) -> GPXTrack:
         return self._track
 
 
+@final
 class ByteTrack(Track):
-    def __init__(self, bytefile, n_track: int = 0, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(
+        self,
+        bytefile: bytes,
+        n_track: int = 0,
+        stopped_speed_threshold: float = 1,
+        max_speed_percentile: int = 95,
+    ) -> None:
+        super().__init__(
+            stopped_speed_threshold=stopped_speed_threshold,
+            max_speed_percentile=max_speed_percentile,
+        )
 
         gpx = gpxpy.parse(bytefile)
 
@@ -456,8 +480,9 @@ class PyTrack(Track):
         heartrate: None | list[int] = None,
         cadence: None | list[int] = None,
         power: None | list[int] = None,
-        **kwargs,
-    ):
+        stopped_speed_threshold: float = 1,
+        max_speed_percentile: int = 95,
+    ) -> None:
         """A geospacial data track initialized from python objects
 
         :param points: List of Latitude/Longitude tuples
@@ -469,7 +494,10 @@ class PyTrack(Track):
         :raises TrackInitializationError: Raised if number of elevation, time, heatrate,
                                           or cadence values do not match passed points
         """
-        super().__init__(**kwargs)
+        super().__init__(
+            stopped_speed_threshold=stopped_speed_threshold,
+            max_speed_percentile=max_speed_percentile,
+        )
 
         gpx = GPX()
 
@@ -593,8 +621,16 @@ class PyTrack(Track):
 
 @final
 class SegmentTrack(Track):
-    def __init__(self, segment: GPXTrackSegment, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(
+        self,
+        segment: GPXTrackSegment,
+        stopped_speed_threshold: float = 1,
+        max_speed_percentile: int = 95,
+    ) -> None:
+        super().__init__(
+            stopped_speed_threshold=stopped_speed_threshold,
+            max_speed_percentile=max_speed_percentile,
+        )
         gpx = GPX()
 
         gpx_track = GPXTrack()
@@ -611,12 +647,20 @@ class SegmentTrack(Track):
 
 @final
 class FITFileTrack(Track):
-    def __init__(self, fit_file: str, **kwargs):
+    def __init__(
+        self,
+        fit_file: str,
+        stopped_speed_threshold: float = 1,
+        max_speed_percentile: int = 95,
+    ) -> None:
         """
         Load a .fit file and extract the data into a Track object.
         NOTE: Tested with Wahoo devices only
         """
-        super().__init__(**kwargs)
+        super().__init__(
+            stopped_speed_threshold=stopped_speed_threshold,
+            max_speed_percentile=max_speed_percentile,
+        )
 
         logger.info("Loading gpx track from file %s", fit_file)
 

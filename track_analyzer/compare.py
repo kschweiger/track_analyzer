@@ -3,6 +3,7 @@ from collections import deque
 from functools import lru_cache
 
 import numpy as np
+import numpy.typing as npt
 from gpxpy.gpx import GPXTrackSegment
 
 from track_analyzer.model import Position2D, SegmentOverlap
@@ -351,7 +352,12 @@ def get_segment_overlap(
             return []
 
 
-def _calc_plate_overlap(base_segment, plate_base, match_segment, plate_match):
+def _calc_plate_overlap(
+    base_segment: GPXTrackSegment,
+    plate_base: npt.NDArray,
+    match_segment: GPXTrackSegment,
+    plate_match: npt.NDArray,
+) -> SegmentOverlap:
     overlap_plate = plate_base + plate_match
 
     overlap_plate_ = np.digitize(overlap_plate, np.array([0, 2, 3])) - 1
