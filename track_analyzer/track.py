@@ -43,6 +43,7 @@ class Track(ABC):
         self.processed_segment_data: Dict[
             int, tuple[float, float, float, float, pd.DataFrame]
         ] = {}
+        self.processed_track_data: None | tuple[int, pd.DataFrame] = None
 
         self.session_data: Dict[str, str | int | float] = {}
 
@@ -102,9 +103,6 @@ class Track(ABC):
             else:
                 track_data = pd.concat([track_data, data]).reset_index(drop=True)
 
-        if track_data is None:
-            raise RuntimeError
-
         if self.track.segments[0].has_times():
             track_max_speed = track_data.speed[track_data.in_speed_percentile].max()
             track_avg_speed = track_data.speed[track_data.in_speed_percentile].mean()
@@ -116,7 +114,7 @@ class Track(ABC):
             stopped_distance=track_stopped_distance,
             max_speed=track_max_speed,
             avg_speed=track_avg_speed,
-            data=track_data,
+            data=track_data,  # type: ignore
         )
 
     def get_segment_overview(self, n_segment: int = 0) -> SegmentOverview:
@@ -255,6 +253,37 @@ class Track(ABC):
 
     def get_segment_data(self, n_segment: int = 0) -> pd.DataFrame:
         _, _, _, _, data = self._get_processed_segment_data(n_segment)
+
+        return data
+
+    def get_track_data(self) -> pd.DataFrame:
+        track_data: None | pd.DataFrame = None
+
+        processed_track_data = self._get_processed_track_data()
+        if processed_track_data is not None:
+            return processed_track_data
+
+        for i_segment in range(self.n_segments):
+            _, _, _, _, _data = self._get_processed_segment_data(i_segment)
+            data = _data.copy()
+            data["segment"] = i_segment
+            if track_data is None:
+                track_data = data
+            else:
+                track_data = pd.concat([track_data, data]).reset_index(drop=True)
+
+        return self._set_processed_track_data(track_data)
+
+    def _get_processed_track_data(self) -> None | pd.DataFrame:
+        if self.processed_track_data:
+            segments_in_data, data = self.processed_track_data
+            if segments_in_data == self.n_segments:
+                return data
+
+        return None
+
+    def _set_processed_track_data(self, data: pd.DataFrame) -> pd.DataFrame:
+        self.processed_track_data = (self.n_segments, data)
 
         return data
 
