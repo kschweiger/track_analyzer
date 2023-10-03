@@ -31,11 +31,11 @@ def two_segment_py_data() -> tuple[tuple[list, list, list], tuple[list, list, li
     segment_1_elevations = [2248, 2247, 2244, 2245, 2252, 2256]
     segment_1_times = [
         datetime(2023, 8, 1, 10),
+        datetime(2023, 8, 1, 10, 1),
         datetime(2023, 8, 1, 10, 2),
+        datetime(2023, 8, 1, 10, 3),
         datetime(2023, 8, 1, 10, 4),
-        datetime(2023, 8, 1, 10, 8),
-        datetime(2023, 8, 1, 10, 12),
-        datetime(2023, 8, 1, 10, 16),
+        datetime(2023, 8, 1, 10, 5),
     ]
     ####
     segment_2_points = [
@@ -49,12 +49,12 @@ def two_segment_py_data() -> tuple[tuple[list, list, list], tuple[list, list, li
 
     segment_2_elevations = [2263, 2268, 2270, 2269, 2266, 2248]
     segment_2_times = [
-        datetime(2023, 8, 1, 10, 18),
-        datetime(2023, 8, 1, 10, 20),
-        datetime(2023, 8, 1, 10, 22),
-        datetime(2023, 8, 1, 10, 24),
-        datetime(2023, 8, 1, 10, 25),
-        datetime(2023, 8, 1, 10, 30),
+        datetime(2023, 8, 1, 10, 6),
+        datetime(2023, 8, 1, 10, 7),
+        datetime(2023, 8, 1, 10, 8),
+        datetime(2023, 8, 1, 10, 9),
+        datetime(2023, 8, 1, 10, 9),
+        datetime(2023, 8, 1, 10, 10),
     ]
 
     return (segment_1_points, segment_1_elevations, segment_1_times), (
@@ -415,19 +415,17 @@ def test_track_data(
     assert track._processed_track_data is None
 
     data_track = track.get_track_data()
-    pt_segs, pt_df = track._processed_track_data  # type: ignore
+    pt_segs, (_, _, _, _, pt_df) = track._processed_track_data  # type: ignore
     assert pt_segs == 1
     assert isinstance(pt_df, pd.DataFrame)
 
     assert spy_get.call_count == 1
-    assert spy_get.spy_return is None
     assert spy_set.call_count == 1
 
     track.get_track_data()
 
     assert spy_get.call_count == 2
     assert spy_set.call_count == 1
-    assert spy_get.spy_return is not None
 
     data_segment = track.get_segment_data(0)
     assert isinstance(data_track, pd.DataFrame)
@@ -437,13 +435,13 @@ def test_track_data(
     track.add_segmeent(segment_2_points, segment_2_elevations, segment_2_times)
     data_track_post_add_seg = track.get_track_data()
 
-    pt_segs, pt_df = track._processed_track_data  # type: ignore
+    pt_segs, (_, _, _, _, pt_df) = track._processed_track_data  # type: ignore
     assert pt_segs == 2
     assert isinstance(pt_df, pd.DataFrame)
 
     assert spy_set.call_count == 2
     assert spy_get.call_count == 3
-    assert spy_get.spy_return is None
+    assert spy_get.call_count == 3
 
     assert isinstance(data_track_post_add_seg, pd.DataFrame)
 

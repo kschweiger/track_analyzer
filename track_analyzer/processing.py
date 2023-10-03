@@ -1,10 +1,55 @@
 from typing import Any, Dict, Union
 
 import pandas as pd
-from gpxpy.gpx import GPXTrackSegment
+from gpxpy.gpx import GPXTrack, GPXTrackSegment
 
 from track_analyzer.exceptions import GPXPointExtensionError
 from track_analyzer.utils import get_extension_value
+
+
+def get_processed_track_data(
+    track: GPXTrack,
+    stopped_speed_threshold: float = 1,
+) -> tuple[float, float, float, float, pd.DataFrame]:
+    track_time: float = 0
+    track_distance: float = 0
+    track_stopped_time: float = 0
+    track_stopped_distance: float = 0
+    track_data: None | pd.DataFrame = None
+
+    for i_segment, segment in enumerate(track.segments):
+        (
+            time,
+            distance,
+            stopped_time,
+            stopped_distance,
+            _data,
+        ) = get_processed_segment_data(segment, stopped_speed_threshold)
+
+        track_time += time
+        track_distance += distance
+        track_stopped_time += stopped_time
+        track_stopped_distance += stopped_distance
+
+        data = _data.copy()
+        data["segment"] = i_segment
+
+        if track_data is None:
+            track_data = data
+        else:
+            track_data = pd.concat([track_data, data]).reset_index(drop=True)
+
+    # Not really possible but keeps linters happy
+    if track_data is None:
+        raise RuntimeError("Track has no segments")
+
+    return (
+        track_time,
+        track_distance,
+        track_stopped_time,
+        track_stopped_distance,
+        track_data,
+    )
 
 
 def get_processed_segment_data(
@@ -105,19 +150,18 @@ def get_processed_data_w_time(
                     data["cum_distance_moving"].append(cum_moving)
                     data["cum_distance_stopped"].append(cum_stopped)
 
+                    data["latitude"].append(point.latitude)
+                    data["longitude"].append(point.longitude)
+                    if point.has_elevation():
+                        data["elevation"].append(point.elevation)
+                    else:
+                        data["elevation"].append(None)
+
                     if not is_stopped:
                         data["speed"].append(point_distance / seconds)
-                        data["latitude"].append(point.latitude)
-                        data["longitude"].append(point.longitude)
-                        if point.has_elevation():
-                            data["elevation"].append(point.elevation)
-                        else:
-                            data["elevation"].append(None)
                     else:
                         data["speed"].append(None)
-                        data["latitude"].append(None)
-                        data["longitude"].append(None)
-                        data["elevation"].append(None)
+
                     for key in ["heartrate", "cadence", "power"]:
                         try:
                             data[key].append(float(get_extension_value(point, key)))

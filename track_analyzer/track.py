@@ -17,7 +17,10 @@ from track_analyzer.exceptions import (
     TrackTransformationError,
 )
 from track_analyzer.model import Position3D, SegmentOverview
-from track_analyzer.processing import get_processed_segment_data
+from track_analyzer.processing import (
+    get_processed_segment_data,
+    get_processed_track_data,
+)
 from track_analyzer.utils import (
     calc_elevation_metrics,
     get_extended_track_point,
@@ -26,6 +29,8 @@ from track_analyzer.utils import (
 )
 
 logger = logging.getLogger(__name__)
+
+process_data_tuple_type = tuple[float, float, float, float, pd.DataFrame]
 
 
 class Track(ABC):
@@ -40,10 +45,8 @@ class Track(ABC):
         self.stopped_speed_threshold = stopped_speed_threshold
         self.max_speed_percentile = max_speed_percentile
 
-        self._processed_segment_data: Dict[
-            int, tuple[float, float, float, float, pd.DataFrame]
-        ] = {}
-        self._processed_track_data: None | tuple[int, pd.DataFrame] = None
+        self._processed_segment_data: Dict[int, process_data_tuple_type] = {}
+        self._processed_track_data: None | tuple[int, process_data_tuple_type] = None
 
         self.session_data: Dict[str, str | int | float] = {}
 
@@ -75,39 +78,18 @@ class Track(ABC):
 
         :return: A SegmentOverview object containing the metrics
         """
-        track_time: float = 0
-        track_distance: float = 0
-        track_stopped_time: float = 0
-        track_stopped_distance: float = 0
-        track_data: None | pd.DataFrame = None
+        (
+            track_time,
+            track_distance,
+            track_stopped_time,
+            track_stopped_distance,
+            track_data,
+        ) = self._get_processed_track_data()
 
         track_max_speed = None
         track_avg_speed = None
 
-        for i_segment in range(self.n_segments):
-            (
-                time,
-                distance,
-                stopped_time,
-                stopped_distance,
-                data,
-            ) = self._get_processed_segment_data(i_segment)
-
-            track_time += time
-            track_distance += distance
-            track_stopped_time += stopped_time
-            track_stopped_distance += stopped_distance
-
-            if track_data is None:
-                track_data = data
-            else:
-                track_data = pd.concat([track_data, data]).reset_index(drop=True)
-
-        # Not really possible but keeps linters happy
-        if track_data is None:
-            raise RuntimeError
-
-        if self.track.segments[0].has_times():
+        if all(seg.has_times() for seg in self.track.segments):
             track_max_speed = track_data.speed[track_data.in_speed_percentile].max()
             track_avg_speed = track_data.speed[track_data.in_speed_percentile].mean()
 
@@ -253,6 +235,39 @@ class Track(ABC):
 
         return self._processed_segment_data[n_segment]
 
+    def _get_processed_track_data(self) -> process_data_tuple_type:
+        if self._processed_track_data:
+            segments_in_data, data = self._processed_track_data
+            if segments_in_data == self.n_segments:
+                return data
+
+        (
+            time,
+            distance,
+            stopped_time,
+            stopped_distance,
+            data,
+        ) = get_processed_track_data(self.track, self.stopped_speed_threshold)
+
+        if all(seg.has_times() for seg in self.track.segments):
+            data = self._apply_outlier_cleaning(data)
+
+        return self._set_processed_track_data(
+            (
+                time,
+                distance,
+                stopped_time,
+                stopped_distance,
+                data,
+            )
+        )
+
+    def _set_processed_track_data(
+        self, data: process_data_tuple_type
+    ) -> process_data_tuple_type:
+        self._processed_track_data = (self.n_segments, data)
+        return data
+
     def get_segment_data(self, n_segment: int = 0) -> pd.DataFrame:
         _, _, _, _, data = self._get_processed_segment_data(n_segment)
 
@@ -261,37 +276,9 @@ class Track(ABC):
     def get_track_data(self) -> pd.DataFrame:
         track_data: None | pd.DataFrame = None
 
-        processed_track_data = self._get_processed_track_data()
-        if processed_track_data is not None:
-            return processed_track_data
+        _, _, _, _, track_data = self._get_processed_track_data()
 
-        for i_segment in range(self.n_segments):
-            _, _, _, _, _data = self._get_processed_segment_data(i_segment)
-            data = _data.copy()
-            data["segment"] = i_segment
-            if track_data is None:
-                track_data = data
-            else:
-                track_data = pd.concat([track_data, data]).reset_index(drop=True)
-
-        # Not really possible but keeps linters happy
-        if track_data is None:
-            raise RuntimeError
-
-        return self._set_processed_track_data(track_data)
-
-    def _get_processed_track_data(self) -> None | pd.DataFrame:
-        if self._processed_track_data:
-            segments_in_data, data = self._processed_track_data
-            if segments_in_data == self.n_segments:
-                return data
-
-        return None
-
-    def _set_processed_track_data(self, data: pd.DataFrame) -> pd.DataFrame:
-        self._processed_track_data = (self.n_segments, data)
-
-        return data
+        return track_data
 
     def interpolate_points_in_segment(self, spacing: float, n_segment: int = 0) -> None:
         """
