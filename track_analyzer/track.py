@@ -189,24 +189,35 @@ class Track(ABC):
             self.track.segments[n_segment], latitude, longitude
         )
 
-    def _get_aggregated_pp_distance_in_segmeent(
+    def _get_aggregated_pp_distance(self, agg: str, threshold: float) -> float:
+        data = self.get_track_data()
+
+        return data[data.distance >= threshold].distance.agg(agg)
+
+    def _get_aggregated_pp_distance_in_segment(
         self, agg: str, n_segment: int, threshold: float
     ) -> float:
         data = self.get_segment_data(n_segment=n_segment)
 
         return data[data.distance >= threshold].distance.agg(agg)
 
+    def get_avg_pp_distance(self, threshold: float = 10) -> float:
+        return self._get_aggregated_pp_distance("average", threshold)
+
     def get_avg_pp_distance_in_segment(
         self, n_segment: int = 0, threshold: float = 10
     ) -> float:
-        return self._get_aggregated_pp_distance_in_segmeent(
+        return self._get_aggregated_pp_distance_in_segment(
             "average", n_segment, threshold
         )
+
+    def get_max_pp_distance(self, threshold: float = 10) -> float:
+        return self._get_aggregated_pp_distance("max", threshold)
 
     def get_max_pp_distance_in_segment(
         self, n_segment: int = 0, threshold: float = 10
     ) -> float:
-        return self._get_aggregated_pp_distance_in_segmeent("max", n_segment, threshold)
+        return self._get_aggregated_pp_distance_in_segment("max", n_segment, threshold)
 
     def _get_processed_segment_data(
         self, n_segment: int = 0
