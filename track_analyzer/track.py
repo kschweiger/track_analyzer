@@ -93,7 +93,7 @@ class Track(ABC):
             track_max_speed = track_data.speed[track_data.in_speed_percentile].max()
             track_avg_speed = track_data.speed[track_data.in_speed_percentile].mean()
 
-        return self.create_segment_overview(
+        return self._create_segment_overview(
             time=track_time,
             distance=track_distance,
             stopped_time=track_stopped_time,
@@ -110,7 +110,9 @@ class Track(ABC):
         Args:
             n_segment: Index of the segment the overview should be generated for
 
-        Returns: A SegmentOverview object containing the metrics
+        Returns: A SegmentOverview object containing the metrics moving time and
+        distance, total time and distance, maximum and average speed and elevation and
+        cummulated uphill, downholl elevation
         """
         (
             time,
@@ -127,7 +129,7 @@ class Track(ABC):
             max_speed = data.speed[data.in_speed_percentile].max()
             avg_speed = data.speed[data.in_speed_percentile].mean()
 
-        return self.create_segment_overview(
+        return self._create_segment_overview(
             time=time,
             distance=distance,
             stopped_time=stopped_time,
@@ -137,7 +139,7 @@ class Track(ABC):
             data=data,
         )
 
-    def create_segment_overview(
+    def _create_segment_overview(
         self,
         time: float,
         distance: float,
@@ -147,6 +149,7 @@ class Track(ABC):
         avg_speed: None | float,
         data: pd.DataFrame,
     ) -> SegmentOverview:
+        """Derive overview metrics for a segmeent"""
         total_time = time + stopped_time
         total_distance = distance + stopped_distance
 
@@ -185,6 +188,15 @@ class Track(ABC):
     def get_closest_point(
         self, n_segment: int, latitude: float, longitude: float
     ) -> tuple[GPXTrackPoint, float, int]:
+        """
+        Get closest point in a segment to the passed latitude and longitude
+
+        :param n_segment: Index of the segment
+        :param latitude: Latitude to check
+        :param longitude: Longitude to check
+        :return: Tuple containg the point as GPXTrackPoint, the distance from
+        the passed coordinates and the index in the segment
+        """
         return get_point_distance_in_segment(
             self.track.segments[n_segment], latitude, longitude
         )
@@ -202,21 +214,51 @@ class Track(ABC):
         return data[data.distance >= threshold].distance.agg(agg)
 
     def get_avg_pp_distance(self, threshold: float = 10) -> float:
+        """
+        Get average distance between points in the track.
+
+        :param threshold: Minimum distance between points required to  be used for the
+        average, defaults to 10
+        :return: Average distance
+        """
         return self._get_aggregated_pp_distance("average", threshold)
 
     def get_avg_pp_distance_in_segment(
         self, n_segment: int = 0, threshold: float = 10
     ) -> float:
+        """
+        Get average distance between points in the segment with index n_segment.
+
+        :param n_segment: Index of the segement to process, defaults to 0
+        :param threshold: Minimum distance between points required to  be used for the
+        average, defaults to 10
+        :return: Average distance
+        """
         return self._get_aggregated_pp_distance_in_segment(
             "average", n_segment, threshold
         )
 
     def get_max_pp_distance(self, threshold: float = 10) -> float:
+        """
+        Get maximum distance between points in the track.
+
+        :param threshold: Minimum distance between points required to  be used for the
+        maximum, defaults to 10
+        :return: Maximum distance
+        """
         return self._get_aggregated_pp_distance("max", threshold)
 
     def get_max_pp_distance_in_segment(
         self, n_segment: int = 0, threshold: float = 10
     ) -> float:
+        """
+        Get maximum distance between points in the segment with index n_segment.
+
+        :param n_segment: Index of the segement to process, defaults to 0
+        :param threshold: Minimum distance between points required to  be used for the
+        maximum, defaults to 10
+        :return: Maximum distance
+        """
         return self._get_aggregated_pp_distance_in_segment("max", n_segment, threshold)
 
     def _get_processed_segment_data(
@@ -276,15 +318,28 @@ class Track(ABC):
     def _set_processed_track_data(
         self, data: process_data_tuple_type
     ) -> process_data_tuple_type:
+        """Save processed data internally to reduce compute.
+        Mainly separated for testing"""
         self._processed_track_data = (self.n_segments, data)
         return data
 
     def get_segment_data(self, n_segment: int = 0) -> pd.DataFrame:
+        """Get processed data for the segmeent with passed index as DataFrame
+
+        :param n_segment: Index of the segement, defaults to 0
+        :return: DataFrame with segmenet data
+        """
         _, _, _, _, data = self._get_processed_segment_data(n_segment)
 
         return data
 
     def get_track_data(self) -> pd.DataFrame:
+        """
+        Get processed data for the track as DataFrame. Segment are indicated
+        via the segment column.
+
+        :return: DataFrame with track data
+        """
         track_data: None | pd.DataFrame = None
 
         _, _, _, _, track_data = self._get_processed_track_data()
@@ -313,6 +368,12 @@ class Track(ABC):
     def get_point_data_in_segmnet(
         self, n_segment: int = 0
     ) -> tuple[list[tuple[float, float]], None | list[float], None | list[datetime]]:
+        """Get raw coordinates (latitude, longitude), times and elevations for the
+        segement with the passed index.
+
+        :param n_segment: Index of the segement, defaults to 0
+        :return: tuple with coordinates (latitude, longitude), times and elevations
+        """
         coords = []
         elevations = []
         times = []

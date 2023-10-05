@@ -2,7 +2,6 @@ import importlib.resources
 from datetime import datetime
 from unittest.mock import MagicMock
 
-# import gpxpy
 import pandas as pd
 import pytest
 from gpxpy.gpx import GPX, GPXTrack, GPXTrackPoint, GPXTrackSegment

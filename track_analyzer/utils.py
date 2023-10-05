@@ -357,6 +357,7 @@ def get_distances(v1: npt.NDArray, v2: npt.NDArray) -> npt.NDArray:
     return dp_km * 1000
 
 
+# TODO: Generalize to track
 def get_point_distance_in_segment(
     segment: GPXTrackSegment, latitude: float, longitude: float
 ) -> tuple[GPXTrackPoint, float, int]:
