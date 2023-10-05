@@ -300,7 +300,13 @@ def test_get_closest_point() -> None:
         [datetime(2023, 1, 1, 10), datetime(2023, 1, 1, 10, 30)],
     )
 
-    point, distance, idx = track.get_closest_point(0, 1.1, 1.1)
+    distance_result = track.get_closest_point(0, 1.1, 1.1)
+
+    point, distance, idx = (
+        distance_result.point,
+        distance_result.distance,
+        distance_result.segment_point_idx,
+    )
 
     assert isinstance(point, GPXTrackPoint)
     assert isinstance(distance, float)

@@ -1,4 +1,5 @@
 import logging
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from math import acos, asin, atan2, cos, degrees, pi, sin, sqrt
 from typing import Callable, Dict, Union
@@ -7,9 +8,13 @@ from xml.etree.ElementTree import Element
 import coloredlogs
 import numpy as np
 import numpy.typing as npt
-from gpxpy.gpx import GPXBounds, GPXTrackPoint, GPXTrackSegment
+from gpxpy.gpx import GPXBounds, GPXTrack, GPXTrackPoint, GPXTrackSegment
 
-from track_analyzer.exceptions import GPXPointExtensionError, InvalidBoundsError
+from track_analyzer.exceptions import (
+    GPXPointExtensionError,
+    InvalidBoundsError,
+    TrackAnalysisError,
+)
 from track_analyzer.model import ElevationMetrics, Position2D, Position3D
 
 logger = logging.getLogger(__name__)
@@ -19,6 +24,15 @@ class ExtensionFieldElement(Element):
     def __init__(self, name: str, text: str) -> None:
         super().__init__(name)
         self.text = text
+
+
+@dataclass
+class PointDistance:
+    point: GPXTrackPoint
+    distance: float
+    point_idx_abs: int
+    segment_idx: int
+    segment_point_idx: int
 
 
 def distance(pos1: Position2D, pos2: Position2D) -> float:
@@ -357,21 +371,48 @@ def get_distances(v1: npt.NDArray, v2: npt.NDArray) -> npt.NDArray:
     return dp_km * 1000
 
 
-# TODO: Generalize to track
-def get_point_distance_in_segment(
-    segment: GPXTrackSegment, latitude: float, longitude: float
-) -> tuple[GPXTrackPoint, float, int]:
-    points = []
-    for point in segment.points:
-        points.append([point.latitude, point.longitude])
+def get_point_distance(
+    track: GPXTrack, segment_idx: None | int, latitude: float, longitude: float
+) -> PointDistance:
+    points: list[tuple[float, float]] = []
+    segment_point_idx_map: dict[int, tuple[int, int]] = {}
+    if segment_idx is None:
+        for i_segment, segment in enumerate(track.segments):
+            first_idx = len(points)
+            for point in segment.points:
+                points.append((point.latitude, point.longitude))
+            last_idx = len(points) - 1
+
+            segment_point_idx_map[i_segment] = (first_idx, last_idx)
+    else:
+        segment = track.segments[segment_idx]
+        for point in segment.points:
+            points.append((point.latitude, point.longitude))
+
+        segment_point_idx_map[segment_idx] = (0, len(points) - 1)
 
     distances = get_distances(np.array(points), np.array([[latitude, longitude]]))
 
-    min_idx = int(distances.argmin())
+    _min_idx = int(distances.argmin())
     min_distance = float(distances.min())
-    min_point = segment.points[min_idx]
+    _min_point = None
+    _min_segment = -1
+    _min_idx_in_segment = -1
+    for i_seg, (i_min, i_max) in segment_point_idx_map.items():
+        if i_min <= _min_idx <= i_max:
+            _min_idx_in_segment = _min_idx - i_min
+            _min_point = track.segments[i_seg].points[_min_idx_in_segment]
+            _min_segment = i_seg
+    if _min_point is None:
+        raise TrackAnalysisError("Point could not be determined")
 
-    return min_point, min_distance, min_idx
+    return PointDistance(
+        point=_min_point,
+        distance=min_distance,
+        point_idx_abs=_min_idx,
+        segment_idx=_min_segment,
+        segment_point_idx=_min_idx_in_segment,
+    )
 
 
 def get_points_inside_bounds(

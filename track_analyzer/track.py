@@ -9,7 +9,7 @@ import gpxpy
 import numpy as np
 import pandas as pd
 from fitparse import DataMessage, FitFile, StandardUnitsDataProcessor
-from gpxpy.gpx import GPX, GPXTrack, GPXTrackPoint, GPXTrackSegment
+from gpxpy.gpx import GPX, GPXTrack, GPXTrackSegment
 
 from track_analyzer.compare import get_segment_overlap
 from track_analyzer.exceptions import (
@@ -22,9 +22,10 @@ from track_analyzer.processing import (
     get_processed_track_data,
 )
 from track_analyzer.utils import (
+    PointDistance,
     calc_elevation_metrics,
     get_extended_track_point,
-    get_point_distance_in_segment,
+    get_point_distance,
     interpolate_segment,
 )
 
@@ -187,7 +188,7 @@ class Track(ABC):
 
     def get_closest_point(
         self, n_segment: int, latitude: float, longitude: float
-    ) -> tuple[GPXTrackPoint, float, int]:
+    ) -> PointDistance:
         """
         Get closest point in a segment to the passed latitude and longitude
 
@@ -197,9 +198,7 @@ class Track(ABC):
         :return: Tuple containg the point as GPXTrackPoint, the distance from
         the passed coordinates and the index in the segment
         """
-        return get_point_distance_in_segment(
-            self.track.segments[n_segment], latitude, longitude
-        )
+        return get_point_distance(self.track, n_segment, latitude, longitude)
 
     def _get_aggregated_pp_distance(self, agg: str, threshold: float) -> float:
         data = self.get_track_data()

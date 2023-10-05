@@ -13,7 +13,7 @@ from track_analyzer.compare import (
 )
 from track_analyzer.model import Position2D, SegmentOverlap
 from track_analyzer.track import PyTrack
-from track_analyzer.utils import distance
+from track_analyzer.utils import PointDistance, distance
 
 
 @pytest.mark.parametrize(
@@ -29,7 +29,7 @@ from track_analyzer.utils import distance
         ([(2, 1), (2.2, 1), (2.4, 1), (2.6, 1)], False),
     ],
 )
-def test_check_segment_bound_overlap(compare_points, result):
+def test_check_segment_bound_overlap(compare_points, result) -> None:
     reference_points = [(1, 1), (1.5, 1.5), (2, 2)]
 
     reference_segment = PyTrack(
@@ -43,7 +43,7 @@ def test_check_segment_bound_overlap(compare_points, result):
     assert check_segment_bound_overlap(reference_segment, [check_track]) == [result]
 
 
-def test_derive_plate_bins():
+def test_derive_plate_bins() -> None:
     width = 100
     bounds_min_latitude = 47.99
     bounds_min_longitude = 7.85
@@ -105,7 +105,9 @@ def test_derive_plate_bins():
         ),
     ],
 )
-def test_convert_segment_to_plate(mocker, points, patch_bins, normalize, exp_plate):
+def test_convert_segment_to_plate(
+    mocker, points, patch_bins, normalize, exp_plate
+) -> None:
     mocker.patch("track_analyzer.compare.derive_plate_bins", return_value=patch_bins)
 
     grid_width = 100
@@ -145,15 +147,18 @@ def test_convert_segment_to_plate(mocker, points, patch_bins, normalize, exp_pla
         ),
     ],
 )
-def test_get_segment_overlap(mocker, plate_base, plate_match, exp_overlap):
+def test_get_segment_overlap(mocker, plate_base, plate_match, exp_overlap) -> None:
     mocker.patch(
         "track_analyzer.compare.convert_segment_to_plate",
         side_effect=[plate_base, plate_match],
     )
 
     mocker.patch(
-        "track_analyzer.compare.get_point_distance_in_segment",
-        side_effect=[(GPXTrackPoint(1, 1), 10, 0), (GPXTrackPoint(2, 2), 10, 3)],
+        "track_analyzer.compare.get_point_distance",
+        side_effect=[
+            PointDistance(GPXTrackPoint(1, 1), 10, 0, 0, 0),
+            PointDistance(GPXTrackPoint(2, 2), 10, 3, 0, 3),
+        ],
     )
 
     base_segment = MagicMock()
@@ -173,7 +178,7 @@ def test_get_segment_overlap(mocker, plate_base, plate_match, exp_overlap):
         assert data.overlap == overlap
 
 
-def test_get_segment_overlap_multi():
+def test_get_segment_overlap_multi() -> None:
     base_segment = GPXTrackSegment()
     base_segment.points = [
         GPXTrackPoint(1, 1),
@@ -261,5 +266,5 @@ def test_get_segment_overlap_multi():
         ),
     ],
 )
-def test_extract_ranges(points, allow_points, exp):
+def test_extract_ranges(points, allow_points, exp) -> None:
     assert _extract_ranges(points, allow_points) == exp
