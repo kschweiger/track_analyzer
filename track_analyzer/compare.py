@@ -3,7 +3,8 @@ from collections import deque
 from functools import lru_cache
 
 import numpy as np
-from gpxpy.gpx import GPXTrackSegment
+import numpy.typing as npt
+from gpxpy.gpx import GPXTrack, GPXTrackSegment
 
 from track_analyzer.model import Position2D, SegmentOverlap
 from track_analyzer.utils import (
@@ -12,7 +13,7 @@ from track_analyzer.utils import (
     distance,
     get_latitude_at_distance,
     get_longitude_at_distance,
-    get_point_distance_in_segment,
+    get_point_distance,
     get_points_inside_bounds,
     split_segment_by_id,
 )
@@ -351,7 +352,12 @@ def get_segment_overlap(
             return []
 
 
-def _calc_plate_overlap(base_segment, plate_base, match_segment, plate_match):
+def _calc_plate_overlap(
+    base_segment: GPXTrackSegment,
+    plate_base: npt.NDArray,
+    match_segment: GPXTrackSegment,
+    plate_match: npt.NDArray,
+) -> SegmentOverlap:
     overlap_plate = plate_base + plate_match
 
     overlap_plate_ = np.digitize(overlap_plate, np.array([0, 2, 3])) - 1
@@ -374,12 +380,24 @@ def _calc_plate_overlap(base_segment, plate_base, match_segment, plate_match):
         match_segment.points[-1],
     )
 
-    first_point_base, first_distance, first_idx = get_point_distance_in_segment(
-        base_segment, first_point_match.latitude, first_point_match.longitude
+    base_track = GPXTrack()
+    base_track.segments = [base_segment]
+
+    first_point_distance_info = get_point_distance(
+        base_track, 0, first_point_match.latitude, first_point_match.longitude
+    )
+    first_point_base, first_idx = (
+        first_point_distance_info.point,
+        first_point_distance_info.segment_point_idx,
     )
 
-    last_point_base, last_distance, last_idx = get_point_distance_in_segment(
-        base_segment, last_point_match.latitude, last_point_match.longitude
+    last_point_distance_info = get_point_distance(
+        base_track, 0, last_point_match.latitude, last_point_match.longitude
+    )
+
+    last_point_base, last_idx = (
+        last_point_distance_info.point,
+        last_point_distance_info.segment_point_idx,
     )
 
     if last_idx > first_idx:

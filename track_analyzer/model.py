@@ -68,7 +68,7 @@ class SegmentOverview:
     max_velocity_kmh: None | float = field(init=False)
     avg_velocity_kmh: None | float = field(init=False)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.moving_distance_km = self.moving_distance / 1000
         self.total_distance_km = self.total_distance / 1000
         self.max_velocity_kmh = (

@@ -3,13 +3,13 @@ from __future__ import annotations
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Dict, Sequence
+from typing import Dict, Sequence, final
 
 import gpxpy
 import numpy as np
 import pandas as pd
 from fitparse import DataMessage, FitFile, StandardUnitsDataProcessor
-from gpxpy.gpx import GPX, GPXTrack, GPXTrackPoint, GPXTrackSegment
+from gpxpy.gpx import GPX, GPXTrack, GPXTrackSegment
 
 from track_analyzer.compare import get_segment_overlap
 from track_analyzer.exceptions import (
@@ -17,21 +17,27 @@ from track_analyzer.exceptions import (
     TrackTransformationError,
 )
 from track_analyzer.model import Position3D, SegmentOverview
-from track_analyzer.processing import get_processed_segment_data
+from track_analyzer.processing import (
+    get_processed_segment_data,
+    get_processed_track_data,
+)
 from track_analyzer.utils import (
+    PointDistance,
     calc_elevation_metrics,
     get_extended_track_point,
-    get_point_distance_in_segment,
+    get_point_distance,
     interpolate_segment,
 )
 
 logger = logging.getLogger(__name__)
 
+process_data_tuple_type = tuple[float, float, float, float, pd.DataFrame]
+
 
 class Track(ABC):
     def __init__(
-        self, stopped_speed_threshold: float = 1, max_speed_percentile: int = 95
-    ):
+        self, stopped_speed_threshold: float, max_speed_percentile: int
+    ) -> None:
         logger.debug(
             "Using threshold for stopped speed: %s km/h", stopped_speed_threshold
         )
@@ -40,9 +46,8 @@ class Track(ABC):
         self.stopped_speed_threshold = stopped_speed_threshold
         self.max_speed_percentile = max_speed_percentile
 
-        self.processed_segment_data: Dict[
-            int, tuple[float, float, float, float, pd.DataFrame]
-        ] = {}
+        self._processed_segment_data: Dict[int, process_data_tuple_type] = {}
+        self._processed_track_data: None | tuple[int, process_data_tuple_type] = None
 
         self.session_data: Dict[str, str | int | float] = {}
 
@@ -55,6 +60,10 @@ class Track(ABC):
     def n_segments(self) -> int:
         return len(self.track.segments)
 
+    def add_segmeent(self, segment: GPXTrackSegment) -> None:
+        self.track.segments.append(segment)
+        logger.info("Added segment with postition: %s", len(self.track.segments))
+
     def get_xml(self, name: None | str = None, email: None | str = None) -> str:
         gpx = GPX()
 
@@ -64,6 +73,37 @@ class Track(ABC):
 
         return gpx.to_xml()
 
+    def get_track_overview(self) -> SegmentOverview:
+        """
+        Get overall metrics for the track. Equivalent to the sum of all segments
+
+        :return: A SegmentOverview object containing the metrics
+        """
+        (
+            track_time,
+            track_distance,
+            track_stopped_time,
+            track_stopped_distance,
+            track_data,
+        ) = self._get_processed_track_data()
+
+        track_max_speed = None
+        track_avg_speed = None
+
+        if all(seg.has_times() for seg in self.track.segments):
+            track_max_speed = track_data.speed[track_data.in_speed_percentile].max()
+            track_avg_speed = track_data.speed[track_data.in_speed_percentile].mean()
+
+        return self._create_segment_overview(
+            time=track_time,
+            distance=track_distance,
+            stopped_time=track_stopped_time,
+            stopped_distance=track_stopped_distance,
+            max_speed=track_max_speed,
+            avg_speed=track_avg_speed,
+            data=track_data,  # type: ignore
+        )
+
     def get_segment_overview(self, n_segment: int = 0) -> SegmentOverview:
         """
         Get overall metrics for a segment
@@ -71,7 +111,9 @@ class Track(ABC):
         Args:
             n_segment: Index of the segment the overview should be generated for
 
-        Returns: A SegmentOverview object containing the metrics
+        Returns: A SegmentOverview object containing the metrics moving time and
+        distance, total time and distance, maximum and average speed and elevation and
+        cummulated uphill, downholl elevation
         """
         (
             time,
@@ -81,15 +123,36 @@ class Track(ABC):
             data,
         ) = self._get_processed_segment_data(n_segment)
 
-        total_time = time + stopped_time
-        total_distance = distance + stopped_distance
-
         max_speed = None
         avg_speed = None
 
         if self.track.segments[n_segment].has_times():
             max_speed = data.speed[data.in_speed_percentile].max()
             avg_speed = data.speed[data.in_speed_percentile].mean()
+
+        return self._create_segment_overview(
+            time=time,
+            distance=distance,
+            stopped_time=stopped_time,
+            stopped_distance=stopped_distance,
+            max_speed=max_speed,
+            avg_speed=avg_speed,
+            data=data,
+        )
+
+    def _create_segment_overview(
+        self,
+        time: float,
+        distance: float,
+        stopped_time: float,
+        stopped_distance: float,
+        max_speed: None | float,
+        avg_speed: None | float,
+        data: pd.DataFrame,
+    ) -> SegmentOverview:
+        """Derive overview metrics for a segmeent"""
+        total_time = time + stopped_time
+        total_distance = distance + stopped_distance
 
         max_elevation = None
         min_elevation = None
@@ -110,7 +173,7 @@ class Track(ABC):
             uphill = elevation_metrics.uphill
             downhill = elevation_metrics.downhill
 
-        overview = SegmentOverview(
+        return SegmentOverview(
             time,
             total_time,
             distance,
@@ -123,38 +186,84 @@ class Track(ABC):
             downhill,
         )
 
-        return overview
-
     def get_closest_point(
         self, n_segment: int, latitude: float, longitude: float
-    ) -> tuple[GPXTrackPoint, float, int]:
-        return get_point_distance_in_segment(
-            self.track.segments[n_segment], latitude, longitude
-        )
+    ) -> PointDistance:
+        """
+        Get closest point in a segment to the passed latitude and longitude
 
-    def _get_aggregated_pp_distance_in_segmeent(
+        :param n_segment: Index of the segment
+        :param latitude: Latitude to check
+        :param longitude: Longitude to check
+        :return: Tuple containg the point as GPXTrackPoint, the distance from
+        the passed coordinates and the index in the segment
+        """
+        return get_point_distance(self.track, n_segment, latitude, longitude)
+
+    def _get_aggregated_pp_distance(self, agg: str, threshold: float) -> float:
+        data = self.get_track_data()
+
+        return data[data.distance >= threshold].distance.agg(agg)
+
+    def _get_aggregated_pp_distance_in_segment(
         self, agg: str, n_segment: int, threshold: float
     ) -> float:
         data = self.get_segment_data(n_segment=n_segment)
 
         return data[data.distance >= threshold].distance.agg(agg)
 
+    def get_avg_pp_distance(self, threshold: float = 10) -> float:
+        """
+        Get average distance between points in the track.
+
+        :param threshold: Minimum distance between points required to  be used for the
+        average, defaults to 10
+        :return: Average distance
+        """
+        return self._get_aggregated_pp_distance("average", threshold)
+
     def get_avg_pp_distance_in_segment(
         self, n_segment: int = 0, threshold: float = 10
     ) -> float:
-        return self._get_aggregated_pp_distance_in_segmeent(
+        """
+        Get average distance between points in the segment with index n_segment.
+
+        :param n_segment: Index of the segement to process, defaults to 0
+        :param threshold: Minimum distance between points required to  be used for the
+        average, defaults to 10
+        :return: Average distance
+        """
+        return self._get_aggregated_pp_distance_in_segment(
             "average", n_segment, threshold
         )
+
+    def get_max_pp_distance(self, threshold: float = 10) -> float:
+        """
+        Get maximum distance between points in the track.
+
+        :param threshold: Minimum distance between points required to  be used for the
+        maximum, defaults to 10
+        :return: Maximum distance
+        """
+        return self._get_aggregated_pp_distance("max", threshold)
 
     def get_max_pp_distance_in_segment(
         self, n_segment: int = 0, threshold: float = 10
     ) -> float:
-        return self._get_aggregated_pp_distance_in_segmeent("max", n_segment, threshold)
+        """
+        Get maximum distance between points in the segment with index n_segment.
+
+        :param n_segment: Index of the segement to process, defaults to 0
+        :param threshold: Minimum distance between points required to  be used for the
+        maximum, defaults to 10
+        :return: Maximum distance
+        """
+        return self._get_aggregated_pp_distance_in_segment("max", n_segment, threshold)
 
     def _get_processed_segment_data(
         self, n_segment: int = 0
     ) -> tuple[float, float, float, float, pd.DataFrame]:
-        if n_segment not in self.processed_segment_data:
+        if n_segment not in self._processed_segment_data:
             (
                 time,
                 distance,
@@ -168,7 +277,7 @@ class Track(ABC):
             if self.track.segments[n_segment].has_times():
                 data = self._apply_outlier_cleaning(data)
 
-            self.processed_segment_data[n_segment] = (
+            self._processed_segment_data[n_segment] = (
                 time,
                 distance,
                 stopped_time,
@@ -176,12 +285,65 @@ class Track(ABC):
                 data,
             )
 
-        return self.processed_segment_data[n_segment]
+        return self._processed_segment_data[n_segment]
+
+    def _get_processed_track_data(self) -> process_data_tuple_type:
+        if self._processed_track_data:
+            segments_in_data, data = self._processed_track_data
+            if segments_in_data == self.n_segments:
+                return data
+
+        (
+            time,
+            distance,
+            stopped_time,
+            stopped_distance,
+            data,
+        ) = get_processed_track_data(self.track, self.stopped_speed_threshold)
+
+        if all(seg.has_times() for seg in self.track.segments):
+            data = self._apply_outlier_cleaning(data)
+
+        return self._set_processed_track_data(
+            (
+                time,
+                distance,
+                stopped_time,
+                stopped_distance,
+                data,
+            )
+        )
+
+    def _set_processed_track_data(
+        self, data: process_data_tuple_type
+    ) -> process_data_tuple_type:
+        """Save processed data internally to reduce compute.
+        Mainly separated for testing"""
+        self._processed_track_data = (self.n_segments, data)
+        return data
 
     def get_segment_data(self, n_segment: int = 0) -> pd.DataFrame:
+        """Get processed data for the segmeent with passed index as DataFrame
+
+        :param n_segment: Index of the segement, defaults to 0
+        :return: DataFrame with segmenet data
+        """
         _, _, _, _, data = self._get_processed_segment_data(n_segment)
 
         return data
+
+    def get_track_data(self) -> pd.DataFrame:
+        """
+        Get processed data for the track as DataFrame. Segment are indicated
+        via the segment column.
+
+        :return: DataFrame with track data
+        """
+        track_data: None | pd.DataFrame = None
+
+        _, _, _, _, track_data = self._get_processed_track_data()
+
+        return track_data
 
     def interpolate_points_in_segment(self, spacing: float, n_segment: int = 0) -> None:
         """
@@ -196,15 +358,21 @@ class Track(ABC):
         )
 
         # Reset saved processed data
-        if n_segment in self.processed_segment_data:
+        if n_segment in self._processed_segment_data:
             logger.debug(
                 "Deleting saved processed segment data for segment %s", n_segment
             )
-            self.processed_segment_data.pop(n_segment)
+            self._processed_segment_data.pop(n_segment)
 
     def get_point_data_in_segmnet(
         self, n_segment: int = 0
     ) -> tuple[list[tuple[float, float]], None | list[float], None | list[datetime]]:
+        """Get raw coordinates (latitude, longitude), times and elevations for the
+        segement with the passed index.
+
+        :param n_segment: Index of the segement, defaults to 0
+        :return: tuple with coordinates (latitude, longitude), times and elevations
+        """
         coords = []
         elevations = []
         times = []
@@ -300,8 +468,15 @@ class Track(ABC):
         return matched_tracks
 
 
+@final
 class GPXFileTrack(Track):
-    def __init__(self, gpx_file: str, n_track: int = 0, **kwargs):
+    def __init__(
+        self,
+        gpx_file: str,
+        n_track: int = 0,
+        stopped_speed_threshold: float = 1,
+        max_speed_percentile: int = 95,
+    ) -> None:
         """
         Initialize a Track object from a gpx file
 
@@ -309,28 +484,40 @@ class GPXFileTrack(Track):
             gpx_file: Path to the gpx file.
             n_track: Index of track in the gpx file.
         """
-        super().__init__(**kwargs)
+        super().__init__(
+            stopped_speed_threshold=stopped_speed_threshold,
+            max_speed_percentile=max_speed_percentile,
+        )
 
         logger.info("Loading gpx track from file %s", gpx_file)
 
-        gpx = self._get_pgx(gpx_file)
+        gpx = self._get_gpx(gpx_file)
 
         self._track = gpx.tracks[n_track]
 
     @staticmethod
-    def _get_pgx(gpx_file) -> GPX:
+    def _get_gpx(gpx_file: str) -> GPX:
         with open(gpx_file, "r") as f:
-            gpx = gpxpy.parse(f)
-        return gpx
+            return gpxpy.parse(f)
 
     @property
     def track(self) -> GPXTrack:
         return self._track
 
 
+@final
 class ByteTrack(Track):
-    def __init__(self, bytefile, n_track: int = 0, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(
+        self,
+        bytefile: bytes,
+        n_track: int = 0,
+        stopped_speed_threshold: float = 1,
+        max_speed_percentile: int = 95,
+    ) -> None:
+        super().__init__(
+            stopped_speed_threshold=stopped_speed_threshold,
+            max_speed_percentile=max_speed_percentile,
+        )
 
         gpx = gpxpy.parse(bytefile)
 
@@ -341,6 +528,7 @@ class ByteTrack(Track):
         return self._track
 
 
+@final
 class PyTrack(Track):
     def __init__(
         self,
@@ -350,8 +538,9 @@ class PyTrack(Track):
         heartrate: None | list[int] = None,
         cadence: None | list[int] = None,
         power: None | list[int] = None,
-        **kwargs,
-    ):
+        stopped_speed_threshold: float = 1,
+        max_speed_percentile: int = 95,
+    ) -> None:
         """A geospacial data track initialized from python objects
 
         :param points: List of Latitude/Longitude tuples
@@ -363,8 +552,42 @@ class PyTrack(Track):
         :raises TrackInitializationError: Raised if number of elevation, time, heatrate,
                                           or cadence values do not match passed points
         """
-        super().__init__(**kwargs)
+        super().__init__(
+            stopped_speed_threshold=stopped_speed_threshold,
+            max_speed_percentile=max_speed_percentile,
+        )
 
+        gpx = GPX()
+
+        gpx_track = GPXTrack()
+        gpx.tracks.append(gpx_track)
+
+        gpx_segment = self._create_segmeent(
+            points=points,
+            elevations=elevations,
+            times=times,
+            heartrate=heartrate,
+            cadence=cadence,
+            power=power,
+        )
+
+        gpx_track.segments.append(gpx_segment)
+
+        self._track = gpx.tracks[0]
+
+    @property
+    def track(self) -> GPXTrack:
+        return self._track
+
+    def _create_segmeent(
+        self,
+        points: list[tuple[float, float]],
+        elevations: None | list[float],
+        times: None | list[datetime],
+        heartrate: None | list[int] = None,
+        cadence: None | list[int] = None,
+        power: None | list[int] = None,
+    ) -> GPXTrackSegment:
         elevations_: list[None] | list[float]
         times_: list[None] | list[datetime]
         heartrate_: list[None] | list[int]
@@ -416,13 +639,7 @@ class PyTrack(Track):
         else:
             power_ = len(points) * [None]
 
-        gpx = GPX()
-
-        gpx_track = GPXTrack()
-        gpx.tracks.append(gpx_track)
-
         gpx_segment = GPXTrackSegment()
-        gpx_track.segments.append(gpx_segment)
 
         for (lat, lng), ele, time, hr, cad, pw in zip(
             points, elevations_, times_, heartrate_, cadence_, power_
@@ -438,16 +655,40 @@ class PyTrack(Track):
 
             gpx_segment.points.append(this_point)
 
-        self._track = gpx.tracks[0]
+        return gpx_segment
 
-    @property
-    def track(self) -> GPXTrack:
-        return self._track
+    def add_segmeent(  # type: ignore
+        self,
+        points: list[tuple[float, float]],
+        elevations: None | list[float],
+        times: None | list[datetime],
+        heartrate: None | list[int] = None,
+        cadence: None | list[int] = None,
+        power: None | list[int] = None,
+    ) -> None:
+        gpx_segment = self._create_segmeent(
+            points=points,
+            elevations=elevations,
+            times=times,
+            heartrate=heartrate,
+            cadence=cadence,
+            power=power,
+        )
+        super().add_segmeent(gpx_segment)
 
 
+@final
 class SegmentTrack(Track):
-    def __init__(self, segment: GPXTrackSegment, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(
+        self,
+        segment: GPXTrackSegment,
+        stopped_speed_threshold: float = 1,
+        max_speed_percentile: int = 95,
+    ) -> None:
+        super().__init__(
+            stopped_speed_threshold=stopped_speed_threshold,
+            max_speed_percentile=max_speed_percentile,
+        )
         gpx = GPX()
 
         gpx_track = GPXTrack()
@@ -462,13 +703,22 @@ class SegmentTrack(Track):
         return self._track
 
 
+@final
 class FITFileTrack(Track):
-    def __init__(self, fit_file: str, **kwargs):
+    def __init__(
+        self,
+        fit_file: str,
+        stopped_speed_threshold: float = 1,
+        max_speed_percentile: int = 95,
+    ) -> None:
         """
         Load a .fit file and extract the data into a Track object.
         NOTE: Tested with Wahoo devices only
         """
-        super().__init__(**kwargs)
+        super().__init__(
+            stopped_speed_threshold=stopped_speed_threshold,
+            max_speed_percentile=max_speed_percentile,
+        )
 
         logger.info("Loading gpx track from file %s", fit_file)
 

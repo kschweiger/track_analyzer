@@ -2,12 +2,13 @@ from math import asin, degrees, isclose
 
 import numpy as np
 import pytest
-from gpxpy.gpx import GPXTrackPoint, GPXTrackSegment
+from gpxpy.gpx import GPXTrack, GPXTrackPoint, GPXTrackSegment
 
 from track_analyzer.model import Position2D, Position3D
 from track_analyzer.track import PyTrack
 from track_analyzer.utils import (
     ExtensionFieldElement,
+    PointDistance,
     calc_elevation_metrics,
     center_geolocation,
     distance,
@@ -16,6 +17,7 @@ from track_analyzer.utils import (
     get_extension_value,
     get_latitude_at_distance,
     get_longitude_at_distance,
+    get_point_distance,
     get_points_inside_bounds,
     get_segment_base_area,
     hex_to_rgb,
@@ -23,7 +25,7 @@ from track_analyzer.utils import (
 )
 
 
-def test_distance_far():
+def test_distance_far() -> None:
     p1 = Position2D(51.5073219, -0.1276474)  # London
     p2 = Position2D(48.8588897, 2.320041)  # Paris
 
@@ -32,7 +34,7 @@ def test_distance_far():
     assert int(d / 1000) == 342
 
 
-def test_distance_close():
+def test_distance_close() -> None:
     p1 = Position2D(48.86104740612081, 2.3356136263202165)
     p2 = Position2D(48.861134753323505, 2.335389661859064)
 
@@ -41,7 +43,7 @@ def test_distance_close():
     assert int(d) == 19
 
 
-def test_calc_elevation_metrics(mocker):
+def test_calc_elevation_metrics(mocker) -> None:
     mocker.patch("track_analyzer.utils.distance", return_value=150)
 
     positions = [
@@ -71,7 +73,7 @@ def test_calc_elevation_metrics(mocker):
     assert len(metrics.slopes) == len(positions)
 
 
-def test_calc_elevation_metrics_nan(mocker):
+def test_calc_elevation_metrics_nan(mocker) -> None:
     mocker.patch("track_analyzer.utils.distance", return_value=150)
     positions = [
         Position3D(0, 0, 100),
@@ -87,7 +89,7 @@ def test_calc_elevation_metrics_nan(mocker):
     ("coords", "exp_lat", "exp_lon"),
     [([(10, 0), (20, 0)], 15, 0), ([(0, 10), (0, 20)], 0, 15)],
 )
-def test_center_geolocation(coords, exp_lat, exp_lon):
+def test_center_geolocation(coords, exp_lat, exp_lon) -> None:
     ret_lat, ret_lon = center_geolocation(coords)
     assert isclose(ret_lat, exp_lat)
     assert isclose(ret_lon, exp_lon)
@@ -103,18 +105,18 @@ def test_center_geolocation(coords, exp_lat, exp_lon):
         ("#0000FF", (0, 0, 255)),  # Blue
     ],
 )
-def test_hex_to_rgb(in_str, exp_out):
+def test_hex_to_rgb(in_str, exp_out) -> None:
     assert hex_to_rgb(in_str) == exp_out
 
 
-def test_get_color_gradient():
+def test_get_color_gradient() -> None:
     gradient = get_color_gradient("#FFFFFF", "#000000", 5)
     assert len(gradient) == 5
     assert gradient[0] == "#FFFFFF"
     assert gradient[-1] == "#000000"
 
 
-def test_get_segment_base_area():
+def test_get_segment_base_area() -> None:
     points = [
         (48.86104740612081, 2.3356136263202165),
         (48.861134753323505, 2.335389661859064),
@@ -130,7 +132,7 @@ def test_get_segment_base_area():
     assert area > 0
 
 
-def test_get_segment_base_area_long_line():
+def test_get_segment_base_area_long_line() -> None:
     points = [
         (48.86104740612081, 2.3356136263202165),
         (48.861134753323505, 2.3356136263202165),
@@ -147,7 +149,7 @@ def test_get_segment_base_area_long_line():
     )
 
 
-def test_get_segment_base_area_lat_line():
+def test_get_segment_base_area_lat_line() -> None:
     points = [
         (48.86104740612081, 2.3356136263202165),
         (48.86104740612081, 2.335389661859064),
@@ -168,7 +170,7 @@ def test_get_segment_base_area_lat_line():
     ("value", "distance", "to_east", "exp_value"),
     [(47.996, 111.2, True, 47.997), (47.996, 111.2, False, 47.995)],
 )
-def test_get_latitude_at_distance(value, distance, to_east, exp_value):
+def test_get_latitude_at_distance(value, distance, to_east, exp_value) -> None:
     assert (
         round(get_latitude_at_distance(Position2D(value, 1), distance, to_east), 3)
         == exp_value
@@ -179,7 +181,7 @@ def test_get_latitude_at_distance(value, distance, to_east, exp_value):
     ("value", "distance", "to_north", "exp_value"),
     [(7.854, 74.41, True, 7.855), (7.854, 74.41, False, 7.853)],
 )
-def test_get_longitude_at_distance(value, distance, to_north, exp_value):
+def test_get_longitude_at_distance(value, distance, to_north, exp_value) -> None:
     assert (
         round(
             get_longitude_at_distance(Position2D(47.996, value), distance, to_north), 3
@@ -195,14 +197,14 @@ def test_get_longitude_at_distance(value, distance, to_north, exp_value):
         ([[0, 1], [1, 1], [2, 2]], [[1, 1]], (3, 1)),
     ],
 )
-def test_get_distance(v1_point, v2_points, exp_shape):
+def test_get_distance(v1_point, v2_points, exp_shape) -> None:
     distances = get_distances(np.array(v1_point), np.array(v2_points))
 
     assert isinstance(distances, np.ndarray)
     assert distances.shape == exp_shape
 
 
-def test_get_distance_computation():
+def test_get_distance_computation() -> None:
     v1_points = [[0, 1], [1, 1], [2, 2]]
     v2_points = [[1, 1], [2, 2]]
 
@@ -257,7 +259,7 @@ def test_get_distance_computation():
         ),
     ],
 )
-def test_get_points_inside_bounds(points, bounds, exp_array):
+def test_get_points_inside_bounds(points, bounds, exp_array) -> None:
     test_segment = GPXTrackSegment()
     for lat, lng in points:
         test_segment.points.append(GPXTrackPoint(lat, lng))
@@ -265,7 +267,7 @@ def test_get_points_inside_bounds(points, bounds, exp_array):
     assert get_points_inside_bounds(test_segment, *bounds) == exp_array
 
 
-def test_split_segment_by_id():
+def test_split_segment_by_id() -> None:
     in_segment = GPXTrackSegment()
     in_segment.points = [
         GPXTrackPoint(1, 1),
@@ -307,9 +309,67 @@ def test_split_segment_by_id():
         assert ret_point.longitude == exp_point.longitude
 
 
-def test_get_extension_value():
+def test_get_extension_value() -> None:
     point = GPXTrackPoint(latitude=1, longitude=1)
     elem = ExtensionFieldElement("some_key", "some_value")
     point.extensions.append(elem)
 
     assert get_extension_value(point, "some_key") == "some_value"
+
+
+@pytest.mark.parametrize(
+    (
+        "segment_idx",
+        "test_lat",
+        "test_long",
+        "exp_point",
+        "exp_point_idx_abs",
+        "exp_segment_idx",
+        "exp_segment_point_idx",
+    ),
+    [
+        (None, 3.01, 3.01, GPXTrackPoint(3, 3), 2, 0, 2),
+        (None, 7.01, 7.01, GPXTrackPoint(7, 7), 6, 1, 2),
+        (0, 3.01, 3.01, GPXTrackPoint(3, 3), 2, 0, 2),
+        (0, 7.01, 7.01, GPXTrackPoint(4, 4), 3, 0, 3),
+        (1, 7.01, 7.01, GPXTrackPoint(7, 7), 2, 1, 2),
+    ],
+)
+def test_get_point_distance_in_segment(
+    segment_idx: int,
+    test_lat: float,
+    test_long: float,
+    exp_point: GPXTrackPoint,
+    exp_point_idx_abs: int,
+    exp_segment_idx: int,
+    exp_segment_point_idx: int,
+) -> None:
+    segment_1 = GPXTrackSegment()
+    segment_1.points = [
+        GPXTrackPoint(1, 1),
+        GPXTrackPoint(2, 2),
+        GPXTrackPoint(3, 3),
+        GPXTrackPoint(4, 4),
+    ]
+
+    segment_2 = GPXTrackSegment()
+    segment_2.points = [
+        GPXTrackPoint(5, 5),
+        GPXTrackPoint(6, 6),
+        GPXTrackPoint(7, 7),
+        GPXTrackPoint(8, 8),
+    ]
+
+    track = GPXTrack()
+    track.segments = [segment_1, segment_2]
+
+    res = get_point_distance(track, segment_idx, test_lat, test_long)
+
+    assert isinstance(res, PointDistance)
+
+    assert res.point.latitude == exp_point.latitude
+    assert res.point.longitude == exp_point.longitude
+    assert res.distance > 0
+    assert res.point_idx_abs == exp_point_idx_abs
+    assert res.segment_idx == exp_segment_idx
+    assert res.segment_point_idx == exp_segment_point_idx

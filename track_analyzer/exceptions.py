@@ -28,3 +28,7 @@ class GPXPointExtensionError(Exception):
 
 class VisualizationSetupError(Exception):
     pass
+
+
+class TrackAnalysisError(Exception):
+    pass

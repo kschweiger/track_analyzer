@@ -1,4 +1,5 @@
 import os
+from time import sleep
 
 import gpxpy
 import pytest
@@ -8,7 +9,7 @@ from track_analyzer.exceptions import APIResponseError
 
 
 @pytest.mark.skip("Currently not working. Also not the best option out there... ")
-def test_open_elevation_enhancer():
+def test_open_elevation_enhancer() -> None:
     enhancer = OpenElevationEnhancer()
 
     query_data = [(10, 10), (20, 20), (41.161758, -8.583933)]
@@ -19,14 +20,15 @@ def test_open_elevation_enhancer():
 
 
 @pytest.mark.skip("Currently not working. Also not the best option out there... ")
-def test_open_elevation_enhancer_api_exceptions():
+def test_open_elevation_enhancer_api_exceptions() -> None:
     enhancer = OpenElevationEnhancer()
 
     with pytest.raises(APIResponseError):
         enhancer.get_elevation_data([])
 
 
-def test_opentopo_elevation_enhancer():
+def test_opentopo_elevation_enhancer() -> None:
+    sleep(2)
     enhancer = OpenTopoElevationEnhancer()
 
     query_data = [(48.8588897, 2.320041), (41.161758, -8.583933)]
@@ -37,7 +39,8 @@ def test_opentopo_elevation_enhancer():
 
 
 @pytest.mark.skipif(os.environ.get("TEST_ENV") == "CI", reason="Not tested on CI")
-def test_opentopo_elevation_enhancer_splitting():
+def test_opentopo_elevation_enhancer_splitting() -> None:
+    sleep(2)
     enhancer = OpenTopoElevationEnhancer()
 
     query_data = [(48.8588897, 2.320041), (41.161758, -8.583933)]
@@ -47,7 +50,7 @@ def test_opentopo_elevation_enhancer_splitting():
     assert ret_data == [44.59263610839844, 113.41450500488281]
 
 
-def enhancer_test_track(mocker, inplace):
+def enhancer_test_track(mocker, inplace) -> None:
     enhancer = OpenTopoElevationEnhancer(skip_checks=True)
 
     mock_get_data = mocker.Mock()
@@ -70,7 +73,7 @@ def enhancer_test_track(mocker, inplace):
     return gpx_track, enhancer.enhance_track(gpx_track, inplace=inplace)
 
 
-def test_enhancer_enhance_track(mocker):
+def test_enhancer_enhance_track(mocker) -> None:
     orig_track, enhanced_track = enhancer_test_track(mocker, False)
 
     assert orig_track != enhanced_track
@@ -82,7 +85,7 @@ def test_enhancer_enhance_track(mocker):
     assert enhanced_track.segments[0].points[1].elevation == 275
 
 
-def test_enhancer_enhance_track_inplace(mocker):
+def test_enhancer_enhance_track_inplace(mocker) -> None:
     orig_track, enhanced_track = enhancer_test_track(mocker, True)
 
     assert orig_track == enhanced_track

@@ -14,7 +14,7 @@ from track_analyzer.visualize import (
 )
 
 
-def test_get_slope_colors():
+def test_get_slope_colors() -> None:
     colors = get_slope_colors("#0000FF", "#00FF00", "#00FF00", -5, 5)
 
     assert len(colors.keys()) == 11
@@ -23,18 +23,19 @@ def test_get_slope_colors():
     assert colors[5] == "#00FF00"
 
 
-def test_plot_track_with_slope():
+@pytest.mark.parametrize("n_segment", [0, None])
+def test_plot_track_with_slope(n_segment: None | int) -> None:
     resource_files = importlib.resources.files(resources)
 
     test_track = ByteTrack(
         (resource_files / "Freiburger_Münster_nach_Schau_Ins_Land.gpx").read_bytes()
     )
 
-    fig = plot_track_with_slope(test_track, 0)
+    fig = plot_track_with_slope(test_track, n_segment=n_segment)
 
     assert isinstance(fig, go.Figure)
 
-    fig = plot_track_with_slope(test_track, 0, intervals=1)
+    fig = plot_track_with_slope(test_track, n_segment=n_segment, intervals=1)
 
     assert isinstance(fig, go.Figure)
 
@@ -43,7 +44,7 @@ def test_plot_track_with_slope():
     "flag",
     [{"include_heartrate": True}, {"include_cadence": True}, {"include_power": True}],
 )
-def test_2d_plot_w_extensions(flag):
+def test_2d_plot_w_extensions(flag: dict[str, bool]) -> None:
     track = PyTrack(
         points=[(1, 1), (2, 2), (3, 3), (4, 4)],
         elevations=[100, 200, 220, 200],
@@ -70,7 +71,9 @@ def test_2d_plot_w_extensions(flag):
         },
     ],
 )
-def test_2d_plot_w_extensions_plot_mulitple_error(combinations):
+def test_2d_plot_w_extensions_plot_mulitple_error(
+    combinations: dict[str, bool]
+) -> None:
     with pytest.raises(VisualizationSetupError):
         plot_track_2d(pd.DataFrame({}), **combinations)
 
@@ -79,7 +82,7 @@ def test_2d_plot_w_extensions_plot_mulitple_error(combinations):
     "flag",
     [{"include_heartrate": True}, {"include_cadence": True}, {"include_power": True}],
 )
-def test_2d_plot_w_extensions_plot_no_data_error(flag):
+def test_2d_plot_w_extensions_plot_no_data_error(flag: dict[str, bool]) -> None:
     track = PyTrack(
         points=[(1, 1), (2, 2), (3, 3), (4, 4)],
         elevations=[100, 200, 220, 200],

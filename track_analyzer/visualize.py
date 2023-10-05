@@ -8,7 +8,10 @@ from plotly.graph_objs import Figure
 from plotly.subplots import make_subplots
 
 from track_analyzer.exceptions import VisualizationSetupError
-from track_analyzer.processing import get_processed_segment_data
+from track_analyzer.processing import (
+    get_processed_segment_data,
+    get_processed_track_data,
+)
 from track_analyzer.track import Track
 from track_analyzer.utils import center_geolocation, get_color_gradient
 
@@ -16,7 +19,11 @@ logger = logging.getLogger(__name__)
 
 
 def get_slope_colors(
-    color_min: str, color_neutral: str, color_max: str, min_slope=-16, max_slope=16
+    color_min: str,
+    color_neutral: str,
+    color_max: str,
+    min_slope: int = -16,
+    max_slope: int = 16,
 ) -> Dict[int, str]:
     """
     Generate a color gradient for the slope plots. The three passed colors are
@@ -217,9 +224,7 @@ def plot_track_3d(data: pd.DataFrame, strict_data_selection: bool = False) -> Fi
 
     data_for_plot = data[mask]
 
-    fig = px.line_3d(data_for_plot, x="latitude", y="longitude", z="elevation")
-
-    return fig
+    return px.line_3d(data_for_plot, x="latitude", y="longitude", z="elevation")
 
 
 def plot_track_on_map(
@@ -250,7 +255,7 @@ def plot_track_on_map(
 
 def plot_track_with_slope(
     track: Track,
-    n_segment: int,
+    n_segment: None | int,
     intervals: float = 200,
     slope_gradient_color: tuple[str, str, str] = ("#0000FF", "#00FF00", "#FF0000"),
     min_slope: int = -18,
@@ -263,19 +268,35 @@ def plot_track_with_slope(
         *slope_gradient_color, max_slope=max_slope, min_slope=min_slope
     )
 
-    segement = track.track.segments[n_segment]
+    if n_segment is None:
+        _track = track.track
 
-    if not segement.has_elevations():
-        logger.warning("Segement has no elevation")
-        return None
+        if not _track.has_elevations():
+            logger.warning("Track has no elevation")
+            return None
 
-    if track.get_avg_pp_distance_in_segment(n_segment) >= intervals:
-        logger.debug("Average pp distance larget than interval. Skipping reduction")
+        if track.get_avg_pp_distance() >= intervals:
+            logger.debug("Average pp distance larget than interval. Skipping reduction")
+        else:
+            _track = _track.clone()
+            _track.reduce_points(intervals)
+
+        _, _, _, _, data = get_processed_track_data(_track)
+
     else:
-        segement = track.track.segments[n_segment].clone()
-        segement.reduce_points(intervals)
+        segement = track.track.segments[n_segment]
 
-    _, _, _, _, data = get_processed_segment_data(segement)
+        if not segement.has_elevations():
+            logger.warning("Segement has no elevation")
+            return None
+
+        if track.get_avg_pp_distance_in_segment(n_segment) >= intervals:
+            logger.debug("Average pp distance larget than interval. Skipping reduction")
+        else:
+            segement = track.track.segments[n_segment].clone()
+            segement.reduce_points(intervals)
+
+        _, _, _, _, data = get_processed_segment_data(segement)
 
     data = data[data.moving]
 
