@@ -227,7 +227,7 @@ def plot_track_3d(data: pd.DataFrame, strict_data_selection: bool = False) -> Fi
     return px.line_3d(data_for_plot, x="latitude", y="longitude", z="elevation")
 
 
-def plot_track_on_map(
+def plot_track_line_on_map(
     data: pd.DataFrame,
     zoom: int = 13,
     height: None | int = None,
@@ -395,5 +395,5 @@ if __name__ == "__main__":
     data = track.get_segment_data(0)
 
     # fig = plot_track_2d(data, True)
-    fig = plot_track_on_map(data)
+    fig = plot_track_line_on_map(data)
     fig.show()
