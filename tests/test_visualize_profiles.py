@@ -7,11 +7,11 @@ import pytest
 from tests import resources
 from track_analyzer.exceptions import VisualizationSetupError
 from track_analyzer.track import ByteTrack, PyTrack
-from track_analyzer.visualize import (
-    get_slope_colors,
+from track_analyzer.visualize.profiles import (
     plot_track_2d,
     plot_track_with_slope,
 )
+from track_analyzer.visualize.utils import get_slope_colors
 
 
 def test_get_slope_colors() -> None:

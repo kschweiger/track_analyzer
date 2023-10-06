@@ -1,8 +1,6 @@
 import logging
-from typing import Dict
 
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 from plotly.graph_objs import Figure
 from plotly.subplots import make_subplots
@@ -13,38 +11,9 @@ from track_analyzer.processing import (
     get_processed_track_data,
 )
 from track_analyzer.track import Track
-from track_analyzer.utils import center_geolocation, get_color_gradient
+from track_analyzer.visualize.utils import get_slope_colors
 
 logger = logging.getLogger(__name__)
-
-
-def get_slope_colors(
-    color_min: str,
-    color_neutral: str,
-    color_max: str,
-    min_slope: int = -16,
-    max_slope: int = 16,
-) -> Dict[int, str]:
-    """
-    Generate a color gradient for the slope plots. The three passed colors are
-    used for the MIN_SLOPE point, the 0 point and the MAX_SLOPE value respectively
-
-
-    :param color_min: Color at the MIN_SLOPE value
-    :param color_neutral: Color at 0
-    :param color_max: Color at the MAX_SLOPE value
-    :param min_slope: Minimum slope of the gradient, defaults to -16
-    :param max_slope: Maximum slope of the gradient, defaults to 16
-    :return: Dict mapping between slopes and colors
-    """
-    neg_points = list(range(min_slope, 1))
-    pos_points = list(range(0, max_slope + 1))
-    neg_colors = get_color_gradient(color_min, color_neutral, len(neg_points))
-    pos_colors = get_color_gradient(color_neutral, color_max, len(pos_points))
-    colors = {}
-    colors.update({point: color for point, color in zip(neg_points, neg_colors)})
-    colors.update({point: color for point, color in zip(pos_points, pos_colors)})
-    return colors
 
 
 def plot_track_2d(
@@ -217,42 +186,6 @@ def plot_track_2d(
     return fig
 
 
-def plot_track_3d(data: pd.DataFrame, strict_data_selection: bool = False) -> Figure:
-    mask = data.moving
-    if strict_data_selection:
-        mask = mask & data.in_speed_percentile
-
-    data_for_plot = data[mask]
-
-    return px.line_3d(data_for_plot, x="latitude", y="longitude", z="elevation")
-
-
-def plot_track_line_on_map(
-    data: pd.DataFrame,
-    zoom: int = 13,
-    height: None | int = None,
-    width: None | int = None,
-) -> Figure:
-    mask = data.moving
-
-    center_lat, center_lon = center_geolocation(
-        [(r["latitude"], r["longitude"]) for r in data[mask].to_dict("records")]
-    )
-    fig = px.line_mapbox(
-        data[mask],
-        lat="latitude",
-        lon="longitude",
-        zoom=zoom,
-        center={"lon": center_lon, "lat": center_lat},
-        height=height,
-        width=width,
-    )
-    fig.update_layout(mapbox_style="open-street-map")
-    fig.update_layout(margin={"r": 57, "t": 0, "l": 49, "b": 0})
-
-    return fig
-
-
 def plot_track_with_slope(
     track: Track,
     n_segment: None | int,
@@ -382,18 +315,3 @@ def plot_track_with_slope(
     fig.update_xaxes(title_text="Distance [m]")
 
     return fig
-
-
-if __name__ == "__main__":
-    import sys
-
-    from track_analyzer.track import GPXFileTrack
-
-    file = sys.argv[1]
-
-    track = GPXFileTrack(file)
-    data = track.get_segment_data(0)
-
-    # fig = plot_track_2d(data, True)
-    fig = plot_track_line_on_map(data)
-    fig.show()
