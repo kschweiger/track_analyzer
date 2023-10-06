@@ -6,6 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.graph_objs import Figure
 
+from track_analyzer.exceptions import VisualizationSetupError
 from track_analyzer.utils import center_geolocation, get_color_gradient
 from track_analyzer.visualize.constants import (
     COLOR_GRADIENTS,
@@ -72,6 +73,21 @@ def plot_track_enriched_on_map(
 
     # ~~~~~~~~~~~ Generator colors for passed column ~~~~~~~~~~~~~~~~~
     color_column_values = plot_data[enrich_with_column]
+
+    if color_column_values.isna().all():
+        raise VisualizationSetupError(
+            f"Plotting not possible. No values for {enrich_with_column} in passed data."
+        )
+
+    if color_column_values.isna().any():
+        logger.warning(
+            "%s nan rows in %s. Dropping points",
+            color_column_values.isna().sum(),
+            enrich_with_column,
+        )
+        plot_data = plot_data[~color_column_values.isna()]
+        color_column_values = color_column_values[~color_column_values.isna()]
+
     if enrich_with_column == "speed":
         color_column_values = color_column_values * 3.6
     diff_abs = color_column_values.max() - color_column_values.min()
