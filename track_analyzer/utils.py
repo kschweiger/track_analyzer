@@ -493,3 +493,16 @@ def get_extended_track_point(
         this_point.extensions.append(ExtensionFieldElement(name=key, text=str(value)))
 
     return this_point
+
+
+def format_timedelta(td: timedelta) -> str:
+    seconds = td.seconds
+    hours = int(seconds / 3600)
+    seconds -= hours * 3600
+    minutes = int(seconds / 60)
+    seconds -= minutes * 60
+
+    if td.days > 0:
+        hours += 24 * td.days
+
+    return "{0:02d}:{1:02d}:{2:02d}".format(hours, minutes, seconds)

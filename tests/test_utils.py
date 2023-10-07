@@ -1,3 +1,4 @@
+from datetime import timedelta
 from math import asin, degrees, isclose
 
 import numpy as np
@@ -12,6 +13,7 @@ from track_analyzer.utils import (
     calc_elevation_metrics,
     center_geolocation,
     distance,
+    format_timedelta,
     get_color_gradient,
     get_distances,
     get_extension_value,
@@ -373,3 +375,20 @@ def test_get_point_distance_in_segment(
     assert res.point_idx_abs == exp_point_idx_abs
     assert res.segment_idx == exp_segment_idx
     assert res.segment_point_idx == exp_segment_point_idx
+
+
+@pytest.mark.parametrize(
+    ("td", "exp"),
+    [
+        (timedelta(seconds=86400), "24:00:00"),
+        (timedelta(seconds=3600), "01:00:00"),
+        (timedelta(seconds=60), "00:01:00"),
+        (timedelta(seconds=1), "00:00:01"),
+        (timedelta(seconds=3610), "01:00:10"),
+        (timedelta(seconds=121), "00:02:01"),
+        (timedelta(seconds=61), "00:01:01"),
+        (timedelta(seconds=86400 * 2), "48:00:00"),
+    ],
+)
+def test_format_timedelta(td: timedelta, exp: str) -> None:
+    assert format_timedelta(td) == exp

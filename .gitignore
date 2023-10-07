@@ -138,3 +138,5 @@ dmypy.json
 .vscode
 experiments
 .ruff_cache
+.coveragerc
+cov.xml
