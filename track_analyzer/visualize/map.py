@@ -1,13 +1,19 @@
 import logging
+from datetime import timedelta
 from typing import Literal
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.graph_objs import Figure
 
 from track_analyzer.exceptions import VisualizationSetupError
-from track_analyzer.utils import center_geolocation, get_color_gradient
+from track_analyzer.utils import (
+    center_geolocation,
+    format_timedelta,
+    get_color_gradient,
+)
 from track_analyzer.visualize.constants import (
     COLOR_GRADIENTS,
     DEFAULT_COLOR_GRADIENT,
@@ -167,6 +173,98 @@ def plot_track_enriched_on_map(
     fig.add_trace(colorbar_trace)
 
     fig.update_layout(mapbox_style="open-street-map")
+    fig.update_layout(
+        margin={"r": 57, "t": 5, "l": 49, "b": 5},
+        mapbox={
+            "style": "open-street-map",
+            "zoom": zoom,
+            "center": {"lon": center_lon, "lat": center_lat},
+        },
+        height=height,
+        hovermode="closest",
+        width=width,
+        showlegend=False,
+    )
+
+    return fig
+
+
+def plot_segments_on_map(
+    data: pd.DataFrame,
+    zoom: int = 13,
+    height: None | int = None,
+    width: None | int = None,
+    average_only: bool = True,
+) -> Figure:
+    mask = data.moving
+
+    plot_data = data[mask]
+
+    if "segment" not in plot_data.columns:
+        raise VisualizationSetupError(
+            "Data has no **segment** in columns. Required for plot"
+        )
+    if len(plot_data.segment.unique()) < 2:
+        raise VisualizationSetupError("Data does not have mulitple segments")
+
+    center_lat, center_lon = center_geolocation(
+        [(r["latitude"], r["longitude"]) for r in data[mask].to_dict("records")]
+    )
+
+    fig = go.Figure()
+    for i_segment, frame in plot_data.groupby(by="segment"):
+        mean_heartrate = frame.heartrate.agg("mean")
+        min_heartrate = frame.heartrate.agg("min")
+        max_heartrate = frame.heartrate.agg("max")
+
+        mean_speed = frame.speed.agg("mean") * 3.6
+        min_speed = frame.speed.agg("min") * 3.6
+        max_speed = frame.speed.agg("max") * 3.6
+
+        mean_power = frame.power.agg("mean")
+        min_power = frame.power.agg("min")
+        max_power = frame.power.agg("max")
+
+        distance = frame.distance.sum() / 1000
+        _total_time = frame.time.sum()  # in seconds
+        total_time = timedelta(seconds=int(_total_time.astype(int)))
+        min_elevation = frame.elevation.min()
+        max_elevation = frame.elevation.max()
+
+        text = (
+            f"<b>Segment {i_segment}</b><br>"
+            + f"<b>Distance</b>: {distance:.2f} km<br>"
+            + f"<b>Time</b>: {format_timedelta(total_time)}<br>"
+            + f"<b>Elevation</b>: &#8600; {min_elevation} m "
+            + f"&#8599; {max_elevation} m<br>"
+        )
+        if not np.isnan(mean_speed):
+            text += f"<b>Speed</b>: &#248; {mean_speed:.1f} "
+            if not average_only:
+                text += f" &#8600;{min_speed:.1f} &#8599;{max_speed:.1f} km/h <br>"
+            text += " km/h <br>"
+        if not np.isnan(mean_heartrate):
+            text += f"<b>Heartrate</b>: &#248; {int(mean_heartrate)} "
+            if not average_only:
+                text += f"&#8600;{int(min_heartrate)} &#8599;{int(max_heartrate)}<br>"
+            text += " bpm<br>"
+        if not np.isnan(mean_power):
+            text += f"<b>Power</b>: &#248; {mean_power:.1f} "
+            if not average_only:
+                text += f"&#8600;{min_power:.1f} &#8599;{max_power:.1f}<br>"
+            text += " W<br>"
+
+        fig.add_trace(
+            go.Scattermapbox(
+                lat=frame["latitude"],
+                lon=frame["longitude"],
+                mode="lines",
+                hovertemplate="%{text} ",
+                text=len(frame) * [text],
+                name="",
+            )
+        )
+
     fig.update_layout(
         margin={"r": 57, "t": 5, "l": 49, "b": 5},
         mapbox={

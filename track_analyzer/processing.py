@@ -80,6 +80,9 @@ def get_processed_segment_data(
         "heartrate": [],
         "cadence": [],
         "power": [],
+        "time": [],
+        "cum_time": [],
+        "cum_time_moving": [],
         "cum_distance": [],
         "cum_distance_moving": [],
         "cum_distance_stopped": [],
@@ -111,6 +114,9 @@ def get_processed_data_w_time(
 
     distance = 0.0
     stopped_distance = 0.0
+
+    cum_time = 0
+    cum_time_moving = 0
 
     cum_distance = 0
     cum_moving = 0
@@ -146,6 +152,10 @@ def get_processed_data_w_time(
                         data["moving"].append(True)
 
                     cum_distance += point_distance
+                    cum_time += seconds
+                    data["time"].append(seconds)
+                    data["cum_time"].append(cum_time)
+
                     data["cum_distance"].append(cum_distance)
                     data["cum_distance_moving"].append(cum_moving)
                     data["cum_distance_stopped"].append(cum_stopped)
@@ -159,8 +169,11 @@ def get_processed_data_w_time(
 
                     if not is_stopped:
                         data["speed"].append(point_distance / seconds)
+                        cum_time_moving += seconds
+                        data["cum_time_moving"].append(cum_time_moving)
                     else:
                         data["speed"].append(None)
+                        data["cum_time_moving"].append(None)
 
                     for key in ["heartrate", "cadence", "power"]:
                         try:
@@ -193,6 +206,9 @@ def get_processed_data_wo_time(
                 data["elevation"].append(None)
 
             cum_distance += point_distance
+            data["time"].append(None)
+            data["cum_time"].append(None)
+            data["cum_time_moving"].append(None)
             data["cum_distance"].append(cum_distance)
             data["cum_distance_moving"].append(cum_distance)
             data["cum_distance_stopped"].append(None)
