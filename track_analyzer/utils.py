@@ -1,5 +1,4 @@
 import logging
-from dataclasses import dataclass
 from datetime import datetime, timedelta
 from math import acos, asin, atan2, cos, degrees, pi, sin, sqrt
 from typing import Callable, Dict, Union
@@ -15,7 +14,7 @@ from track_analyzer.exceptions import (
     InvalidBoundsError,
     TrackAnalysisError,
 )
-from track_analyzer.model import ElevationMetrics, Position2D, Position3D
+from track_analyzer.model import ElevationMetrics, PointDistance, Position2D, Position3D
 
 logger = logging.getLogger(__name__)
 
@@ -24,15 +23,6 @@ class ExtensionFieldElement(Element):
     def __init__(self, name: str, text: str) -> None:
         super().__init__(name)
         self.text = text
-
-
-@dataclass
-class PointDistance:
-    point: GPXTrackPoint
-    distance: float
-    point_idx_abs: int
-    segment_idx: int
-    segment_point_idx: int
 
 
 def distance(pos1: Position2D, pos2: Position2D) -> float:

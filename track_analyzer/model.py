@@ -100,3 +100,12 @@ class SegmentOverlap:
         ret_str += " to ".join(point_strs)
 
         return ret_str
+
+
+@dataclass
+class PointDistance:
+    point: GPXTrackPoint
+    distance: float
+    point_idx_abs: int
+    segment_idx: int
+    segment_point_idx: int

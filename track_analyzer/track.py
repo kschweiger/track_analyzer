@@ -16,13 +16,12 @@ from track_analyzer.exceptions import (
     TrackInitializationError,
     TrackTransformationError,
 )
-from track_analyzer.model import Position3D, SegmentOverview
+from track_analyzer.model import PointDistance, Position3D, SegmentOverview
 from track_analyzer.processing import (
     get_processed_segment_data,
     get_processed_track_data,
 )
 from track_analyzer.utils import (
-    PointDistance,
     calc_elevation_metrics,
     get_extended_track_point,
     get_point_distance,

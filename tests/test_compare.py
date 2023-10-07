@@ -11,9 +11,9 @@ from track_analyzer.compare import (
     derive_plate_bins,
     get_segment_overlap,
 )
-from track_analyzer.model import Position2D, SegmentOverlap
+from track_analyzer.model import PointDistance, Position2D, SegmentOverlap
 from track_analyzer.track import PyTrack
-from track_analyzer.utils import PointDistance, distance
+from track_analyzer.utils import distance
 
 
 @pytest.mark.parametrize(

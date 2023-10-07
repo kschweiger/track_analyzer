@@ -5,11 +5,10 @@ import numpy as np
 import pytest
 from gpxpy.gpx import GPXTrack, GPXTrackPoint, GPXTrackSegment
 
-from track_analyzer.model import Position2D, Position3D
+from track_analyzer.model import PointDistance, Position2D, Position3D
 from track_analyzer.track import PyTrack
 from track_analyzer.utils import (
     ExtensionFieldElement,
-    PointDistance,
     calc_elevation_metrics,
     center_geolocation,
     distance,
