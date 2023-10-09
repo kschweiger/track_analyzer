@@ -7,6 +7,37 @@ from track_analyzer.exceptions import GPXPointExtensionError
 from track_analyzer.utils import get_extension_value
 
 
+def _recalc_cumulated_columns(data: pd.DataFrame) -> pd.DataFrame:
+    data = data.copy()
+    data.cum_time = data.time.cumsum()
+    data.cum_distance = data.distance.cumsum()
+
+    cum_time_moving = []
+    cum_distance_moving = []
+    cum_distance_stopped = []
+    for idx, rcrd in enumerate(data.to_dict("records")):
+        if idx == 0:
+            cum_time_moving.append(rcrd["time"] if rcrd["moving"] else 0)
+            cum_distance_moving.append(rcrd["distance"] if rcrd["moving"] else 0)
+            cum_distance_stopped.append(0 if rcrd["moving"] else rcrd["distance"])
+        else:
+            cum_time_moving.append(
+                cum_time_moving[-1] + (rcrd["time"] if rcrd["moving"] else 0)
+            )
+            cum_distance_moving.append(
+                cum_distance_moving[-1] + (rcrd["distance"] if rcrd["moving"] else 0)
+            )
+            cum_distance_stopped.append(
+                cum_distance_stopped[-1] + (0 if rcrd["moving"] else rcrd["distance"])
+            )
+
+    data.cum_time_moving = cum_time_moving
+    data.cum_distance_moving = cum_distance_moving
+    data.cum_distance_stopped = cum_distance_stopped
+
+    return data
+
+
 def get_processed_track_data(
     track: GPXTrack,
     stopped_speed_threshold: float = 1,
@@ -42,6 +73,9 @@ def get_processed_track_data(
     # Not really possible but keeps linters happy
     if track_data is None:
         raise RuntimeError("Track has no segments")
+
+    # Recalculate all cumulated columns over the segments
+    track_data = _recalc_cumulated_columns(track_data)
 
     return (
         track_time,
