@@ -1,10 +1,15 @@
-from typing import Any, Dict, Union
+import logging
+from datetime import timedelta
+from typing import Any, Callable, Dict, Literal, Union
 
+import numpy as np
 import pandas as pd
 from gpxpy.gpx import GPXTrack, GPXTrackSegment
 
 from track_analyzer.exceptions import GPXPointExtensionError
 from track_analyzer.utils import get_extension_value
+
+logger = logging.getLogger(__name__)
 
 
 def _recalc_cumulated_columns(data: pd.DataFrame) -> pd.DataFrame:
@@ -12,13 +17,13 @@ def _recalc_cumulated_columns(data: pd.DataFrame) -> pd.DataFrame:
     data.cum_time = data.time.cumsum()
     data.cum_distance = data.distance.cumsum()
 
-    cum_time_moving: list[None | float] = []
+    cum_time_moving: list[None] | list[float] = []
     cum_distance_moving = []
     cum_distance_stopped = []
     for idx, rcrd in enumerate(data.to_dict("records")):
         if idx == 0:
             if rcrd["time"] is None:
-                cum_time_moving.append(None)
+                cum_time_moving.append(None)  # type: ignore
             else:
                 cum_time_moving.append(rcrd["time"] if rcrd["moving"] else 0)
 
@@ -26,7 +31,7 @@ def _recalc_cumulated_columns(data: pd.DataFrame) -> pd.DataFrame:
             cum_distance_stopped.append(0 if rcrd["moving"] else rcrd["distance"])
         else:
             if rcrd["time"] is None:
-                cum_time_moving.append(None)
+                cum_time_moving.append(None)  # type: ignore
             else:
                 cum_time_moving.append(
                     cum_time_moving[-1] + (rcrd["time"] if rcrd["moving"] else 0)
@@ -264,3 +269,73 @@ def get_processed_data_wo_time(
                     data[key].append(None)
 
     return distance, data
+
+
+def split_data_by_time(
+    data: pd.DataFrame,
+    split_at: timedelta,
+    moving_only: bool = True,
+    method: Literal["first", "closest", "interploation"] = "closest",
+) -> pd.DataFrame:
+    return split_data(
+        data=data,
+        split_by="time",
+        split_at=split_at.total_seconds(),
+        moving_only=moving_only,
+        method=method,
+    )
+
+
+def split_data(
+    data: pd.DataFrame,
+    split_by: Literal["distance", "time"],
+    split_at: float,
+    moving_only: bool = True,
+    method: Literal["first", "closest", "interploation"] = "closest",
+) -> pd.DataFrame:
+    split_idx_finder: Callable[[pd.Series, float], int]
+    if method == "closest":
+        split_idx_finder = lambda s, v: np.abs(s.to_numpy() - v).argmin()
+    # TODO: Implement method in which the plotting point is interpolat to the ecxat val
+    elif method == "interploation":
+        raise NotImplementedError("Interploation splitting method not implemented")
+    else:
+        split_idx_finder = lambda s, v: s[s < v].index.max()
+
+    data = data.copy()
+
+    if split_by == "distance":
+        column = "cum_distance_moving" if moving_only else "cum_distance"
+    else:
+        column = "cum_time_moving" if moving_only else "cum_time"
+
+    max_value = data[column].max()
+
+    if split_at > max_value:
+        logger.warning(
+            "Data can not be split further by %s with passed value %s",
+            split_by,
+            split_at,
+        )
+        return data
+
+    split_vals = [split_at]
+    while split_vals[-1] < max_value:
+        split_vals.append(split_vals[-1] + split_at)
+
+    split_vals = split_vals[:-1]
+
+    logger.debug("Splitting into %s segments", len(split_vals))
+
+    last_split = 0
+    i_segement = 0
+    for val in split_vals:
+        split_idx = split_idx_finder(data[column], val)
+        data.loc[last_split:split_idx, "segment"] = i_segement
+        last_split = split_idx + 1
+        i_segement += 1
+
+    if last_split != data.index.max() + 1:
+        data.loc[last_split : data.index.max() + 1, "segment"] = i_segement
+
+    return data

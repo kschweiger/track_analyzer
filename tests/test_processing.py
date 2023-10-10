@@ -1,8 +1,14 @@
+from datetime import timedelta
+from typing import Literal
+
 import pandas as pd
+import pytest
 
 from track_analyzer.processing import (
     _recalc_cumulated_columns,
     get_processed_track_data,
+    split_data,
+    split_data_by_time,
 )
 from track_analyzer.track import Track
 
@@ -57,3 +63,62 @@ def test_recalc_cumulated_columns() -> None:
     )
 
     assert ret_data.cum_time_moving.iloc[-1] == ret_data[ret_data.moving].time.sum()
+
+
+# NOTE: expected value depends on track_for_test fixture. Keep in mind if fixture is
+# NOTE: changed and this tests fails afterwards
+@pytest.mark.parametrize("method", ["first", "closest"])
+@pytest.mark.parametrize(
+    ("split_by", "split_at", "moving_only"),
+    [
+        ("distance", 100, True),
+        ("distance", 100, False),
+        ("time", 100, True),
+        ("time", 100, False),
+    ],
+)
+def test_split_data(
+    track_for_test: Track,
+    split_by: Literal["distance", "time"],
+    split_at: float,
+    moving_only: bool,
+    method: Literal["first", "closest", "interploation"],
+) -> None:
+    data = track_for_test.get_track_data()
+
+    ret_data = split_data(
+        data,
+        split_at=split_at,
+        split_by=split_by,
+        moving_only=moving_only,
+        method=method,
+    )
+
+    if moving_only:
+        comp_col = (
+            "cum_distance_moving" if split_by == "distance" else "cum_time_moving"
+        )
+    else:
+        comp_col = "cum_distance" if split_by == "distance" else "cum_time"
+
+    assert not ret_data.compare(data).empty
+
+    assert (
+        len(ret_data.segment.unique()) == (ret_data[comp_col].iloc[-1] // split_at) + 1
+    )
+
+
+def test_split_data_unity(track_for_test: Track) -> None:
+    data = track_for_test.get_track_data()
+
+    ret_data = split_data(data, split_by="distance", split_at=10_000)
+
+    assert ret_data.compare(data).empty
+
+
+def test_split_data_by_time(track_for_test: Track) -> None:
+    data = track_for_test.get_track_data()
+
+    ret_data = split_data_by_time(data, split_at=timedelta(seconds=100))
+
+    assert not ret_data.compare(data).empty
