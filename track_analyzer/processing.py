@@ -12,18 +12,26 @@ def _recalc_cumulated_columns(data: pd.DataFrame) -> pd.DataFrame:
     data.cum_time = data.time.cumsum()
     data.cum_distance = data.distance.cumsum()
 
-    cum_time_moving = []
+    cum_time_moving: list[None | float] = []
     cum_distance_moving = []
     cum_distance_stopped = []
     for idx, rcrd in enumerate(data.to_dict("records")):
         if idx == 0:
-            cum_time_moving.append(rcrd["time"] if rcrd["moving"] else 0)
+            if rcrd["time"] is None:
+                cum_time_moving.append(None)
+            else:
+                cum_time_moving.append(rcrd["time"] if rcrd["moving"] else 0)
+
             cum_distance_moving.append(rcrd["distance"] if rcrd["moving"] else 0)
             cum_distance_stopped.append(0 if rcrd["moving"] else rcrd["distance"])
         else:
-            cum_time_moving.append(
-                cum_time_moving[-1] + (rcrd["time"] if rcrd["moving"] else 0)
-            )
+            if rcrd["time"] is None:
+                cum_time_moving.append(None)
+            else:
+                cum_time_moving.append(
+                    cum_time_moving[-1] + (rcrd["time"] if rcrd["moving"] else 0)
+                )
+
             cum_distance_moving.append(
                 cum_distance_moving[-1] + (rcrd["distance"] if rcrd["moving"] else 0)
             )
