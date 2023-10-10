@@ -1,3 +1,36 @@
+##  (2023-10-10)
+
+* build: Bumped version to 0.4.0 :bookmark: ([1e78b80](https://github.com/kschweiger/track_analyzer/commit/1e78b80))
+* feat: Added method to get overall track DataFrame ([5881dd1](https://github.com/kschweiger/track_analyzer/commit/5881dd1))
+* feat: Added plot method for shown different segments in track with segment metrics ([b88a9d2](https://github.com/kschweiger/track_analyzer/commit/b88a9d2))
+* feat: Added plot that shows track on map and enriches the visualization with an additonal metric ([036cfe0](https://github.com/kschweiger/track_analyzer/commit/036cfe0))
+* feat: Added track overview ([731d1ab](https://github.com/kschweiger/track_analyzer/commit/731d1ab))
+* feat: Implemented splitting function ([429763d](https://github.com/kschweiger/track_analyzer/commit/429763d))
+* feat(plot_track_enriched_on_map): Deal with nan's in data used to enrich plot ([ba16c33](https://github.com/kschweiger/track_analyzer/commit/ba16c33))
+* feat(plot_track_with_slope): Function can be run for segments of full tracks ([1a4cc29](https://github.com/kschweiger/track_analyzer/commit/1a4cc29))
+* feat(Track): Added add_segment method ([8c30cb6](https://github.com/kschweiger/track_analyzer/commit/8c30cb6))
+* fix: Fixed issue with cumulative values in precessed track data with multiple segments ([8123a53](https://github.com/kschweiger/track_analyzer/commit/8123a53))
+* fix(_recalc_cumulated_columns): Method did not consider data w/o time entries ([eab717b](https://github.com/kschweiger/track_analyzer/commit/eab717b))
+* refactor: Moved logic for generating the processed track data to processing.py and adapted Track cod ([0f042d0](https://github.com/kschweiger/track_analyzer/commit/0f042d0))
+* refactor: Moved plot method to sub-package ([7a5d6d1](https://github.com/kschweiger/track_analyzer/commit/7a5d6d1))
+* refactor: Moved PointDistance to model.py ([5590f5e](https://github.com/kschweiger/track_analyzer/commit/5590f5e))
+* refactor: processed data are private attributes ([40a353d](https://github.com/kschweiger/track_analyzer/commit/40a353d))
+* refactor: Renamed plot_track_on_map to plot_track_line_on_map ([7997d37](https://github.com/kschweiger/track_analyzer/commit/7997d37))
+* refactor(get_point_distance): Generalized get_point_distance_in_segment for tracks and renamed metho ([9dbc0b7](https://github.com/kschweiger/track_analyzer/commit/9dbc0b7))
+* test: Added test for interactive plots ([a1f7397](https://github.com/kschweiger/track_analyzer/commit/a1f7397))
+* test: Adding test for map visualization methods ([8a80298](https://github.com/kschweiger/track_analyzer/commit/8a80298))
+* doc: Added documentation for public Track methods ([ea06619](https://github.com/kschweiger/track_analyzer/commit/ea06619))
+
+
+
+## <small>0.3.2 (2023-09-03)</small>
+
+* doc: Updated CHANGELOG.md :memo: ([5b3c1a7](https://github.com/kschweiger/track_analyzer/commit/5b3c1a7))
+* build: Bumped version to 0.3.2 :bookmark: ([9575242](https://github.com/kschweiger/track_analyzer/commit/9575242))
+* refactor! : Color of additional trace in plot_track_2d can be changed for all. Renamed color_velocit ([00e7264](https://github.com/kschweiger/track_analyzer/commit/00e7264))
+
+
+
 ##  (2023-09-03)
 
 * build: Bumped version to 0.3.2 :bookmark: ([9575242](https://github.com/kschweiger/track_analyzer/commit/9575242))
