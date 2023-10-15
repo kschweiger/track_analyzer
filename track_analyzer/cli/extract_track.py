@@ -1,6 +1,6 @@
 import click
 
-from track_analyzer.track import FITFileTrack
+from track_analyzer.track import FITTrack
 
 
 @click.command()
@@ -11,13 +11,13 @@ from track_analyzer.track import FITFileTrack
 @click.option(
     "--email", help="Optinally set the eMail property in the output file", default=None
 )
-def main(filename: str, name: None | str, email: None | str):
+def main(filename: str, name: None | str, email: None | str) -> None:
     """
     Extract the track information for FILENAME file in fit format and
     save to regular gpx file
     """
     click.echo("Extracting track from %s" % filename)
-    track = FITFileTrack(filename)
+    track = FITTrack(filename)
 
     out_file_name = filename.replace(".fit", "") + ".gpx"
     click.echo("Writing file %s" % out_file_name)

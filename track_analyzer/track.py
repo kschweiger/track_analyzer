@@ -703,10 +703,10 @@ class SegmentTrack(Track):
 
 
 @final
-class FITFileTrack(Track):
+class FITTrack(Track):
     def __init__(
         self,
-        fit_file: str,
+        source: str | bytes,
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
     ) -> None:
@@ -719,10 +719,13 @@ class FITFileTrack(Track):
             max_speed_percentile=max_speed_percentile,
         )
 
-        logger.info("Loading gpx track from file %s", fit_file)
+        if isinstance(source, str):
+            logger.info("Loading fit track from file %s", source)
+        else:
+            logger.info("Using passed bytes data as fit track")
 
         fit_data = FitFile(
-            fit_file,
+            source,
             data_processor=StandardUnitsDataProcessor(),
         )
 
