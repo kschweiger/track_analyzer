@@ -9,16 +9,16 @@ import plotly.graph_objects as go
 from plotly.graph_objs import Figure
 
 from track_analyzer.exceptions import VisualizationSetupError
-from track_analyzer.utils import (
+from track_analyzer.utils.base import (
     center_geolocation,
     format_timedelta,
-    get_color_gradient,
 )
 from track_analyzer.visualize.constants import (
     COLOR_GRADIENTS,
     DEFAULT_COLOR_GRADIENT,
     ENRICH_UNITS,
 )
+from track_analyzer.visualize.utils import get_color_gradient
 
 logger = logging.getLogger(__name__)
 

@@ -3,29 +3,38 @@ from __future__ import annotations
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Dict, Sequence, final
+from typing import Dict, Literal, Sequence, final
 
 import gpxpy
 import numpy as np
 import pandas as pd
 from fitparse import DataMessage, FitFile, StandardUnitsDataProcessor
 from gpxpy.gpx import GPX, GPXTrack, GPXTrackSegment
+from plotly.graph_objs.graph_objs import Figure
 
 from track_analyzer.compare import get_segment_overlap
 from track_analyzer.exceptions import (
     TrackInitializationError,
     TrackTransformationError,
+    VisualizationSetupError,
 )
 from track_analyzer.model import PointDistance, Position3D, SegmentOverview
 from track_analyzer.processing import (
     get_processed_segment_data,
     get_processed_track_data,
 )
-from track_analyzer.utils import (
+from track_analyzer.utils.base import (
     calc_elevation_metrics,
     get_extended_track_point,
     get_point_distance,
     interpolate_segment,
+)
+from track_analyzer.visualize import (
+    plot_segments_on_map,
+    plot_track_2d,
+    plot_track_enriched_on_map,
+    plot_track_line_on_map,
+    plot_track_with_slope,
 )
 
 logger = logging.getLogger(__name__)
@@ -465,6 +474,60 @@ class Track(ABC):
                 )
             )
         return matched_tracks
+
+    def plot(
+        self,
+        kind: Literal[
+            "profile", "profile-slope", "map-line", "map-line-enhanced", "map-segments"
+        ],
+        *,
+        segment: None | int = None,
+        **kwargs,
+    ) -> Figure:
+        valid_kinds = [
+            "profile",
+            "profile-slope",
+            "map-line",
+            "map-line-enhanced",
+            "map-segments",
+        ]
+
+        require_elevation = ["profile", "profile-slope"]
+        if kind not in valid_kinds:
+            raise VisualizationSetupError(
+                f"Kind {kind} is not valid. Pass on of {','.join(valid_kinds)}"
+            )
+
+        if segment is None:
+            from track_analyzer.utils.track import extract_track_data_for_plot
+
+            data = extract_track_data_for_plot(
+                track=self, kind=kind, require_elevation=require_elevation, **kwargs
+            )
+        else:
+            from track_analyzer.utils.track import extract_segment_data_for_plot
+
+            data = extract_segment_data_for_plot(
+                track=self,
+                segment=segment,
+                kind=kind,
+                require_elevation=require_elevation,
+                **kwargs,
+            )
+
+        fig: Figure
+        if kind == "profile":
+            fig = plot_track_2d(data=data, **kwargs)
+        elif kind == "profile-slope":
+            fig = plot_track_with_slope(data=data, **kwargs)
+        elif kind == "map-line":
+            fig = plot_track_line_on_map(data=data, **kwargs)
+        elif kind == "map-line-enhanced":
+            fig = plot_track_enriched_on_map(data=data, **kwargs)
+        else:
+            fig = plot_segments_on_map(data=data, **kwargs)
+
+        return fig
 
 
 @final

@@ -1,9 +1,37 @@
 import logging
 from typing import Dict
 
-from track_analyzer.utils import get_color_gradient
+import numpy as np
 
 logger = logging.getLogger(__name__)
+
+
+def hex_to_rgb(hex: str) -> tuple[int, int, int]:
+    """
+    Pass a hex color name (as string) and get the RGB value
+
+    Source: https://medium.com/@BrendanArtley/matplotlib-color-gradients-21374910584b
+
+    >> hex_to_RGB("#FFFFFF") -> [255,255,255]
+    """
+    return tuple([int(hex[i : i + 2], 16) for i in range(1, 6, 2)])  # type: ignore
+
+
+def get_color_gradient(c1: str, c2: str, n: int) -> list[str]:
+    """
+    Create a color gradient between two passed colors with N steps.
+
+    Source: https://medium.com/@BrendanArtley/matplotlib-color-gradients-21374910584b
+    """
+    assert n > 1
+    c1_rgb = np.array(hex_to_rgb(c1)) / 255
+    c2_rgb = np.array(hex_to_rgb(c2)) / 255
+    mix_pcts = [x / (n - 1) for x in range(n)]
+    rgb_colors = [((1 - mix) * c1_rgb + (mix * c2_rgb)) for mix in mix_pcts]
+    return [
+        ("#" + "".join([format(int(round(val * 255)), "02x") for val in item])).upper()
+        for item in rgb_colors
+    ]
 
 
 def get_slope_colors(
