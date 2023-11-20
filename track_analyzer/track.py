@@ -482,8 +482,33 @@ class Track(ABC):
         ],
         *,
         segment: None | int = None,
+        reduce_pp_intervals: None | int = None,
         **kwargs,
     ) -> Figure:
+        """
+        Visualize the full track or a single segment.
+        profile: Elevation profile of the track. May be enhanced with additional
+        information like Velocity, Heartrate, Cadence, and Power. Pass keyword args
+        for track_analyzer.visualize.plot_track_2d
+        profile-slope: Elevation profile with slopes between points. Use the
+        reduce_pp_intervals argument to reduce the number of slope intervals.
+        Pass keyword args for track_analyzer.visualize.plot_track_with_slope
+        map-line: Visualize coordinates on the map
+        Pass keyword args for track_analyzer.visualize.plot_track_line_on_map
+        map-line-enhanced: Visualize coordinates on the map. Enhance with additional
+        information like Elevation, Velocity, Heartrate, Cadence, and Power.
+        Pass keyword args for track_analyzer.visualize.plot_track_enriched_on_map
+        map-segments: Visualize coordinates on the map split into segments.
+        Pass keyword args for track_analyzer.visualize.plot_segments_on_map
+
+        :param kind: Kind of plot, choose from profile, profile-slope, map-line,
+        map-line-enhanced, map-segments
+        :param segment: Select a specific segment, defaults to None
+        :param reduce_pp_intervals: Optionally pass a distance in m which is used to
+        reduce the points in a track, defaults to None
+        :raises VisualizationSetupError: If the plot prequisites are not met
+        :return: Figure (plotly)
+        """
         valid_kinds = [
             "profile",
             "profile-slope",
@@ -502,7 +527,10 @@ class Track(ABC):
             from track_analyzer.utils.track import extract_track_data_for_plot
 
             data = extract_track_data_for_plot(
-                track=self, kind=kind, require_elevation=require_elevation, **kwargs
+                track=self,
+                kind=kind,
+                require_elevation=require_elevation,
+                intervals=reduce_pp_intervals,
             )
         else:
             from track_analyzer.utils.track import extract_segment_data_for_plot
@@ -512,7 +540,7 @@ class Track(ABC):
                 segment=segment,
                 kind=kind,
                 require_elevation=require_elevation,
-                **kwargs,
+                intervals=reduce_pp_intervals,
             )
 
         fig: Figure
