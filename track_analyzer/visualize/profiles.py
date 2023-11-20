@@ -6,11 +6,6 @@ from plotly.graph_objs import Figure
 from plotly.subplots import make_subplots
 
 from track_analyzer.exceptions import VisualizationSetupError
-from track_analyzer.processing import (
-    get_processed_segment_data,
-    get_processed_track_data,
-)
-from track_analyzer.track import Track
 from track_analyzer.visualize.utils import get_slope_colors
 
 logger = logging.getLogger(__name__)
@@ -18,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 def plot_track_2d(
     data: pd.DataFrame,
+    *,
     include_velocity: bool = False,
     include_heartrate: bool = False,
     include_cadence: bool = False,
@@ -30,6 +26,7 @@ def plot_track_2d(
     color_additional_trace: None | str = None,
     color_poi: None | str = None,
     slider: bool = False,
+    **kwargs,
 ) -> Figure:
     if (
         sum(
@@ -52,6 +49,9 @@ def plot_track_2d(
         mask = mask & data.in_speed_percentile
 
     data_for_plot = data[mask]
+
+    if data_for_plot.elevation.isna().all():
+        raise VisualizationSetupError("Can not plot profile w/o elevation information")
 
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     fig.add_trace(
@@ -187,51 +187,24 @@ def plot_track_2d(
 
 
 def plot_track_with_slope(
-    track: Track,
-    n_segment: None | int,
-    intervals: float = 200,
+    data: pd.DataFrame,
+    *,
     slope_gradient_color: tuple[str, str, str] = ("#0000FF", "#00FF00", "#FF0000"),
     min_slope: int = -18,
     max_slope: int = 18,
     height: None | int = 600,
     width: None | int = 1800,
     slider: bool = False,
-) -> None | Figure:
+    **kwargs,
+) -> Figure:
     slope_color_map = get_slope_colors(
         *slope_gradient_color, max_slope=max_slope, min_slope=min_slope
     )
 
-    if n_segment is None:
-        _track = track.track
-
-        if not _track.has_elevations():
-            logger.warning("Track has no elevation")
-            return None
-
-        if track.get_avg_pp_distance() >= intervals:
-            logger.debug("Average pp distance larget than interval. Skipping reduction")
-        else:
-            _track = _track.clone()
-            _track.reduce_points(intervals)
-
-        _, _, _, _, data = get_processed_track_data(_track)
-
-    else:
-        segement = track.track.segments[n_segment]
-
-        if not segement.has_elevations():
-            logger.warning("Segement has no elevation")
-            return None
-
-        if track.get_avg_pp_distance_in_segment(n_segment) >= intervals:
-            logger.debug("Average pp distance larget than interval. Skipping reduction")
-        else:
-            segement = track.track.segments[n_segment].clone()
-            segement.reduce_points(intervals)
-
-        _, _, _, _, data = get_processed_segment_data(segement)
-
     data = data[data.moving]
+
+    if data.elevation.isna().all():
+        raise VisualizationSetupError("Can not plot profile w/o elevation information")
 
     elevations = data.elevation.to_list()
     diff_elevation = [0]

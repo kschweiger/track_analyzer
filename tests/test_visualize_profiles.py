@@ -30,12 +30,12 @@ def test_plot_track_with_slope(n_segment: None | int) -> None:
     test_track = ByteTrack(
         (resource_files / "Freiburger_Münster_nach_Schau_Ins_Land.gpx").read_bytes()
     )
+    if n_segment is None:
+        data = test_track.get_track_data()
+    else:
+        data = test_track.get_segment_data(n_segment=n_segment)
 
-    fig = plot_track_with_slope(test_track, n_segment=n_segment)
-
-    assert isinstance(fig, go.Figure)
-
-    fig = plot_track_with_slope(test_track, n_segment=n_segment, intervals=1)
+    fig = plot_track_with_slope(data)
 
     assert isinstance(fig, go.Figure)
 

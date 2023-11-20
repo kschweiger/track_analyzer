@@ -25,9 +25,11 @@ logger = logging.getLogger(__name__)
 
 def plot_track_line_on_map(
     data: pd.DataFrame,
+    *,
     zoom: int = 13,
     height: None | int = None,
     width: None | int = None,
+    **kwargs,
 ) -> Figure:
     mask = data.moving
 
@@ -51,13 +53,17 @@ def plot_track_line_on_map(
 
 def plot_track_enriched_on_map(
     data: pd.DataFrame,
-    enrich_with_column: Literal["elevation", "speed", "heartrate", "cadence", "power"],
+    *,
+    enrich_with_column: Literal[
+        "elevation", "speed", "heartrate", "cadence", "power"
+    ] = "elevation",
     zoom: int = 13,
     height: None | int = None,
     width: None | int = None,
     overwrite_color_gradient: None | tuple[str, str] = None,
     overwrite_unit_text: None | str = None,
     cbar_ticks: int = 5,
+    **kwargs,
 ) -> Figure:
     mask = data.moving
 
@@ -191,10 +197,12 @@ def plot_track_enriched_on_map(
 
 def plot_segments_on_map(
     data: pd.DataFrame,
+    *,
     zoom: int = 13,
     height: None | int = None,
     width: None | int = None,
     average_only: bool = True,
+    **kwargs,
 ) -> Figure:
     mask = data.moving
 
