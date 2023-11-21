@@ -113,7 +113,7 @@ def plot_track_enriched_on_map(
         else:
             color_min, color_max = DEFAULT_COLOR_GRADIENT
     color_map = pd.Series(
-        data=get_color_gradient(color_min, color_max, int(diff_abs) + 1),
+        data=get_color_gradient(color_min, color_max, round(diff_abs) + 1),
         index=range(int(color_column_values.min()), int(color_column_values.max()) + 1),
     )
 

@@ -201,7 +201,7 @@ def plot_track_with_slope(
         *slope_gradient_color, max_slope=max_slope, min_slope=min_slope
     )
 
-    data = data[data.moving]
+    data = data[data.moving].copy()
 
     if data.elevation.isna().all():
         raise VisualizationSetupError("Can not plot profile w/o elevation information")
