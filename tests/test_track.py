@@ -454,18 +454,26 @@ def test_track_data(
     assert set(data_track_post_add_seg.segment.unique()) == {0, 1}
 
 
+@pytest.mark.parametrize("intervals", [None, 1, 200])
 @pytest.mark.parametrize("segment", [None, 0])
 @pytest.mark.parametrize(
     "kind",
-    ["profile", "profile-slope", "map-line", "map-line-enhanced"],
+    [
+        "profile",
+        "profile-slope",
+        "map-line",
+        "map-line-enhanced",
+        # "map-segments" # TODO: Add test once segment splitting is implemented
+    ],
 )
-def test_plot_segment_indepenent(segment: int | None, kind: str) -> None:
+def test_plot_segment_indepenent(
+    intervals: int | None, segment: int | None, kind: str
+) -> None:
     resource_files = importlib.resources.files(resources)
 
     track = ByteTrack(
         (resource_files / "Freiburger_Münster_nach_Schau_Ins_Land.gpx").read_bytes()
     )
 
-    fig = track.plot(kind, segment=segment)
-
+    fig = track.plot(kind, segment=segment, reduce_pp_intervals=intervals)
     assert isinstance(fig, Figure)
