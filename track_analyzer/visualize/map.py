@@ -9,25 +9,27 @@ import plotly.graph_objects as go
 from plotly.graph_objs import Figure
 
 from track_analyzer.exceptions import VisualizationSetupError
-from track_analyzer.utils import (
+from track_analyzer.utils.base import (
     center_geolocation,
     format_timedelta,
-    get_color_gradient,
 )
 from track_analyzer.visualize.constants import (
     COLOR_GRADIENTS,
     DEFAULT_COLOR_GRADIENT,
     ENRICH_UNITS,
 )
+from track_analyzer.visualize.utils import get_color_gradient
 
 logger = logging.getLogger(__name__)
 
 
 def plot_track_line_on_map(
     data: pd.DataFrame,
+    *,
     zoom: int = 13,
     height: None | int = None,
     width: None | int = None,
+    **kwargs,
 ) -> Figure:
     mask = data.moving
 
@@ -51,13 +53,17 @@ def plot_track_line_on_map(
 
 def plot_track_enriched_on_map(
     data: pd.DataFrame,
-    enrich_with_column: Literal["elevation", "speed", "heartrate", "cadence", "power"],
+    *,
+    enrich_with_column: Literal[
+        "elevation", "speed", "heartrate", "cadence", "power"
+    ] = "elevation",
     zoom: int = 13,
     height: None | int = None,
     width: None | int = None,
     overwrite_color_gradient: None | tuple[str, str] = None,
     overwrite_unit_text: None | str = None,
     cbar_ticks: int = 5,
+    **kwargs,
 ) -> Figure:
     mask = data.moving
 
@@ -107,7 +113,7 @@ def plot_track_enriched_on_map(
         else:
             color_min, color_max = DEFAULT_COLOR_GRADIENT
     color_map = pd.Series(
-        data=get_color_gradient(color_min, color_max, int(diff_abs) + 1),
+        data=get_color_gradient(color_min, color_max, round(diff_abs) + 1),
         index=range(int(color_column_values.min()), int(color_column_values.max()) + 1),
     )
 
@@ -191,10 +197,12 @@ def plot_track_enriched_on_map(
 
 def plot_segments_on_map(
     data: pd.DataFrame,
+    *,
     zoom: int = 13,
     height: None | int = None,
     width: None | int = None,
     average_only: bool = True,
+    **kwargs,
 ) -> Figure:
     mask = data.moving
 

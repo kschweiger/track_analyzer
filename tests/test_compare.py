@@ -13,7 +13,7 @@ from track_analyzer.compare import (
 )
 from track_analyzer.model import PointDistance, Position2D, SegmentOverlap
 from track_analyzer.track import PyTrack
-from track_analyzer.utils import distance
+from track_analyzer.utils.base import distance
 
 
 @pytest.mark.parametrize(
@@ -29,7 +29,9 @@ from track_analyzer.utils import distance
         ([(2, 1), (2.2, 1), (2.4, 1), (2.6, 1)], False),
     ],
 )
-def test_check_segment_bound_overlap(compare_points, result) -> None:
+def test_check_segment_bound_overlap(
+    compare_points: list[tuple[float, float]], result: bool
+) -> None:
     reference_points = [(1, 1), (1.5, 1.5), (2, 2)]
 
     reference_segment = PyTrack(

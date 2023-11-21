@@ -7,7 +7,7 @@ import pandas as pd
 from gpxpy.gpx import GPXTrack, GPXTrackSegment
 
 from track_analyzer.exceptions import GPXPointExtensionError
-from track_analyzer.utils import get_extension_value
+from track_analyzer.utils.base import get_extension_value
 
 logger = logging.getLogger(__name__)
 

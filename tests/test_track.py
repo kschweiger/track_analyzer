@@ -5,6 +5,7 @@ from unittest.mock import MagicMock
 import pandas as pd
 import pytest
 from gpxpy.gpx import GPX, GPXTrack, GPXTrackPoint, GPXTrackSegment
+from plotly.graph_objs.graph_objs import Figure
 from pytest_mock import MockerFixture
 
 from tests import resources
@@ -14,7 +15,7 @@ from track_analyzer.exceptions import (
 )
 from track_analyzer.model import SegmentOverview
 from track_analyzer.track import ByteTrack, GPXFileTrack, PyTrack, Track
-from track_analyzer.utils import get_extension_value
+from track_analyzer.utils.base import get_extension_value
 
 
 @pytest.fixture()
@@ -451,3 +452,28 @@ def test_track_data(
     assert isinstance(data_track_post_add_seg, pd.DataFrame)
 
     assert set(data_track_post_add_seg.segment.unique()) == {0, 1}
+
+
+@pytest.mark.parametrize("intervals", [None, 1, 200])
+@pytest.mark.parametrize("segment", [None, 0])
+@pytest.mark.parametrize(
+    "kind",
+    [
+        "profile",
+        "profile-slope",
+        "map-line",
+        "map-line-enhanced",
+        # "map-segments" # TODO: Add test once segment splitting is implemented
+    ],
+)
+def test_plot_segment_indepenent(
+    intervals: int | None, segment: int | None, kind: str
+) -> None:
+    resource_files = importlib.resources.files(resources)
+
+    track = ByteTrack(
+        (resource_files / "Freiburger_Münster_nach_Schau_Ins_Land.gpx").read_bytes()
+    )
+
+    fig = track.plot(kind, segment=segment, reduce_pp_intervals=intervals)
+    assert isinstance(fig, Figure)
