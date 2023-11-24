@@ -284,7 +284,7 @@ class Track(ABC):
                 self.track.segments[n_segment], self.stopped_speed_threshold
             )
 
-            if self.track.segments[n_segment].has_times():
+            if data.time.notna().any():
                 data = self._apply_outlier_cleaning(data)
 
             self._processed_segment_data[n_segment] = (
@@ -310,13 +310,13 @@ class Track(ABC):
             distance,
             stopped_time,
             stopped_distance,
-            data,
+            processed_data,
         ) = get_processed_track_data(
             self.track, self.stopped_speed_threshold, connect_segments=connect_segments
         )
 
-        if all(seg.has_times() for seg in self.track.segments):
-            data = self._apply_outlier_cleaning(data)
+        if processed_data.time.notna().any():
+            processed_data = self._apply_outlier_cleaning(processed_data)
 
         return self._set_processed_track_data(
             (
@@ -324,7 +324,7 @@ class Track(ABC):
                 distance,
                 stopped_time,
                 stopped_distance,
-                data,
+                processed_data,
             ),
             connect_segments,
         )
@@ -421,8 +421,14 @@ class Track(ABC):
         return coords, elevations, times
 
     def _apply_outlier_cleaning(self, data: pd.DataFrame) -> pd.DataFrame:
+        speeds = data.speed[data.speed.notna()].to_list()
+        if not speeds:
+            logger.warning(
+                "Trying to apply outlier cleaning to track w/o speed information"
+            )
+            return data
         speed_percentile = np.percentile(
-            [s for s in data.speed[data.speed.notna()].to_list()],
+            data.speed[data.speed.notna()].to_list(),
             self.max_speed_percentile,
         )
 
@@ -569,6 +575,41 @@ class Track(ABC):
             fig = plot_segments_on_map(data=data, **kwargs)
 
         return fig
+
+    def split(
+        self, coords: tuple[float, float], distance_threshold: float = 20
+    ) -> None:
+        """
+        Split the track at the passed coordinates. The distance_threshold parameter
+        defines the maximum distance between the passed coordingates and the closest
+        point in the track.
+
+        :param coords: Latitude, Longitude point at which the split should be made
+        :param distance_threshold: Maximum distance between coords and closest point,
+        defaults to 20
+        :raises TrackTransformationError: If distance exceeds threshold
+        """
+        lat, long = coords
+        point_distance = get_point_distance(
+            self.track, None, latitude=lat, longitude=long
+        )
+
+        if point_distance.distance > distance_threshold:
+            raise TrackTransformationError(
+                f"Closes point in track has distance {point_distance.distance:.2f}m "
+                "from passed coordingates"
+            )
+        # Split the segment. The closest point should be the first
+        # point of the second segment
+        pre_segment, post_segment = self.track.segments[
+            point_distance.segment_idx
+        ].split(point_distance.segment_point_idx - 1)
+
+        self.track.segments[point_distance.segment_idx] = pre_segment
+        self.track.segments.insert(point_distance.segment_idx + 1, post_segment)
+
+        self._processed_segment_data = {}
+        self._processed_track_data = {}
 
 
 @final
