@@ -456,6 +456,54 @@ def test_track_data(
     assert set(data_track_post_add_seg.segment.unique()) == {0, 1}
 
 
+def test_split_track() -> None:
+    track = PyTrack(
+        [
+            (1.0001, 1.0001),
+            (1.00012, 1.00012),
+            (1.00014, 1.00014),
+            (1.00016, 1.00016),
+            (1.00018, 1.00018),
+            (1.0002, 1.0002),
+        ],
+        [100, 100, 100, 100, 100, 100],
+        [
+            datetime(2023, 1, 1, 10),
+            datetime(2023, 1, 1, 10, 0, 10),
+            datetime(2023, 1, 1, 10, 0, 20),
+            datetime(2023, 1, 1, 10, 0, 30),
+            datetime(2023, 1, 1, 10, 0, 40),
+            datetime(2023, 1, 1, 10, 0, 50),
+        ],
+    )
+
+    assert track.n_segments == 1
+    pre_split_track_data = track.get_track_data()
+    pre_split_segment_data = track.get_segment_data(0)
+
+    track.split(coords=(1.000139, 1.000139))
+
+    assert track.n_segments == 2
+    assert track.track.segments[1].points[0].latitude == 1.00014
+    assert track.track.segments[1].points[0].longitude == 1.00014
+
+    post_split_track_data = track.get_track_data()
+    post_split_segment_0_data = track.get_segment_data(0)
+    post_split_segment_1_data = track.get_segment_data(1)
+
+    assert not pre_split_track_data.compare(post_split_track_data).empty
+    assert (
+        pre_split_track_data.drop("segment", axis=1)
+        .compare(post_split_track_data.drop("segment", axis=1))
+        .empty
+    )
+
+    assert (
+        len(pre_split_segment_data)
+        == len(post_split_segment_0_data) + len(post_split_segment_1_data) + 1
+    )
+
+
 @pytest.mark.parametrize("intervals", [None, 1, 200])
 @pytest.mark.parametrize("segment", [None, 0])
 @pytest.mark.parametrize(
