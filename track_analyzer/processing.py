@@ -4,7 +4,7 @@ from typing import Any, Callable, Dict, Literal, Union
 
 import numpy as np
 import pandas as pd
-from gpxpy.gpx import GPXTrack, GPXTrackSegment
+from gpxpy.gpx import GPXTrack, GPXTrackPoint, GPXTrackSegment
 
 from track_analyzer.exceptions import GPXPointExtensionError
 from track_analyzer.utils.base import get_extension_value
@@ -54,7 +54,30 @@ def _recalc_cumulated_columns(data: pd.DataFrame) -> pd.DataFrame:
 def get_processed_track_data(
     track: GPXTrack,
     stopped_speed_threshold: float = 1,
+    connect_segments: Literal["full", "forward"] = "forward",
 ) -> tuple[float, float, float, float, pd.DataFrame]:
+    """
+    Process GPX track data and return a tuple of calculated values. The connect_segmen
+    argument determines connection between segments in the DataFrame will be handled. As
+    default each segment in the Track will be processed individually and the returned.
+    Choosing forward will add the first point form the next segment to the end of each
+    segment. So that each segment ends with the first point of the next segment.
+    Choosingfull will also add the last point from the previous segment (which is the
+    first point of the current segment) to the segment. This will result in a duplicated
+    row in the DataFrame but can be usefull for plotting so that no gap is intrudoced by
+    the conversion.
+
+    :param track: GPXTrack to process
+    :param stopped_speed_threshold: Threshold in km/h for speeds counting as stopped,
+    default is 1 km/h
+    :param connect_segments: Option to connect segments, choices are "full" or "forward"
+    default is forward
+    :return: Tuple containing track time, track distance, stopped time, stopped
+    distance, and track data as a DataFrame
+    :raises RuntimeError: If track has no segments
+    """
+    if connect_segments not in ["full", "forward"]:
+        raise ValueError("connect_segments must be full or forward")
     track_time: float = 0
     track_distance: float = 0
     track_stopped_time: float = 0
@@ -62,13 +85,34 @@ def get_processed_track_data(
     track_data: None | pd.DataFrame = None
 
     for i_segment, segment in enumerate(track.segments):
+        extend_segment_post = None
+        extend_segment_start = None
+        if connect_segments in ["full", "forward"]:
+            try:
+                next_segmnet = track.segments[i_segment + 1]
+            except IndexError:
+                pass
+            else:
+                extend_segment_post = [next_segmnet.points[0]]
+        if i_segment > 0 and connect_segments in ["full"]:
+            try:
+                prev_segmnet = track.segments[i_segment - 1]
+            except IndexError:
+                pass
+            else:
+                extend_segment_start = [prev_segmnet.points[-1]]
         (
             time,
             distance,
             stopped_time,
             stopped_distance,
             _data,
-        ) = get_processed_segment_data(segment, stopped_speed_threshold)
+        ) = get_processed_segment_data(
+            segment,
+            stopped_speed_threshold,
+            extend_segment_start=extend_segment_start,
+            extend_segment_end=extend_segment_post,
+        )
 
         track_time += time
         track_distance += distance
@@ -100,21 +144,32 @@ def get_processed_track_data(
 
 
 def get_processed_segment_data(
-    segment: GPXTrackSegment, stopped_speed_threshold: float = 1
+    segment: GPXTrackSegment,
+    stopped_speed_threshold: float = 1,
+    extend_segment_start: None | list[GPXTrackPoint] = None,
+    extend_segment_end: None | list[GPXTrackPoint] = None,
 ) -> tuple[float, float, float, float, pd.DataFrame]:
     """
     Calculate the speed and distance from point to point for a segment. This follows
     the implementation of the get_moving_data method in the implementation of
     gpx.GPXTrackSegment
 
-    Args:
-        segment: GPXTrackSegment to process
-        stopped_speed_threshold: Threshold in km/h for speeds counting as moving.
-                                 Default is 1 km/h
-
-    Returns:
-
+    :param segment: GPXTrackSegment to process
+    :param stopped_speed_threshold: Threshold in km/h for speeds counting as moving,
+    default is 1 km/h
+    :param extend_segment_start: Additional points to add at the start of the segment
+    :param extend_segment_end: Additional points to add at the end of the segment
+    :return: Tuple containing segment time, segment distance, stopped time, stopped
+    distance, and segment data as a DataFrame
     """
+    if extend_segment_start or extend_segment_end:
+        segment = segment.clone()
+
+    if extend_segment_start:
+        extend_segment_start.extend(segment.points)
+        segment.points = extend_segment_start
+    if extend_segment_end:
+        segment.points.extend(extend_segment_end)
 
     threshold_ms = stopped_speed_threshold / 3.6
 
@@ -143,9 +198,9 @@ def get_processed_segment_data(
             stopped_time,
             stopped_distance,
             data,
-        ) = get_processed_data_w_time(segment, data, threshold_ms)
+        ) = _get_processed_data_w_time(segment, data, threshold_ms)
     else:
-        distance, data = get_processed_data_wo_time(segment, data)
+        distance, data = _get_processed_data_wo_time(segment, data)
         time, stopped_distance, stopped_time = 0, 0, 0
 
     data_df = pd.DataFrame(data)
@@ -153,7 +208,7 @@ def get_processed_segment_data(
     return (time, distance, stopped_time, stopped_distance, data_df)
 
 
-def get_processed_data_w_time(
+def _get_processed_data_w_time(
     segment: GPXTrackSegment, data: Dict[str, list[Any]], threshold_ms: float
 ) -> tuple[float, float, float, float, Dict[str, list[Any]]]:
     time = 0.0
@@ -231,7 +286,7 @@ def get_processed_data_w_time(
     return time, distance, stopped_time, stopped_distance, data
 
 
-def get_processed_data_wo_time(
+def _get_processed_data_wo_time(
     segment: GPXTrackSegment, data: Dict[str, list[Any]]
 ) -> tuple[float, Dict[str, list[Any]]]:
     cum_distance = 0

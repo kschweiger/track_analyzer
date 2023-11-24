@@ -403,9 +403,11 @@ def test_track_overiew(
     assert track_overview_pre_add != track_overview_post_add
 
 
+@pytest.mark.parametrize("conn_segments", ["forward", "full"])
 def test_track_data(
     mocker: MockerFixture,
     two_segment_py_data: tuple[tuple[list, list, list], tuple[list, list, list]],
+    conn_segments: str,
 ) -> None:
     (segment_1_points, segment_1_elevations, segment_1_times), (
         segment_2_points,
@@ -418,17 +420,17 @@ def test_track_data(
     spy_get = mocker.spy(track, "_get_processed_track_data")
     spy_set = mocker.spy(track, "_set_processed_track_data")
 
-    assert track._processed_track_data is None
+    assert track._processed_track_data == {}
 
-    data_track = track.get_track_data()
-    pt_segs, (_, _, _, _, pt_df) = track._processed_track_data  # type: ignore
+    data_track = track.get_track_data(connect_segments=conn_segments)
+    pt_segs, (_, _, _, _, pt_df) = track._processed_track_data[conn_segments]  # type: ignore
     assert pt_segs == 1
     assert isinstance(pt_df, pd.DataFrame)
 
     assert spy_get.call_count == 1
     assert spy_set.call_count == 1
 
-    track.get_track_data()
+    track.get_track_data(connect_segments=conn_segments)
 
     assert spy_get.call_count == 2
     assert spy_set.call_count == 1
@@ -439,9 +441,9 @@ def test_track_data(
     assert data_segment.compare(data_track.drop(columns=["segment"])).empty
 
     track.add_segmeent(segment_2_points, segment_2_elevations, segment_2_times)
-    data_track_post_add_seg = track.get_track_data()
+    data_track_post_add_seg = track.get_track_data(connect_segments=conn_segments)
 
-    pt_segs, (_, _, _, _, pt_df) = track._processed_track_data  # type: ignore
+    pt_segs, (_, _, _, _, pt_df) = track._processed_track_data[conn_segments]  # type: ignore
     assert pt_segs == 2
     assert isinstance(pt_df, pd.DataFrame)
 

@@ -1,3 +1,5 @@
+from typing import Literal
+
 import pandas as pd
 
 from track_analyzer.exceptions import VisualizationSetupError
@@ -13,6 +15,7 @@ def extract_track_data_for_plot(
     kind: str,
     require_elevation: list[str],
     intervals: None | int = None,
+    connect_segments: Literal["full", "forward"] = "forward",
 ) -> pd.DataFrame:
     """Extract the data from a Track as DataFrame for plotting.
 
@@ -34,7 +37,9 @@ def extract_track_data_for_plot(
             _track = _track.clone()
             _track.reduce_points(intervals)
 
-    _, _, _, _, data = get_processed_track_data(_track)
+    _, _, _, _, data = get_processed_track_data(
+        _track, connect_segments=connect_segments
+    )
 
     return data
 

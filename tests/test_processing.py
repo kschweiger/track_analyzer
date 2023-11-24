@@ -1,16 +1,21 @@
 from datetime import timedelta
 from typing import Literal
 
+import numpy as np
 import pandas as pd
 import pytest
+from gpxpy.gpx import GPXTrack
 
+from track_analyzer.model import Position2D
 from track_analyzer.processing import (
     _recalc_cumulated_columns,
+    get_processed_segment_data,
     get_processed_track_data,
     split_data,
     split_data_by_time,
 )
 from track_analyzer.track import Track
+from track_analyzer.utils.base import distance
 
 
 def test_get_processed_track_data(track_for_test: Track) -> None:
@@ -122,3 +127,114 @@ def test_split_data_by_time(track_for_test: Track) -> None:
     ret_data = split_data_by_time(data, split_at=timedelta(seconds=100))
 
     assert not ret_data.compare(data).empty
+
+
+def check_forward_points_in_segment(data: pd.DataFrame, track: GPXTrack) -> None:
+    return (
+        (
+            data[data.segment == 0].iloc[-1].latitude
+            == track.segments[1].points[0].latitude
+        )
+        and (
+            data[data.segment == 0].iloc[-1].longitude
+            == track.segments[1].points[0].longitude
+        )
+        and (
+            data[data.segment == 1].iloc[-1].latitude
+            == track.segments[2].points[0].latitude
+        )
+        and (
+            data[data.segment == 1].iloc[-1].longitude
+            == track.segments[2].points[0].longitude
+        )
+    )
+
+
+def check_backward_points_in_segment(data: pd.DataFrame, track: GPXTrack) -> None:
+    return (
+        (
+            data[data.segment == 1].iloc[0].latitude
+            == track.segments[1].points[0].latitude
+        )
+        and (
+            data[data.segment == 1].iloc[0].longitude
+            == track.segments[1].points[0].longitude
+        )
+        and (
+            data[data.segment == 2].iloc[0].latitude
+            == track.segments[2].points[0].latitude
+        )
+        and (
+            data[data.segment == 2].iloc[0].longitude
+            == track.segments[2].points[0].longitude
+        )
+    )
+
+
+def test_get_processed_track_data_connect_segments_forward(
+    track_for_test_3_segments: Track,
+) -> None:
+    no_connection_datas = []
+    for segment in track_for_test_3_segments.track.segments:
+        _, _, _, _, _data_no_connect = get_processed_segment_data(segment=segment)
+        no_connection_datas.append(_data_no_connect)
+
+    data_no_connect = pd.concat(no_connection_datas).reset_index(drop=True)
+
+    _, _, _, _, data_connect = get_processed_track_data(
+        track_for_test_3_segments.track, connect_segments="forward"
+    )
+
+    assert len(data_no_connect) + 2 == len(data_connect)
+
+    assert check_forward_points_in_segment(
+        data_connect, track_for_test_3_segments.track
+    )
+    assert not check_backward_points_in_segment(
+        data_connect, track_for_test_3_segments.track
+    )
+
+
+def test_get_processed_track_data_connect_segments_full(
+    track_for_test_3_segments: Track,
+) -> None:
+    no_connection_datas = []
+    for segment in track_for_test_3_segments.track.segments:
+        _, _, _, _, _data_no_connect = get_processed_segment_data(segment=segment)
+        no_connection_datas.append(_data_no_connect)
+
+    data_no_connect = pd.concat(no_connection_datas).reset_index(drop=True)
+
+    _, _, _, _, data_connect = get_processed_track_data(
+        track_for_test_3_segments.track, connect_segments="full"
+    )
+
+    assert len(data_no_connect) + 4 == len(data_connect)
+
+    assert check_forward_points_in_segment(
+        data_connect, track_for_test_3_segments.track
+    )
+    assert check_backward_points_in_segment(
+        data_connect, track_for_test_3_segments.track
+    )
+
+
+def test_compare_pp_distance_to_processed_track(track_for_test) -> None:
+    data = track_for_test.get_track_data()
+
+    points = []
+    for seg in track_for_test.track.segments:
+        points.extend(seg.points)
+
+    distances_for_sum = [0.0]
+    for i in range(len(points) - 1):
+        distances_for_sum.append(
+            distance(
+                Position2D(points[i].latitude, points[i].longitude),
+                Position2D(points[i + 1].latitude, points[i + 1].longitude),
+            )
+        )
+
+    cum_distance = np.cumsum(distances_for_sum)
+
+    assert 0.99 < cum_distance[-1] / data.cum_distance.iloc[-1] < 1.01

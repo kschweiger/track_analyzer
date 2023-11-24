@@ -54,8 +54,8 @@ class Track(ABC):
         self.stopped_speed_threshold = stopped_speed_threshold
         self.max_speed_percentile = max_speed_percentile
 
-        self._processed_segment_data: Dict[int, process_data_tuple_type] = {}
-        self._processed_track_data: None | tuple[int, process_data_tuple_type] = None
+        self._processed_segment_data: dict[int, process_data_tuple_type] = {}
+        self._processed_track_data: dict[str, tuple[int, process_data_tuple_type]] = {}
 
         self.session_data: Dict[str, str | int | float] = {}
 
@@ -81,7 +81,9 @@ class Track(ABC):
 
         return gpx.to_xml()
 
-    def get_track_overview(self) -> SegmentOverview:
+    def get_track_overview(
+        self, connect_segments: Literal["full", "forward"] = "forward"
+    ) -> SegmentOverview:
         """
         Get overall metrics for the track. Equivalent to the sum of all segments
 
@@ -93,7 +95,7 @@ class Track(ABC):
             track_stopped_time,
             track_stopped_distance,
             track_data,
-        ) = self._get_processed_track_data()
+        ) = self._get_processed_track_data(connect_segments=connect_segments)
 
         track_max_speed = None
         track_avg_speed = None
@@ -295,9 +297,11 @@ class Track(ABC):
 
         return self._processed_segment_data[n_segment]
 
-    def _get_processed_track_data(self) -> process_data_tuple_type:
-        if self._processed_track_data:
-            segments_in_data, data = self._processed_track_data
+    def _get_processed_track_data(
+        self, connect_segments: Literal["full", "forward"]
+    ) -> process_data_tuple_type:
+        if connect_segments in self._processed_track_data:
+            segments_in_data, data = self._processed_track_data[connect_segments]
             if segments_in_data == self.n_segments:
                 return data
 
@@ -307,7 +311,9 @@ class Track(ABC):
             stopped_time,
             stopped_distance,
             data,
-        ) = get_processed_track_data(self.track, self.stopped_speed_threshold)
+        ) = get_processed_track_data(
+            self.track, self.stopped_speed_threshold, connect_segments=connect_segments
+        )
 
         if all(seg.has_times() for seg in self.track.segments):
             data = self._apply_outlier_cleaning(data)
@@ -319,15 +325,18 @@ class Track(ABC):
                 stopped_time,
                 stopped_distance,
                 data,
-            )
+            ),
+            connect_segments,
         )
 
     def _set_processed_track_data(
-        self, data: process_data_tuple_type
+        self,
+        data: process_data_tuple_type,
+        connect_segments: Literal["full", "forward"],
     ) -> process_data_tuple_type:
         """Save processed data internally to reduce compute.
         Mainly separated for testing"""
-        self._processed_track_data = (self.n_segments, data)
+        self._processed_track_data[connect_segments] = (self.n_segments, data)
         return data
 
     def get_segment_data(self, n_segment: int = 0) -> pd.DataFrame:
@@ -340,7 +349,9 @@ class Track(ABC):
 
         return data
 
-    def get_track_data(self) -> pd.DataFrame:
+    def get_track_data(
+        self, connect_segments: Literal["full", "forward"] = "forward"
+    ) -> pd.DataFrame:
         """
         Get processed data for the track as DataFrame. Segment are indicated
         via the segment column.
@@ -349,7 +360,9 @@ class Track(ABC):
         """
         track_data: None | pd.DataFrame = None
 
-        _, _, _, _, track_data = self._get_processed_track_data()
+        _, _, _, _, track_data = self._get_processed_track_data(
+            connect_segments=connect_segments
+        )
 
         return track_data
 
@@ -640,7 +653,7 @@ class PyTrack(Track):
         :param cadence: Optional list of cadence values for each point
         :param power: Optional list of power values for each point
         :raises TrackInitializationError: Raised if number of elevation, time, heatrate,
-                                          or cadence values do not match passed points
+        or cadence values do not match passed points
         """
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
