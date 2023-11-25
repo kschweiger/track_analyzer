@@ -5,9 +5,9 @@ import numpy as np
 import pytest
 from gpxpy.gpx import GPXTrack, GPXTrackPoint, GPXTrackSegment
 
-from track_analyzer.model import PointDistance, Position2D, Position3D
-from track_analyzer.track import PyTrack
-from track_analyzer.utils.base import (
+from geo_track_analyzer.model import PointDistance, Position2D, Position3D
+from geo_track_analyzer.track import PyTrack
+from geo_track_analyzer.utils.base import (
     ExtensionFieldElement,
     calc_elevation_metrics,
     center_geolocation,
@@ -43,7 +43,7 @@ def test_distance_close() -> None:
 
 
 def test_calc_elevation_metrics(mocker) -> None:
-    mocker.patch("track_analyzer.utils.base.distance", return_value=150)
+    mocker.patch("geo_track_analyzer.utils.base.distance", return_value=150)
 
     positions = [
         Position3D(0, 0, 100),
@@ -73,7 +73,7 @@ def test_calc_elevation_metrics(mocker) -> None:
 
 
 def test_calc_elevation_metrics_nan(mocker) -> None:
-    mocker.patch("track_analyzer.utils.base.distance", return_value=150)
+    mocker.patch("geo_track_analyzer.utils.base.distance", return_value=150)
     positions = [
         Position3D(0, 0, 100),
         Position3D(0, 0, 1000),

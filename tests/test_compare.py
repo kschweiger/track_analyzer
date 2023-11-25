@@ -4,16 +4,16 @@ import numpy as np
 import pytest
 from gpxpy.gpx import GPXBounds, GPXTrackPoint, GPXTrackSegment
 
-from track_analyzer.compare import (
+from geo_track_analyzer.compare import (
     _extract_ranges,
     check_segment_bound_overlap,
     convert_segment_to_plate,
     derive_plate_bins,
     get_segment_overlap,
 )
-from track_analyzer.model import PointDistance, Position2D, SegmentOverlap
-from track_analyzer.track import PyTrack
-from track_analyzer.utils.base import distance
+from geo_track_analyzer.model import PointDistance, Position2D, SegmentOverlap
+from geo_track_analyzer.track import PyTrack
+from geo_track_analyzer.utils.base import distance
 
 
 @pytest.mark.parametrize(
@@ -110,7 +110,9 @@ def test_derive_plate_bins() -> None:
 def test_convert_segment_to_plate(
     mocker, points, patch_bins, normalize, exp_plate
 ) -> None:
-    mocker.patch("track_analyzer.compare.derive_plate_bins", return_value=patch_bins)
+    mocker.patch(
+        "geo_track_analyzer.compare.derive_plate_bins", return_value=patch_bins
+    )
 
     grid_width = 100
     track = PyTrack(points, len(points) * [None], len(points) * [None])
@@ -151,12 +153,12 @@ def test_convert_segment_to_plate(
 )
 def test_get_segment_overlap(mocker, plate_base, plate_match, exp_overlap) -> None:
     mocker.patch(
-        "track_analyzer.compare.convert_segment_to_plate",
+        "geo_track_analyzer.compare.convert_segment_to_plate",
         side_effect=[plate_base, plate_match],
     )
 
     mocker.patch(
-        "track_analyzer.compare.get_point_distance",
+        "geo_track_analyzer.compare.get_point_distance",
         side_effect=[
             PointDistance(GPXTrackPoint(1, 1), 10, 0, 0, 0),
             PointDistance(GPXTrackPoint(2, 2), 10, 3, 0, 3),

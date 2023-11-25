@@ -5,8 +5,8 @@ import plotly.graph_objects as go
 from plotly.graph_objs import Figure
 from plotly.subplots import make_subplots
 
-from track_analyzer.exceptions import VisualizationSetupError
-from track_analyzer.visualize.utils import get_slope_colors
+from geo_track_analyzer.exceptions import VisualizationSetupError
+from geo_track_analyzer.visualize.utils import get_slope_colors
 
 logger = logging.getLogger(__name__)
 

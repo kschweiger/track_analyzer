@@ -1,6 +1,6 @@
 import click
 
-from track_analyzer.track import FITTrack
+from geo_track_analyzer.track import FITTrack
 
 
 @click.command()

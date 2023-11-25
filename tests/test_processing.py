@@ -6,16 +6,16 @@ import pandas as pd
 import pytest
 from gpxpy.gpx import GPXTrack
 
-from track_analyzer.model import Position2D
-from track_analyzer.processing import (
+from geo_track_analyzer.model import Position2D
+from geo_track_analyzer.processing import (
     _recalc_cumulated_columns,
     get_processed_segment_data,
     get_processed_track_data,
     split_data,
     split_data_by_time,
 )
-from track_analyzer.track import Track
-from track_analyzer.utils.base import distance
+from geo_track_analyzer.track import Track
+from geo_track_analyzer.utils.base import distance
 
 
 def test_get_processed_track_data(track_for_test: Track) -> None:

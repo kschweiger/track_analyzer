@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 from gpxpy.gpx import GPXTrack, GPXTrackPoint, GPXTrackSegment
 
-from track_analyzer.exceptions import GPXPointExtensionError
-from track_analyzer.utils.base import get_extension_value
+from geo_track_analyzer.exceptions import GPXPointExtensionError
+from geo_track_analyzer.utils.base import get_extension_value
 
 logger = logging.getLogger(__name__)
 

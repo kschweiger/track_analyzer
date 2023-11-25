@@ -2,9 +2,9 @@ import importlib.resources
 
 import plotly.graph_objects as go
 
+from geo_track_analyzer.track import ByteTrack
+from geo_track_analyzer.visualize.interactive import plot_track_3d
 from tests import resources
-from track_analyzer.track import ByteTrack
-from track_analyzer.visualize.interactive import plot_track_3d
 
 
 def test_plot_track_3d() -> None:

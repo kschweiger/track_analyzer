@@ -9,12 +9,17 @@ import numpy as np
 import numpy.typing as npt
 from gpxpy.gpx import GPXBounds, GPXTrack, GPXTrackPoint, GPXTrackSegment
 
-from track_analyzer.exceptions import (
+from geo_track_analyzer.exceptions import (
     GPXPointExtensionError,
     InvalidBoundsError,
     TrackAnalysisError,
 )
-from track_analyzer.model import ElevationMetrics, PointDistance, Position2D, Position3D
+from geo_track_analyzer.model import (
+    ElevationMetrics,
+    PointDistance,
+    Position2D,
+    Position3D,
+)
 
 logger = logging.getLogger(__name__)
 

@@ -12,24 +12,24 @@ from fitparse import DataMessage, FitFile, StandardUnitsDataProcessor
 from gpxpy.gpx import GPX, GPXTrack, GPXTrackSegment
 from plotly.graph_objs.graph_objs import Figure
 
-from track_analyzer.compare import get_segment_overlap
-from track_analyzer.exceptions import (
+from geo_track_analyzer.compare import get_segment_overlap
+from geo_track_analyzer.exceptions import (
     TrackInitializationError,
     TrackTransformationError,
     VisualizationSetupError,
 )
-from track_analyzer.model import PointDistance, Position3D, SegmentOverview
-from track_analyzer.processing import (
+from geo_track_analyzer.model import PointDistance, Position3D, SegmentOverview
+from geo_track_analyzer.processing import (
     get_processed_segment_data,
     get_processed_track_data,
 )
-from track_analyzer.utils.base import (
+from geo_track_analyzer.utils.base import (
     calc_elevation_metrics,
     get_extended_track_point,
     get_point_distance,
     interpolate_segment,
 )
-from track_analyzer.visualize import (
+from geo_track_analyzer.visualize import (
     plot_segments_on_map,
     plot_track_2d,
     plot_track_enriched_on_map,
@@ -544,7 +544,7 @@ class Track(ABC):
             )
 
         if segment is None:
-            from track_analyzer.utils.track import extract_track_data_for_plot
+            from geo_track_analyzer.utils.track import extract_track_data_for_plot
 
             data = extract_track_data_for_plot(
                 track=self,
@@ -554,7 +554,7 @@ class Track(ABC):
                 connect_segments="full" if kind in connect_segment_full else "forward",
             )
         else:
-            from track_analyzer.utils.track import extract_segment_data_for_plot
+            from geo_track_analyzer.utils.track import extract_segment_data_for_plot
 
             data = extract_segment_data_for_plot(
                 track=self,

@@ -1,9 +1,9 @@
 import plotly.graph_objects as go
 import pytest
 
-from track_analyzer.exceptions import VisualizationSetupError
-from track_analyzer.track import Track
-from track_analyzer.visualize.map import (
+from geo_track_analyzer.exceptions import VisualizationSetupError
+from geo_track_analyzer.track import Track
+from geo_track_analyzer.visualize.map import (
     plot_segments_on_map,
     plot_track_enriched_on_map,
     plot_track_line_on_map,

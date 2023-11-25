@@ -10,7 +10,7 @@ import requests
 from gpxpy.gpx import GPXTrack
 from requests.structures import CaseInsensitiveDict
 
-from track_analyzer.exceptions import (
+from geo_track_analyzer.exceptions import (
     APIDataNotAvailableError,
     APIHealthCheckFailedError,
     APIResponseError,

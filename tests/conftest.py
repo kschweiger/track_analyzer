@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from track_analyzer.track import PyTrack, Track
+from geo_track_analyzer.track import PyTrack, Track
 
 
 @pytest.fixture()

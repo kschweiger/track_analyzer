@@ -2,12 +2,12 @@ from typing import Literal
 
 import pandas as pd
 
-from track_analyzer.exceptions import VisualizationSetupError
-from track_analyzer.processing import (
+from geo_track_analyzer.exceptions import VisualizationSetupError
+from geo_track_analyzer.processing import (
     get_processed_segment_data,
     get_processed_track_data,
 )
-from track_analyzer.track import Track, logger
+from geo_track_analyzer.track import Track, logger
 
 
 def extract_track_data_for_plot(

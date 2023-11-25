@@ -6,8 +6,8 @@ import numpy as np
 import numpy.typing as npt
 from gpxpy.gpx import GPXTrack, GPXTrackSegment
 
-from track_analyzer.model import Position2D, SegmentOverlap
-from track_analyzer.utils.base import (
+from geo_track_analyzer.model import Position2D, SegmentOverlap
+from geo_track_analyzer.utils.base import (
     check_bounds,
     crop_segment_to_bounds,
     distance,

@@ -1,4 +1,4 @@
-from track_analyzer.model import SegmentOverview
+from geo_track_analyzer.model import SegmentOverview
 
 
 def test_segment_overview_post_init_calcs():

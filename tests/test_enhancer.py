@@ -4,8 +4,8 @@ from time import sleep
 import gpxpy
 import pytest
 
-from track_analyzer.enhancer import OpenElevationEnhancer, OpenTopoElevationEnhancer
-from track_analyzer.exceptions import APIResponseError
+from geo_track_analyzer.enhancer import OpenElevationEnhancer, OpenTopoElevationEnhancer
+from geo_track_analyzer.exceptions import APIResponseError
 
 
 @pytest.mark.skip("Currently not working. Also not the best option out there... ")

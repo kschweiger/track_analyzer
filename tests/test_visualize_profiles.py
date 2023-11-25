@@ -4,14 +4,14 @@ import pandas as pd
 import plotly.graph_objects as go
 import pytest
 
-from tests import resources
-from track_analyzer.exceptions import VisualizationSetupError
-from track_analyzer.track import ByteTrack, PyTrack
-from track_analyzer.visualize.profiles import (
+from geo_track_analyzer.exceptions import VisualizationSetupError
+from geo_track_analyzer.track import ByteTrack, PyTrack
+from geo_track_analyzer.visualize.profiles import (
     plot_track_2d,
     plot_track_with_slope,
 )
-from track_analyzer.visualize.utils import get_slope_colors
+from geo_track_analyzer.visualize.utils import get_slope_colors
+from tests import resources
 
 
 def test_get_slope_colors() -> None:

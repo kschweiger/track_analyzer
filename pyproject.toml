@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "track-analyzer"
+name = "geo-track-analyzer"
 version = "0.4.1"
 description = "Analyze geospacial data tracks"
 authors = ["Korbinian Schweiger <korbinian.schweiger@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{ include = "track_analyzer" }]
+packages = [{ include = "geo_track_analyzer" }]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
@@ -36,7 +36,7 @@ pytest-cov = "^4.1.0"
 pytest-mock = "^3.12.0"
 
 [tool.poetry.scripts]
-extract_fit_track = 'track_analyzer.cli.extract_track:main'
+extract_fit_track = 'geo_track_analyzer.cli.extract_track:main'
 
 [build-system]
 requires = ["poetry-core"]
