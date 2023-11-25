@@ -504,6 +504,11 @@ def test_split_track() -> None:
     )
 
 
+def test_split_exceed_threshold(track_for_test: Track) -> None:
+    with pytest.raises(TrackTransformationError):
+        track_for_test.split((1, 1))
+
+
 @pytest.mark.parametrize("intervals", [None, 1, 200])
 @pytest.mark.parametrize("segment", [None, 0])
 @pytest.mark.parametrize(
@@ -513,7 +518,6 @@ def test_split_track() -> None:
         "profile-slope",
         "map-line",
         "map-line-enhanced",
-        # "map-segments" # TODO: Add test once segment splitting is implemented
     ],
 )
 def test_plot_segment_indepenent(
@@ -526,4 +530,22 @@ def test_plot_segment_indepenent(
     )
 
     fig = track.plot(kind, segment=segment, reduce_pp_intervals=intervals)
+    assert isinstance(fig, Figure)
+
+
+@pytest.mark.parametrize(
+    "kind",
+    ["map-segments"],
+)
+def test_plot_segment_plot(kind: str) -> None:
+    resource_files = importlib.resources.files(resources)
+
+    track = ByteTrack(
+        (resource_files / "Freiburger_Münster_nach_Schau_Ins_Land.gpx").read_bytes()
+    )
+
+    track.split((47.9805, 7.84799))
+
+    fig = track.plot(kind)  # type: ignore
+
     assert isinstance(fig, Figure)

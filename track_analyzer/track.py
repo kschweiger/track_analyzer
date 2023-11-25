@@ -537,6 +537,7 @@ class Track(ABC):
         ]
 
         require_elevation = ["profile", "profile-slope"]
+        connect_segment_full = ["map-segments"]
         if kind not in valid_kinds:
             raise VisualizationSetupError(
                 f"Kind {kind} is not valid. Pass on of {','.join(valid_kinds)}"
@@ -550,6 +551,7 @@ class Track(ABC):
                 kind=kind,
                 require_elevation=require_elevation,
                 intervals=reduce_pp_intervals,
+                connect_segments="full" if kind in connect_segment_full else "forward",
             )
         else:
             from track_analyzer.utils.track import extract_segment_data_for_plot

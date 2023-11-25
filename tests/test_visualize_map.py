@@ -88,3 +88,15 @@ def test_plot_segments_on_map_single_segment(track_for_test: Track) -> None:
     data["segment"] = 0
     with pytest.raises(VisualizationSetupError):
         plot_segments_on_map(data)
+
+
+def test_plot_segments_on_map_pos_ele_only(track_for_test: Track) -> None:
+    data = track_for_test.get_track_data().copy()
+    data.time = None
+    data.speed = None
+    data.power = None
+    data.heartrate = None
+
+    figure = plot_segments_on_map(data, average_only=False)
+
+    assert isinstance(figure, go.Figure)

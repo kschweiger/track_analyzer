@@ -234,16 +234,23 @@ def plot_segments_on_map(
         max_power = frame.power.agg("max")
 
         distance = frame.distance.sum() / 1000
-        _total_time = frame.time.sum()  # in seconds
-        total_time = timedelta(seconds=int(_total_time.astype(int)))
+        if frame.time.isna().all():
+            total_time = None
+        else:
+            _total_time = frame.time.sum()  # in seconds
+            total_time = timedelta(seconds=int(_total_time.astype(int)))
         min_elevation = frame.elevation.min()
         max_elevation = frame.elevation.max()
 
-        text = (
+        text: str = (
             f"<b>Segment {i_segment}</b><br>"
             + f"<b>Distance</b>: {distance:.2f} km<br>"
-            + f"<b>Time</b>: {format_timedelta(total_time)}<br>"
-            + f"<b>Elevation</b>: &#8600; {min_elevation} m "
+        )
+        if total_time is not None:
+            text += f"<b>Time</b>: {format_timedelta(total_time)}<br>"
+
+        text += (
+            f"<b>Elevation</b>: &#8600; {min_elevation} m "
             + f"&#8599; {max_elevation} m<br>"
         )
         if not np.isnan(mean_speed):
