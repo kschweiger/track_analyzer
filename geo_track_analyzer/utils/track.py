@@ -22,8 +22,9 @@ def extract_track_data_for_plot(
     :param track: Track object
     :param kind: Kind of plot
     :param require_elevation: List of kinds of plots that require elevation data to be
-    present in the Track
+        present in the Track
     :param intervals: Optionally reduce the pp-distance in the track, defaults to None
+
     :return: DataFrame
     """
     if kind in require_elevation and not track.track.has_elevations():
@@ -57,8 +58,9 @@ def extract_segment_data_for_plot(
     :param segment: Index of the segment to be extracted
     :param kind: Kind of plot
     :param require_elevation: List of kinds of plots that require elevation data to be
-    present in the Track
+        present in the Track
     :param intervals: Optionally reduce the pp-distance in the track, defaults to None
+
     :return: DataFrame
     """
     if kind in require_elevation and not track.track.segments[segment].has_elevations():

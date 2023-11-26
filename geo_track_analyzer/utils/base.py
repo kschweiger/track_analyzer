@@ -37,6 +37,7 @@ def distance(pos1: Position2D, pos2: Position2D) -> float:
 
     :param pos1: Lat/long position 1
     :param pos2: Lat/long position 2
+
     :returns: Distance in m
     """
     p = pi / 180
@@ -83,8 +84,8 @@ def calc_elevation_metrics(
 
     :param positions: Position3D object containing latitude, longitude and elevation
 
-    :Returns: A ElevationMetrics object containing uphill and downhill distances and the
-    point-to-point slopes.
+    :returns: A ElevationMetrics object containing uphill and downhill distances and the
+        point-to-point slopes.
     """
     uphill = 0.0
     downhill = 0.0
@@ -246,8 +247,9 @@ def interpolate_segment(segment: GPXTrackSegment, spacing: float) -> GPXTrackSeg
 
     :param segment: GPXTrackSegment to interpolate.
     :param spacing: Desired spacing between interpolated points.
+
     :return: Interpolated GPXTrackSegment with points spaced according to the specified
-    spacing.
+        spacing.
     """
     init_points = segment.points
 
@@ -316,6 +318,7 @@ def crop_segment_to_bounds(
     :param bounds_min_longitude: Minimum longitude of the geographical bounds.
     :param bounds_max_latitude: Maximum latitude of the geographical bounds.
     :param bounds_max_longitude: Maximum longitude of the geographical bounds.
+
     :return: Cropped GPXTrackSegment containing only points within the specified bounds.
     """
     cropped_segment = GPXTrackSegment()
@@ -334,8 +337,9 @@ def get_distances(v1: npt.NDArray, v2: npt.NDArray) -> npt.NDArray:
 
     :param v1: A NumPy array of shape (N, 2) containing latitude/longitude pairs.
     :param v2: A NumPy array of shape (N, 2) containing latitude/longitude pairs.
+
     :return: A NumPy array of shape (N, M) containing the distances between the
-    corresponding pairs in v1 and v2.
+        corresponding pairs in v1 and v2.
     """
     v1_lats, v1_longs = v1[:, 0], v1[:, 1]
     v2_lats, v2_longs = v2[:, 0], v2[:, 1]
@@ -371,10 +375,11 @@ def get_point_distance(
 
     :param track: The GPX track to analyze.
     :param segment_idx: The index of the segment to analyze. If None, all segments are
-    analyzed.
+        analyzed.
     :param latitude: The latitude of the point to compare against.
     :param longitude: The longitude of the point to compare against.
     :raises TrackAnalysisError: If the nearest point could not be determined.
+
     :return: PointDistance: The calculated distance to the nearest point on the track.
     """
     points: list[tuple[float, float]] = []
@@ -434,8 +439,9 @@ def get_points_inside_bounds(
     :param bounds_min_longitude: Minimum longitude of the geographical bounds.
     :param bounds_max_latitude: Maximum latitude of the geographical bounds.
     :param bounds_max_longitude: Maximum longitude of the geographical bounds.
+
     :return: List of tuples containing index and a boolean indicating whether the point
-    is inside the bounds.
+        is inside the bounds.
     """
     ret_list = []
     for idx, point in enumerate(segment.points):
@@ -455,7 +461,8 @@ def split_segment_by_id(
 
     :param segment: GPXTrackSegment to be split.
     :param index_ranges: List of tuples representing index ranges for splitting the
-    segment.
+        segment.
+
     :return: List of GPXTrackSegments resulting from the split.
     """
     ret_segments = []
@@ -487,7 +494,7 @@ def check_bounds(bounds: None | GPXBounds) -> None:
 
     :param bounds: GPXBounds object to be checked.
     :raises InvalidBoundsError: If the bounds object is None or has incomplete
-    latitude/longitude values.
+        latitude/longitude values.
     """
     if bounds is None:
         raise InvalidBoundsError("Bounds %s are invalid", bounds)
@@ -526,6 +533,7 @@ def get_extended_track_point(
     :param ele: Elevation of the track point (None if not available).
     :param timestamp: Timestamp of the track point (None if not available).
     :param extensions: Dictionary of extended data fields (key-value pairs).
+
     :return: GPXTrackPoint with specified attributes and extended data fields.
     """
     this_point = GPXTrackPoint(lat, lng, elevation=ele, time=timestamp)
@@ -540,6 +548,7 @@ def format_timedelta(td: timedelta) -> str:
     Format a timedelta object as a string in HH:MM:SS format.
 
     :param td: Timedelta object to be formatted.
+
     :return: Formatted string representing the timedelta in HH:MM:SS format.
     """
     seconds = td.seconds

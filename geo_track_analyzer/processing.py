@@ -69,11 +69,11 @@ def get_processed_track_data(
 
     :param track: GPXTrack to process
     :param stopped_speed_threshold: Threshold in km/h for speeds counting as stopped,
-    default is 1 km/h
+        default is 1 km/h
     :param connect_segments: Option to connect segments, choices are "full" or "forward"
-    default is forward
+        default is forward
     :return: Tuple containing track time, track distance, stopped time, stopped
-    distance, and track data as a DataFrame
+        distance, and track data as a DataFrame
     :raises RuntimeError: If track has no segments
     """
     if connect_segments not in ["full", "forward"]:
@@ -156,11 +156,12 @@ def get_processed_segment_data(
 
     :param segment: GPXTrackSegment to process
     :param stopped_speed_threshold: Threshold in km/h for speeds counting as moving,
-    default is 1 km/h
+        default is 1 km/h
     :param extend_segment_start: Additional points to add at the start of the segment
     :param extend_segment_end: Additional points to add at the end of the segment
+
     :return: Tuple containing segment time, segment distance, stopped time, stopped
-    distance, and segment data as a DataFrame
+        distance, and segment data as a DataFrame
     """
     if extend_segment_start or extend_segment_end:
         segment = segment.clone()

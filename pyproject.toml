@@ -35,6 +35,11 @@ pytest = "^7.4.3"
 pytest-cov = "^4.1.0"
 pytest-mock = "^3.12.0"
 
+
+[tool.poetry.group.doc.dependencies]
+sphinx = "^7.2.6"
+sphinx-rtd-theme = "^1.3.0"
+
 [tool.poetry.scripts]
 extract_fit_track = 'geo_track_analyzer.cli.extract_track:main'
 

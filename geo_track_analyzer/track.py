@@ -43,6 +43,11 @@ process_data_tuple_type = tuple[float, float, float, float, pd.DataFrame]
 
 
 class Track(ABC):
+    """
+    Abstract base container for geospacial Tracks that defines all methods common to
+    all Track types.
+    """
+
     def __init__(
         self, stopped_speed_threshold: float, max_speed_percentile: int
     ) -> None:
@@ -69,10 +74,22 @@ class Track(ABC):
         return len(self.track.segments)
 
     def add_segmeent(self, segment: GPXTrackSegment) -> None:
+        """Add a new segment ot the track
+
+        :param segment: GPXTracksegment to be added
+        """
         self.track.segments.append(segment)
         logger.info("Added segment with postition: %s", len(self.track.segments))
 
     def get_xml(self, name: None | str = None, email: None | str = None) -> str:
+        """Get track as .gpx file data
+
+        :param name: Optional author name to be added to gpx file, defaults to None
+        :param email: Optional auther e-mail address to be added to the gpx file,
+            defaults to None
+
+        :return: Content of a gpx file
+        """
         gpx = GPX()
 
         gpx.tracks = [self.track]
@@ -118,12 +135,12 @@ class Track(ABC):
         """
         Get overall metrics for a segment
 
-        Args:
-            n_segment: Index of the segment the overview should be generated for
+        :param n_segment: Index of the segment the overview should be generated for,
+            default to 0
 
-        Returns: A SegmentOverview object containing the metrics moving time and
-        distance, total time and distance, maximum and average speed and elevation and
-        cummulated uphill, downholl elevation
+        :returns: A SegmentOverview object containing the metrics moving time and
+            distance, total time and distance, maximum and average speed and elevation
+            and cummulated uphill, downholl elevation
         """
         (
             time,
@@ -205,8 +222,9 @@ class Track(ABC):
         :param n_segment: Index of the segment
         :param latitude: Latitude to check
         :param longitude: Longitude to check
+
         :return: Tuple containg the point as GPXTrackPoint, the distance from
-        the passed coordinates and the index in the segment
+            the passed coordinates and the index in the segment
         """
         return get_point_distance(self.track, n_segment, latitude, longitude)
 
@@ -227,7 +245,8 @@ class Track(ABC):
         Get average distance between points in the track.
 
         :param threshold: Minimum distance between points required to  be used for the
-        average, defaults to 10
+            average, defaults to 10
+
         :return: Average distance
         """
         return self._get_aggregated_pp_distance("average", threshold)
@@ -240,7 +259,8 @@ class Track(ABC):
 
         :param n_segment: Index of the segement to process, defaults to 0
         :param threshold: Minimum distance between points required to  be used for the
-        average, defaults to 10
+            average, defaults to 10
+
         :return: Average distance
         """
         return self._get_aggregated_pp_distance_in_segment(
@@ -252,7 +272,8 @@ class Track(ABC):
         Get maximum distance between points in the track.
 
         :param threshold: Minimum distance between points required to  be used for the
-        maximum, defaults to 10
+            maximum, defaults to 10
+
         :return: Maximum distance
         """
         return self._get_aggregated_pp_distance("max", threshold)
@@ -265,7 +286,8 @@ class Track(ABC):
 
         :param n_segment: Index of the segement to process, defaults to 0
         :param threshold: Minimum distance between points required to  be used for the
-        maximum, defaults to 10
+            maximum, defaults to 10
+
         :return: Maximum distance
         """
         return self._get_aggregated_pp_distance_in_segment("max", n_segment, threshold)
@@ -343,6 +365,7 @@ class Track(ABC):
         """Get processed data for the segmeent with passed index as DataFrame
 
         :param n_segment: Index of the segement, defaults to 0
+
         :return: DataFrame with segmenet data
         """
         _, _, _, _, data = self._get_processed_segment_data(n_segment)
@@ -372,6 +395,7 @@ class Track(ABC):
         between each point pair according to the passed spacing parameter
 
         :param spacing: Minimum distance between points added by the interpolation
+
         :param n_segment: segment in the track to use, defaults to 0
         """
         self.track.segments[n_segment] = interpolate_segment(
@@ -394,6 +418,7 @@ class Track(ABC):
         segement with the passed index.
 
         :param n_segment: Index of the segement, defaults to 0
+
         :return: tuple with coordinates (latitude, longitude), times and elevations
         """
         coords = []
@@ -452,6 +477,25 @@ class Track(ABC):
         max_queue_normalize: int = 5,
         merge_subsegments: int = 5,
     ) -> Sequence[tuple[Track, float, bool]]:
+        """Find overlap of a segment of the track with a segment in another track.
+
+        :param n_segment: Segment in the track that sould be used as base for the
+            comparison
+        :param match_track: Track object containing the segment to be matched
+        :param match_track_segment: Segment on the passed track that should be matched
+            to the segment in this track, defaults to 0
+        :param width: Width (in meters) of the grid that will be filled to estimate
+            the overalp , defaults to 50
+        :param overlap_threshold: Minimum overlap (as fracrtion) required to return the
+            overlap data, defaults to 0.75
+        :param max_queue_normalize: Minimum number of successive points in the segment
+            between two points falling into same plate bin, defaults to 5
+        :param merge_subsegments: Number of points between sub segments allowed
+            for merging the segments, defaults to 5
+
+        :return: Tuple containing a Track with the overlapping points, the overlap in
+            percent, and the direction of the overlap
+        """
         max_distance_self = self.get_max_pp_distance_in_segment(n_segment)
 
         segment_self = self.track.segments[n_segment]
@@ -508,26 +552,34 @@ class Track(ABC):
     ) -> Figure:
         """
         Visualize the full track or a single segment.
-        profile: Elevation profile of the track. May be enhanced with additional
-        information like Velocity, Heartrate, Cadence, and Power. Pass keyword args
-        for track_analyzer.visualize.plot_track_2d
-        profile-slope: Elevation profile with slopes between points. Use the
-        reduce_pp_intervals argument to reduce the number of slope intervals.
-        Pass keyword args for track_analyzer.visualize.plot_track_with_slope
-        map-line: Visualize coordinates on the map
-        Pass keyword args for track_analyzer.visualize.plot_track_line_on_map
-        map-line-enhanced: Visualize coordinates on the map. Enhance with additional
-        information like Elevation, Velocity, Heartrate, Cadence, and Power.
-        Pass keyword args for track_analyzer.visualize.plot_track_enriched_on_map
-        map-segments: Visualize coordinates on the map split into segments.
-        Pass keyword args for track_analyzer.visualize.plot_segments_on_map
 
-        :param kind: Kind of plot, choose from profile, profile-slope, map-line,
-        map-line-enhanced, map-segments
+        :param kind: Kind of plot to be generated
+
+            - profile:
+                Elevation profile of the track. May be enhanced with additional
+                information like Velocity, Heartrate, Cadence, and Power. Pass keyword
+                args for :func:`~geo_track_analyzer.visualize.plot_track_2d`
+            - profile-slope:
+                Elevation profile with slopes between points. Use the
+                reduce_pp_intervals argument to reduce the number of slope intervals.
+                Pass keyword args for
+                :func:`~geo_track_analyzer.visualize.plot_track_with_slope`
+            - map-line:
+                Visualize coordinates on the map. Pass keyword args for
+                :func:`~geo_track_analyzer.visualize.plot_track_line_on_map`
+            - map-line-enhanced:
+                Visualize coordinates on the map. Enhance with additional
+                information like Elevation, Velocity, Heartrate, Cadence, and Power.
+                Pass keyword args for
+                :func:`~geo_track_analyzer.visualize.plot_track_enriched_on_map`
+            - map-segments:
+                Visualize coordinates on the map split into segments. Pass keyword args
+                for :func:`~geo_track_analyzer.visualize.plot_segments_on_map`
         :param segment: Select a specific segment, defaults to None
         :param reduce_pp_intervals: Optionally pass a distance in m which is used to
-        reduce the points in a track, defaults to None
+            reduce the points in a track, defaults to None
         :raises VisualizationSetupError: If the plot prequisites are not met
+
         :return: Figure (plotly)
         """
         valid_kinds = [
@@ -590,7 +642,8 @@ class Track(ABC):
 
         :param coords: Latitude, Longitude point at which the split should be made
         :param distance_threshold: Maximum distance between coords and closest point,
-        defaults to 20
+            defaults to 20
+
         :raises TrackTransformationError: If distance exceeds threshold
         """
         lat, long = coords
@@ -618,6 +671,8 @@ class Track(ABC):
 
 @final
 class GPXFileTrack(Track):
+    """Track that should be initialized by loading a .gpx file"""
+
     def __init__(
         self,
         gpx_file: str,
@@ -625,13 +680,16 @@ class GPXFileTrack(Track):
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
     ) -> None:
-        """
-        Initialize a Track object from a gpx file
+        """Initialize a Track object from a gpx file
 
-        Args:
-            gpx_file: Path to the gpx file.
-            n_track: Index of track in the gpx file.
+        :param gpx_file: Path to the gpx file.
+        :param n_track: Index of track in the gpx file, defaults to 0
+        :param stopped_speed_threshold: Minium speed required for a point to be count
+            as moving, defaults to 1
+        :param max_speed_percentile: Points with speed outside of the percentile are not
+            counted when analyzing the track, defaults to 95
         """
+
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
             max_speed_percentile=max_speed_percentile,
@@ -655,6 +713,8 @@ class GPXFileTrack(Track):
 
 @final
 class ByteTrack(Track):
+    """Track that should be initialized from a byte stream"""
+
     def __init__(
         self,
         bytefile: bytes,
@@ -662,6 +722,15 @@ class ByteTrack(Track):
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
     ) -> None:
+        """Initialize a Track object from a gpx file
+
+        :param bytefile: Bytestring of a gpx file
+        :param n_track: Index of track in the gpx file, defaults to 0
+        :param stopped_speed_threshold: Minium speed required for a point to be count
+            as moving, defaults to 1
+        :param max_speed_percentile: Points with speed outside of the percentile are not
+            counted when analyzing the track, defaults to 95
+        """
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
             max_speed_percentile=max_speed_percentile,
@@ -678,6 +747,8 @@ class ByteTrack(Track):
 
 @final
 class PyTrack(Track):
+    """Track that should be initialized from python objects"""
+
     def __init__(
         self,
         points: list[tuple[float, float]],
@@ -697,8 +768,12 @@ class PyTrack(Track):
         :param heartrate: Optional list of heartrate values for each point
         :param cadence: Optional list of cadence values for each point
         :param power: Optional list of power values for each point
+        :param stopped_speed_threshold: Minium speed required for a point to be count
+            as moving, defaults to 1
+        :param max_speed_percentile: Points with speed outside of the percentile are not
+            counted when analyzing the track, defaults to 95
         :raises TrackInitializationError: Raised if number of elevation, time, heatrate,
-        or cadence values do not match passed points
+            or cadence values do not match passed points
         """
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
@@ -827,12 +902,24 @@ class PyTrack(Track):
 
 @final
 class SegmentTrack(Track):
+    """
+    Track that should be initialized by loading a PGXTrackSegment object
+    """
+
     def __init__(
         self,
         segment: GPXTrackSegment,
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
     ) -> None:
+        """Wrap a GPXTrackSegment into a Track object
+
+        :param segment: GPXTrackSegment
+        :param stopped_speed_threshold: Minium speed required for a point to be count
+            as moving, defaults to 1
+        :param max_speed_percentile: Points with speed outside of the percentile are not
+            counted when analyzing the track, defaults to 95
+        """
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
             max_speed_percentile=max_speed_percentile,
@@ -853,15 +940,22 @@ class SegmentTrack(Track):
 
 @final
 class FITTrack(Track):
+    """Track that should be initialized by loading a .fit file"""
+
     def __init__(
         self,
         source: str | bytes,
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
     ) -> None:
-        """
-        Load a .fit file and extract the data into a Track object.
+        """Load a .fit file and extract the data into a Track object.
         NOTE: Tested with Wahoo devices only
+
+        :param source: Patch to fit file or byte representation of fit file
+        :param stopped_speed_threshold: Minium speed required for a point to be count
+            as moving, defaults to 1
+        :param max_speed_percentile: Points with speed outside of the percentile are not
+            counted when analyzing the track, defaults to 95
         """
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,

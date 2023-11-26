@@ -6,20 +6,35 @@ from gpxpy.gpx import GPXTrackPoint
 
 @dataclass
 class Position2D:
+    """Position in a 2D latitude / longitude space"""
+
     latitude: float
+    """Latitude of the point"""
+
     longitude: float
+    """Longitude of the point"""
 
 
 @dataclass
 class Position3D(Position2D):
+    """Position in a 3D latitude / longitude / elevation space"""
+
     elevation: None | float
+    """Elevation of the point"""
 
 
 @dataclass
 class ElevationMetrics:
+    """Collection of elevation related metrics"""
+
     uphill: float
+    """Upill elevation in m"""
+
     downhill: float
+    """Downhill elevation in m"""
+
     slopes: list[float]
+    """Slopes between points in a uphill/downhill section"""
 
 
 @dataclass
