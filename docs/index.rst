@@ -30,4 +30,5 @@ Contents
 .. toctree::
    usage
    visualizations
+   comparison
    api

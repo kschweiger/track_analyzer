@@ -13,6 +13,8 @@ To use Geo-Track-Analyzer, first install it using pip:
 Analyze geospacial tracks
 -------------------------
 
+The focus of this package lies on analyzing and visualizing tracks of cycling or similar activities. Depending on the usecase settings like ``stopped_speed_threshold`` or ``max_speed_percentile`` may not be appropriate.
+
 Initialize a track
 ~~~~~~~~~~~~~~~~~~
 
