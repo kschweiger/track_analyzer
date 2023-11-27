@@ -24,6 +24,14 @@ logger = logging.getLogger(__name__)
 def check_segment_bound_overlap(
     reference_segments: GPXTrackSegment, segments: list[GPXTrackSegment]
 ) -> list[bool]:
+    """Check if segments are within the bounds of a reference segment
+
+    :param reference_segments: Segment defining the bounds inside which the other
+        segments should be contained
+    :param segments: Segments to be checked
+
+    :return: List of bools specifying if the segments are inside the refence bounds
+    """
     reference_bounds = reference_segments.get_bounds()
 
     check_bounds(reference_bounds)
@@ -65,6 +73,7 @@ def derive_plate_bins(
     :param bounds_max_longitude: Maximum longitude of the grid. Bins may end with
                                  larger values than passed here dependeing on the
                                  grid width
+
     :return: tuple with lists let/long values for the bin is latitude and longitude
              direction.
     """
@@ -159,6 +168,7 @@ def convert_segment_to_plate(
                       dependes on the chosen gridwidth.
     :param max_queue_normalize: Number of previous bins considered when normalize is
                                 set to true.
+
     :return: 2DArray representing the plate.
     """
     bins_latitude, bins_longitude = derive_plate_bins(
@@ -246,10 +256,11 @@ def get_segment_overlap(
     :param grid_width: Width (in meters) of the grid that will be filled to estimate
                        the overalp.
     :param max_queue_normalize: Minimum number of successive points in the segment
-                                between to points falling into same plate bin.
+                                between two points falling into same plate bin.
     :param allow_points_outside_bounds: Number of points between sub segments allowed
                                         for merging the segments.
     :param overlap_threshold: Minimum overlap required to return the overlap data.
+
     :return: list of SegmentOverlap objects.
     """
     bounds_match = match_segment.get_bounds()

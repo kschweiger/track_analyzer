@@ -28,6 +28,35 @@ def plot_track_2d(
     slider: bool = False,
     **kwargs,
 ) -> Figure:
+    """Elevation profile of the track. May be enhanced with additional information like
+    Velocity, Heartrate, Cadence, and Power.
+
+    :param data: DataFrame containing track data
+    :param include_velocity: Plot velocity as second y-axis, defaults to False
+    :param include_heartrate: Plot heart rate as second y-axis, defaults to False
+    :param include_cadence: Plot cadence as second y-axis, defaults to False
+    :param include_power: Plot power as second y-axis, defaults to False
+    :param strict_data_selection: If True only included that passing the minimum speed
+        requirements of the Track, defaults to False
+    :param height: Height of the plot, defaults to 600
+    :param width: Width of the plot, defaults to 1800
+    :param pois: Optional lat/long coordingates to add to the plot as points of
+        interest, defaults to None
+    :param color_elevation: Color of the elevation as str interpretable by plotly,
+        defaults to None
+    :param color_additional_trace: Color of velocity/heartrate/cadence/power as str
+        interpretable by plotly, defaults to None
+    :param color_poi: Color of the pois as str interpretable by plotly, defaults to None
+    :param slider: Should a slide be included in the plot to zoom into the x-axis,
+        defaults to False
+    :raises VisualizationSetupError: If more than one of include_velocity,
+        include_heartrate, include_cadence, or include_power was set the True
+    :raises VisualizationSetupError: If elevation data is missing in the data
+    :raises VisualizationSetupError: If the data requried for the additional data is
+       missing
+
+    :return: Plotly Figure object.
+    """
     if (
         sum(
             [
@@ -197,6 +226,23 @@ def plot_track_with_slope(
     slider: bool = False,
     **kwargs,
 ) -> Figure:
+    """Elevation profile with slopes between points.
+
+    :param data: DataFrame containing track data
+    :param slope_gradient_color: Colors for the min, neutral, max slope values,
+        defaults to ("#0000FF", "#00FF00", "#FF0000")
+    :param min_slope: Minimum slope for the gradient also acts as floor for the
+        displayed slope, defaults to -18
+    :param max_slope: Maximum  slope for the gradient also acts as ceiling for the
+        displayed slope, defaults to 18
+    :param height: Height of the plot, defaults to 600
+    :param width: Width of the plot, defaults to 1800
+    :param slider: Should a slide be included in the plot to zoom into the x-axis,
+        defaults to False
+    :raises VisualizationSetupError: If elevation data is missing in the data
+
+    :return: Plotly Figure object
+    """
     slope_color_map = get_slope_colors(
         *slope_gradient_color, max_slope=max_slope, min_slope=min_slope
     )
