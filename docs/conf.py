@@ -24,6 +24,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.autosummary",
+    "sphinx.ext.githubpages",
     "sphinx_rtd_theme",
 ]
 autodoc_default_options = {"members": True, "inherited-members": True}
