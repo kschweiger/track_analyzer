@@ -1,0 +1,30 @@
+﻿geo\_track\_analyzer.model.Position3D
+=====================================
+
+.. currentmodule:: geo_track_analyzer.model
+
+.. autoclass:: Position3D
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Position3D.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Position3D.elevation
+      ~Position3D.latitude
+      ~Position3D.longitude
+   
+   

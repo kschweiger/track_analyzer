@@ -1,0 +1,45 @@
+﻿geo\_track\_analyzer.PyTrack
+============================
+
+.. currentmodule:: geo_track_analyzer
+
+.. autoclass:: PyTrack
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PyTrack.__init__
+      ~PyTrack.add_segmeent
+      ~PyTrack.find_overlap_with_segment
+      ~PyTrack.get_avg_pp_distance
+      ~PyTrack.get_avg_pp_distance_in_segment
+      ~PyTrack.get_closest_point
+      ~PyTrack.get_max_pp_distance
+      ~PyTrack.get_max_pp_distance_in_segment
+      ~PyTrack.get_point_data_in_segmnet
+      ~PyTrack.get_segment_data
+      ~PyTrack.get_segment_overview
+      ~PyTrack.get_track_data
+      ~PyTrack.get_track_overview
+      ~PyTrack.get_xml
+      ~PyTrack.interpolate_points_in_segment
+      ~PyTrack.plot
+      ~PyTrack.split
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~PyTrack.n_segments
+      ~PyTrack.track
+   
+   

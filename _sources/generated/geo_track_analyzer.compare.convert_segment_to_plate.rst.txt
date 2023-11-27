@@ -1,0 +1,6 @@
+﻿geo\_track\_analyzer.compare.convert\_segment\_to\_plate
+========================================================
+
+.. currentmodule:: geo_track_analyzer.compare
+
+.. autofunction:: convert_segment_to_plate

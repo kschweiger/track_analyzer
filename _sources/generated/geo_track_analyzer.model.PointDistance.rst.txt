@@ -1,0 +1,32 @@
+﻿geo\_track\_analyzer.model.PointDistance
+========================================
+
+.. currentmodule:: geo_track_analyzer.model
+
+.. autoclass:: PointDistance
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PointDistance.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~PointDistance.point
+      ~PointDistance.distance
+      ~PointDistance.point_idx_abs
+      ~PointDistance.segment_idx
+      ~PointDistance.segment_point_idx
+   
+   

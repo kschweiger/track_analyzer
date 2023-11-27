@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference &mdash; Geo-Track-Analyzer 0.4.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=c87aa342"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="geo_track_analyzer.GPXFileTrack" href="generated/geo_track_analyzer.GPXFileTrack.html" />
+    <link rel="prev" title="Track comparison" href="comparison.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Geo-Track-Analyzer
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="visualizations.html">Track visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="comparison.html">Track comparison</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#tracks">Tracks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.GPXFileTrack.html">geo_track_analyzer.GPXFileTrack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.FITTrack.html">geo_track_analyzer.FITTrack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.PyTrack.html">geo_track_analyzer.PyTrack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.ByteTrack.html">geo_track_analyzer.ByteTrack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.SegmentTrack.html">geo_track_analyzer.SegmentTrack</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#model">Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.model.Position2D.html">geo_track_analyzer.model.Position2D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.model.Position3D.html">geo_track_analyzer.model.Position3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.model.ElevationMetrics.html">geo_track_analyzer.model.ElevationMetrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.model.SegmentOverview.html">geo_track_analyzer.model.SegmentOverview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.model.SegmentOverlap.html">geo_track_analyzer.model.SegmentOverlap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.model.PointDistance.html">geo_track_analyzer.model.PointDistance</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#enhancer">Enhancer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.OpenTopoElevationEnhancer.html">geo_track_analyzer.OpenTopoElevationEnhancer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.OpenElevationEnhancer.html">geo_track_analyzer.OpenElevationEnhancer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.get_enhancer.html">geo_track_analyzer.get_enhancer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#visualizations">Visualizations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.visualize.plot_track_3d.html">geo_track_analyzer.visualize.plot_track_3d</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.visualize.plot_track_line_on_map.html">geo_track_analyzer.visualize.plot_track_line_on_map</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.visualize.plot_track_enriched_on_map.html">geo_track_analyzer.visualize.plot_track_enriched_on_map</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.visualize.plot_track_2d.html">geo_track_analyzer.visualize.plot_track_2d</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.visualize.plot_track_with_slope.html">geo_track_analyzer.visualize.plot_track_with_slope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.visualize.plot_segments_on_map.html">geo_track_analyzer.visualize.plot_segments_on_map</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#track-comparisons">Track comparisons</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.compare.check_segment_bound_overlap.html">geo_track_analyzer.compare.check_segment_bound_overlap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.compare.get_segment_overlap.html">geo_track_analyzer.compare.get_segment_overlap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/geo_track_analyzer.compare.convert_segment_to_plate.html">geo_track_analyzer.compare.convert_segment_to_plate</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Geo-Track-Analyzer</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">API Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h1>
+<section id="tracks">
+<span id="explanation-api"></span><h2>Tracks<a class="headerlink" href="#tracks" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/geo_track_analyzer.GPXFileTrack.html#geo_track_analyzer.GPXFileTrack" title="geo_track_analyzer.GPXFileTrack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.GPXFileTrack</span></code></a>(gpx_file[, ...])</p></td>
+<td><p>Track that should be initialized by loading a .gpx file</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/geo_track_analyzer.FITTrack.html#geo_track_analyzer.FITTrack" title="geo_track_analyzer.FITTrack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.FITTrack</span></code></a>(source[, ...])</p></td>
+<td><p>Track that should be initialized by loading a .fit file</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/geo_track_analyzer.PyTrack.html#geo_track_analyzer.PyTrack" title="geo_track_analyzer.PyTrack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.PyTrack</span></code></a>(points, ...[, ...])</p></td>
+<td><p>Track that should be initialized from python objects</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/geo_track_analyzer.ByteTrack.html#geo_track_analyzer.ByteTrack" title="geo_track_analyzer.ByteTrack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.ByteTrack</span></code></a>(bytefile[, ...])</p></td>
+<td><p>Track that should be initialized from a byte stream</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/geo_track_analyzer.SegmentTrack.html#geo_track_analyzer.SegmentTrack" title="geo_track_analyzer.SegmentTrack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.SegmentTrack</span></code></a>(segment[, ...])</p></td>
+<td><p>Track that should be initialized by loading a PGXTrackSegment object</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="model">
+<h2>Model<a class="headerlink" href="#model" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/geo_track_analyzer.model.Position2D.html#geo_track_analyzer.model.Position2D" title="geo_track_analyzer.model.Position2D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.model.Position2D</span></code></a>(...)</p></td>
+<td><p>Position in a 2D latitude / longitude space</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/geo_track_analyzer.model.Position3D.html#geo_track_analyzer.model.Position3D" title="geo_track_analyzer.model.Position3D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.model.Position3D</span></code></a>(...)</p></td>
+<td><p>Position in a 3D latitude / longitude / elevation space</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/geo_track_analyzer.model.ElevationMetrics.html#geo_track_analyzer.model.ElevationMetrics" title="geo_track_analyzer.model.ElevationMetrics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.model.ElevationMetrics</span></code></a>(...)</p></td>
+<td><p>Collection of elevation related metrics</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/geo_track_analyzer.model.SegmentOverview.html#geo_track_analyzer.model.SegmentOverview" title="geo_track_analyzer.model.SegmentOverview"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.model.SegmentOverview</span></code></a>(...)</p></td>
+<td><p>Collection of metrics for a Segment</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/geo_track_analyzer.model.SegmentOverlap.html#geo_track_analyzer.model.SegmentOverlap" title="geo_track_analyzer.model.SegmentOverlap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.model.SegmentOverlap</span></code></a>(...)</p></td>
+<td><p>Represent the overlap between two segments</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/geo_track_analyzer.model.PointDistance.html#geo_track_analyzer.model.PointDistance" title="geo_track_analyzer.model.PointDistance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.model.PointDistance</span></code></a>(...)</p></td>
+<td><p>Represents a distance calculation to a point in a GPX track.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="enhancer">
+<h2>Enhancer<a class="headerlink" href="#enhancer" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/geo_track_analyzer.OpenTopoElevationEnhancer.html#geo_track_analyzer.OpenTopoElevationEnhancer" title="geo_track_analyzer.OpenTopoElevationEnhancer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.OpenTopoElevationEnhancer</span></code></a>([...])</p></td>
+<td><p>Use the/a OpenElevation API (<a class="reference external" href="https://opentopodata.org">https://opentopodata.org</a>) to enhance a GPX track with elevation information.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/geo_track_analyzer.OpenElevationEnhancer.html#geo_track_analyzer.OpenElevationEnhancer" title="geo_track_analyzer.OpenElevationEnhancer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.OpenElevationEnhancer</span></code></a>([url])</p></td>
+<td><p>Use the/a OpenElevation API (<a class="reference external" href="https://open-elevation.com">https://open-elevation.com</a>) to enhance a GPX track with elevation information.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/geo_track_analyzer.get_enhancer.html#geo_track_analyzer.get_enhancer" title="geo_track_analyzer.get_enhancer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.get_enhancer</span></code></a>(name)</p></td>
+<td><p>Get a Enhance object for a specific enpoint by passing a distinct name</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="visualizations">
+<h2>Visualizations<a class="headerlink" href="#visualizations" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/geo_track_analyzer.visualize.plot_track_3d.html#geo_track_analyzer.visualize.plot_track_3d" title="geo_track_analyzer.visualize.plot_track_3d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.visualize.plot_track_3d</span></code></a>(data)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/geo_track_analyzer.visualize.plot_track_line_on_map.html#geo_track_analyzer.visualize.plot_track_line_on_map" title="geo_track_analyzer.visualize.plot_track_line_on_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.visualize.plot_track_line_on_map</span></code></a>(data, *)</p></td>
+<td><p>Plot the track line on a map.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/geo_track_analyzer.visualize.plot_track_enriched_on_map.html#geo_track_analyzer.visualize.plot_track_enriched_on_map" title="geo_track_analyzer.visualize.plot_track_enriched_on_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.visualize.plot_track_enriched_on_map</span></code></a>(data, *)</p></td>
+<td><p>Plot the track line enriched with additional information (as z-axis) on a map.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/geo_track_analyzer.visualize.plot_track_2d.html#geo_track_analyzer.visualize.plot_track_2d" title="geo_track_analyzer.visualize.plot_track_2d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.visualize.plot_track_2d</span></code></a>(data, *)</p></td>
+<td><p>Elevation profile of the track.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/geo_track_analyzer.visualize.plot_track_with_slope.html#geo_track_analyzer.visualize.plot_track_with_slope" title="geo_track_analyzer.visualize.plot_track_with_slope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.visualize.plot_track_with_slope</span></code></a>(data, *)</p></td>
+<td><p>Elevation profile with slopes between points.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/geo_track_analyzer.visualize.plot_segments_on_map.html#geo_track_analyzer.visualize.plot_segments_on_map" title="geo_track_analyzer.visualize.plot_segments_on_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.visualize.plot_segments_on_map</span></code></a>(data, *)</p></td>
+<td><p>Plot track line on map.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="track-comparisons">
+<h2>Track comparisons<a class="headerlink" href="#track-comparisons" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/geo_track_analyzer.compare.check_segment_bound_overlap.html#geo_track_analyzer.compare.check_segment_bound_overlap" title="geo_track_analyzer.compare.check_segment_bound_overlap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.compare.check_segment_bound_overlap</span></code></a>(...)</p></td>
+<td><p>Check if segments are within the bounds of a reference segment</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/geo_track_analyzer.compare.get_segment_overlap.html#geo_track_analyzer.compare.get_segment_overlap" title="geo_track_analyzer.compare.get_segment_overlap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.compare.get_segment_overlap</span></code></a>(...)</p></td>
+<td><p>Compare the tracks of two segements and caclulate the overlap.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/geo_track_analyzer.compare.convert_segment_to_plate.html#geo_track_analyzer.compare.convert_segment_to_plate" title="geo_track_analyzer.compare.convert_segment_to_plate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geo_track_analyzer.compare.convert_segment_to_plate</span></code></a>(...)</p></td>
+<td><p>Takes a GPXSegement and fills bins of a 2D array (called plate) with the passed bin width.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="comparison.html" class="btn btn-neutral float-left" title="Track comparison" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="generated/geo_track_analyzer.GPXFileTrack.html" class="btn btn-neutral float-right" title="geo_track_analyzer.GPXFileTrack" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Korbinian Schweiger.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

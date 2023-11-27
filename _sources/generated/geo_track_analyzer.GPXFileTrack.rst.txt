@@ -1,0 +1,45 @@
+﻿geo\_track\_analyzer.GPXFileTrack
+=================================
+
+.. currentmodule:: geo_track_analyzer
+
+.. autoclass:: GPXFileTrack
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GPXFileTrack.__init__
+      ~GPXFileTrack.add_segmeent
+      ~GPXFileTrack.find_overlap_with_segment
+      ~GPXFileTrack.get_avg_pp_distance
+      ~GPXFileTrack.get_avg_pp_distance_in_segment
+      ~GPXFileTrack.get_closest_point
+      ~GPXFileTrack.get_max_pp_distance
+      ~GPXFileTrack.get_max_pp_distance_in_segment
+      ~GPXFileTrack.get_point_data_in_segmnet
+      ~GPXFileTrack.get_segment_data
+      ~GPXFileTrack.get_segment_overview
+      ~GPXFileTrack.get_track_data
+      ~GPXFileTrack.get_track_overview
+      ~GPXFileTrack.get_xml
+      ~GPXFileTrack.interpolate_points_in_segment
+      ~GPXFileTrack.plot
+      ~GPXFileTrack.split
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GPXFileTrack.n_segments
+      ~GPXFileTrack.track
+   
+   

@@ -1,0 +1,30 @@
+﻿geo\_track\_analyzer.model.ElevationMetrics
+===========================================
+
+.. currentmodule:: geo_track_analyzer.model
+
+.. autoclass:: ElevationMetrics
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ElevationMetrics.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ElevationMetrics.uphill
+      ~ElevationMetrics.downhill
+      ~ElevationMetrics.slopes
+   
+   

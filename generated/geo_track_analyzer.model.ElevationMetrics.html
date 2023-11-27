@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geo_track_analyzer.model.ElevationMetrics &mdash; Geo-Track-Analyzer 0.4.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=c87aa342"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="geo_track_analyzer.model.SegmentOverview" href="geo_track_analyzer.model.SegmentOverview.html" />
+    <link rel="prev" title="geo_track_analyzer.model.Position3D" href="geo_track_analyzer.model.Position3D.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #343131" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Geo-Track-Analyzer
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../visualizations.html">Track visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../comparison.html">Track comparison</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#tracks">Tracks</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#model">Model</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="geo_track_analyzer.model.Position2D.html">geo_track_analyzer.model.Position2D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geo_track_analyzer.model.Position3D.html">geo_track_analyzer.model.Position3D</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">geo_track_analyzer.model.ElevationMetrics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#geo_track_analyzer.model.ElevationMetrics"><code class="docutils literal notranslate"><span class="pre">ElevationMetrics</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geo_track_analyzer.model.SegmentOverview.html">geo_track_analyzer.model.SegmentOverview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geo_track_analyzer.model.SegmentOverlap.html">geo_track_analyzer.model.SegmentOverlap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geo_track_analyzer.model.PointDistance.html">geo_track_analyzer.model.PointDistance</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#enhancer">Enhancer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#visualizations">Visualizations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#track-comparisons">Track comparisons</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #343131" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Geo-Track-Analyzer</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API Reference</a></li>
+      <li class="breadcrumb-item active">geo_track_analyzer.model.ElevationMetrics</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/generated/geo_track_analyzer.model.ElevationMetrics.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="geo-track-analyzer-model-elevationmetrics">
+<h1>geo_track_analyzer.model.ElevationMetrics<a class="headerlink" href="#geo-track-analyzer-model-elevationmetrics" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="geo_track_analyzer.model.ElevationMetrics">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geo_track_analyzer.model.</span></span><span class="sig-name descname"><span class="pre">ElevationMetrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uphill</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">downhill</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slopes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geo_track_analyzer.model.ElevationMetrics" title="Link to this definition"></a></dt>
+<dd><p>Collection of elevation related metrics</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="geo_track_analyzer.model.ElevationMetrics.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uphill</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">downhill</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slopes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#geo_track_analyzer.model.ElevationMetrics.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geo_track_analyzer.model.ElevationMetrics.__init__" title="geo_track_analyzer.model.ElevationMetrics.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(uphill, downhill, slopes)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geo_track_analyzer.model.ElevationMetrics.uphill" title="geo_track_analyzer.model.ElevationMetrics.uphill"><code class="xref py py-obj docutils literal notranslate"><span class="pre">uphill</span></code></a></p></td>
+<td><p>Upill elevation in m</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#geo_track_analyzer.model.ElevationMetrics.downhill" title="geo_track_analyzer.model.ElevationMetrics.downhill"><code class="xref py py-obj docutils literal notranslate"><span class="pre">downhill</span></code></a></p></td>
+<td><p>Downhill elevation in m</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geo_track_analyzer.model.ElevationMetrics.slopes" title="geo_track_analyzer.model.ElevationMetrics.slopes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">slopes</span></code></a></p></td>
+<td><p>Slopes between points in a uphill/downhill section</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geo_track_analyzer.model.ElevationMetrics.downhill">
+<span class="sig-name descname"><span class="pre">downhill</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#geo_track_analyzer.model.ElevationMetrics.downhill" title="Link to this definition"></a></dt>
+<dd><p>Downhill elevation in m</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geo_track_analyzer.model.ElevationMetrics.slopes">
+<span class="sig-name descname"><span class="pre">slopes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#geo_track_analyzer.model.ElevationMetrics.slopes" title="Link to this definition"></a></dt>
+<dd><p>Slopes between points in a uphill/downhill section</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geo_track_analyzer.model.ElevationMetrics.uphill">
+<span class="sig-name descname"><span class="pre">uphill</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#geo_track_analyzer.model.ElevationMetrics.uphill" title="Link to this definition"></a></dt>
+<dd><p>Upill elevation in m</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="geo_track_analyzer.model.Position3D.html" class="btn btn-neutral float-left" title="geo_track_analyzer.model.Position3D" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="geo_track_analyzer.model.SegmentOverview.html" class="btn btn-neutral float-right" title="geo_track_analyzer.model.SegmentOverview" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Korbinian Schweiger.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

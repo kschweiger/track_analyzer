@@ -1,0 +1,41 @@
+﻿geo\_track\_analyzer.model.SegmentOverview
+==========================================
+
+.. currentmodule:: geo_track_analyzer.model
+
+.. autoclass:: SegmentOverview
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~SegmentOverview.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SegmentOverview.moving_time_seconds
+      ~SegmentOverview.total_time_seconds
+      ~SegmentOverview.moving_distance
+      ~SegmentOverview.total_distance
+      ~SegmentOverview.max_velocity
+      ~SegmentOverview.avg_velocity
+      ~SegmentOverview.max_elevation
+      ~SegmentOverview.min_elevation
+      ~SegmentOverview.uphill_elevation
+      ~SegmentOverview.downhill_elevation
+      ~SegmentOverview.moving_distance_km
+      ~SegmentOverview.total_distance_km
+      ~SegmentOverview.max_velocity_kmh
+      ~SegmentOverview.avg_velocity_kmh
+   
+   

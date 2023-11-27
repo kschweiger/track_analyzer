@@ -1,0 +1,6 @@
+﻿geo\_track\_analyzer.visualize.plot\_segments\_on\_map
+======================================================
+
+.. currentmodule:: geo_track_analyzer.visualize
+
+.. autofunction:: plot_segments_on_map
