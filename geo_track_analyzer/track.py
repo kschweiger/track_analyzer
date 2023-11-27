@@ -555,26 +555,22 @@ class Track(ABC):
 
         :param kind: Kind of plot to be generated
 
-            - profile:
-                Elevation profile of the track. May be enhanced with additional
-                information like Velocity, Heartrate, Cadence, and Power. Pass keyword
-                args for :func:`~geo_track_analyzer.visualize.plot_track_2d`
-            - profile-slope:
-                Elevation profile with slopes between points. Use the
-                reduce_pp_intervals argument to reduce the number of slope intervals.
-                Pass keyword args for
-                :func:`~geo_track_analyzer.visualize.plot_track_with_slope`
-            - map-line:
-                Visualize coordinates on the map. Pass keyword args for
-                :func:`~geo_track_analyzer.visualize.plot_track_line_on_map`
-            - map-line-enhanced:
-                Visualize coordinates on the map. Enhance with additional
-                information like Elevation, Velocity, Heartrate, Cadence, and Power.
-                Pass keyword args for
-                :func:`~geo_track_analyzer.visualize.plot_track_enriched_on_map`
-            - map-segments:
-                Visualize coordinates on the map split into segments. Pass keyword args
-                for :func:`~geo_track_analyzer.visualize.plot_segments_on_map`
+            - profile: Elevation profile of the track. May be enhanced with additional
+              information like Velocity, Heartrate, Cadence, and Power. Pass keyword
+              args for :func:`~geo_track_analyzer.visualize.plot_track_2d`
+            - profile-slope: Elevation profile with slopes between points. Use the
+              reduce_pp_intervals argument to reduce the number of slope intervals.
+              Pass keyword args for
+              :func:`~geo_track_analyzer.visualize.plot_track_with_slope`
+            - map-line: Visualize coordinates on the map. Pass keyword args for
+              :func:`~geo_track_analyzer.visualize.plot_track_line_on_map`
+            - map-line-enhanced: Visualize coordinates on the map. Enhance with
+              additional information like Elevation, Velocity, Heartrate, Cadence, and
+              Power. Pass keyword args for
+              :func:`~geo_track_analyzer.visualize.plot_track_enriched_on_map`
+            - map-segments: Visualize coordinates on the map split into segments.
+              Pass keyword args for
+              :func:`~geo_track_analyzer.visualize.plot_segments_on_map`
         :param segment: Select a specific segment, defaults to None
         :param reduce_pp_intervals: Optionally pass a distance in m which is used to
             reduce the points in a track, defaults to None
