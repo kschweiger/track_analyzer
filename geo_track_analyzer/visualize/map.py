@@ -29,8 +29,24 @@ def plot_track_line_on_map(
     zoom: int = 13,
     height: None | int = None,
     width: None | int = None,
+    line_width: float = 2.5,
+    map_style: str = "open-street-map",
     **kwargs,
 ) -> Figure:
+    """
+    Plot the track line on a map.
+
+    :param data: DataFrame containing latitude and longitude data.
+    :param zoom: Zoom level for the map, defaults to 13
+    :param height: Height of the plot, defaults to None
+    :param width: Width of the plot, defaults to None
+    :param line_width: Width of the line on the map, defaults to 2.5
+    :param map_style: Valid map_style for plotly mapbox_style, defaults to
+        open-street-map
+    :param kwargs: Additional keyword arguments.
+
+    :return: Plotly Figure object.
+    """
     mask = data.moving
 
     center_lat, center_lon = center_geolocation(
@@ -45,8 +61,13 @@ def plot_track_line_on_map(
         height=height,
         width=width,
     )
-    fig.update_layout(mapbox_style="open-street-map")
-    fig.update_layout(margin={"r": 57, "t": 0, "l": 49, "b": 0})
+    fig.update_traces(
+        line=dict(width=line_width),
+    )
+    fig.update_layout(
+        mapbox_style=map_style,
+        margin={"r": 57, "t": 0, "l": 49, "b": 0},
+    )
 
     return fig
 
@@ -63,8 +84,29 @@ def plot_track_enriched_on_map(
     overwrite_color_gradient: None | tuple[str, str] = None,
     overwrite_unit_text: None | str = None,
     cbar_ticks: int = 5,
+    map_style: str = "open-street-map",
     **kwargs,
 ) -> Figure:
+    """
+    Plot the track line enriched with additional information (as z-axis) on a map.
+
+    :param data: DataFrame containing track data.
+    :param enrich_with_column: Column to enrich the track with, defaults to "elevation"
+    :param zoom: Zoom level for the map, defaults to 13
+    :param height: Height of the plot, defaults to None
+    :param width: Width of the plot, defaults to None
+    :param overwrite_color_gradient: Custom color gradient for the plot. Check
+        track_analyzer.visualize.constants for defaults, defaults to None
+    :param overwrite_unit_text: Custom unit text for the enrichment. Check
+        track_analyzer.visualize.constants for defaults, defaults to None
+    :param cbar_ticks: Number of color bar ticks, defaults to 5
+    :param map_style: Valid map_style for plotly mapbox_style, defaults to
+        open-street-map
+    :param kwargs: Additional keyword arguments.
+    :raises VisualizationSetupError: If no data is in passed enrich_with_column column
+
+    :return: Plotly Figure object.
+    """
     mask = data.moving
 
     plot_data = data[mask]
@@ -114,7 +156,9 @@ def plot_track_enriched_on_map(
             color_min, color_max = DEFAULT_COLOR_GRADIENT
     color_map = pd.Series(
         data=get_color_gradient(color_min, color_max, round(diff_abs) + 1),
-        index=range(int(color_column_values.min()), int(color_column_values.max()) + 1),
+        index=range(
+            round(color_column_values.min()), round(color_column_values.max()) + 1
+        ),
     )
 
     def color_mapper(value: float) -> str:
@@ -178,11 +222,11 @@ def plot_track_enriched_on_map(
 
     fig.add_trace(colorbar_trace)
 
-    fig.update_layout(mapbox_style="open-street-map")
+    fig.update_layout(mapbox_style=map_style)
     fig.update_layout(
         margin={"r": 57, "t": 5, "l": 49, "b": 5},
         mapbox={
-            "style": "open-street-map",
+            "style": map_style,
             "zoom": zoom,
             "center": {"lon": center_lon, "lat": center_lat},
         },
@@ -201,9 +245,28 @@ def plot_segments_on_map(
     zoom: int = 13,
     height: None | int = None,
     width: None | int = None,
+    line_width: float = 2.5,
     average_only: bool = True,
+    map_style: str = "open-street-map",
     **kwargs,
 ) -> Figure:
+    """
+    Plot track line on map. Segments are displayed individually.
+
+    :param data: DataFrame containing track segment data.
+    :param zoom: Zoom level for the map, defaults to 13
+    :param height: Height of the plot, defaults to None
+    :param width: Width of the plot, defaults to None
+    :param line_width: Width of the line on the map, defaults to 2.5
+    :param average_only: Flag to display averages only, defaults to True
+    :param map_style: Valid map_style for plotly mapbox_style, defaults to
+        open-street-map
+    :param kwargs: Additional keyword arguments.
+    :raises VisualizationSetupError: If no segment information is contained in the data
+    :raises VisualizationSetupError: If there are not two or more segments in the data
+
+    :return: Plotly Figure object.
+    """
     mask = data.moving
 
     plot_data = data[mask]
@@ -276,6 +339,7 @@ def plot_segments_on_map(
                 mode="lines",
                 hovertemplate="%{text} ",
                 text=len(frame) * [text],
+                line=dict(width=line_width),
                 name="",
             )
         )
@@ -283,7 +347,7 @@ def plot_segments_on_map(
     fig.update_layout(
         margin={"r": 57, "t": 5, "l": 49, "b": 5},
         mapbox={
-            "style": "open-street-map",
+            "style": map_style,
             "zoom": zoom,
             "center": {"lon": center_lon, "lat": center_lat},
         },

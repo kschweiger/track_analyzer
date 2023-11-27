@@ -6,7 +6,9 @@ ENRICH_UNITS: dict[str, str] = {
     "power": "W",
 }
 
-DEFAULT_COLOR_GRADIENT: tuple[str, str] = ("#00CC96", "#FECB52")
+# Based on plotly.express.colors.sequential.Plotly3
+DEFAULT_COLOR_GRADIENT: tuple[str, str] = ("#0508b8", "#fec3fe")
+
 COLOR_GRADIENTS: dict[str, tuple[str, str]] = {
     "heartrate": ("#636EFA", "#EF553B"),
 }

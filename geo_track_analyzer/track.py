@@ -379,6 +379,8 @@ class Track(ABC):
         )
 
         # Reset saved processed data
+        for key in self._processed_track_data.keys():
+            self._processed_track_data.pop(key)
         if n_segment in self._processed_segment_data:
             logger.debug(
                 "Deleting saved processed segment data for segment %s", n_segment
