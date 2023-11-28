@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 from math import acos, asin, atan2, cos, degrees, pi, sin, sqrt
-from typing import Callable, Dict, Union
+from typing import Callable, Dict, Literal, Type, TypeVar, Union
 from xml.etree.ElementTree import Element
 
 import coloredlogs
@@ -22,6 +22,8 @@ from geo_track_analyzer.model import (
 )
 
 logger = logging.getLogger(__name__)
+
+T = TypeVar("T", float, int)
 
 
 class ExtensionFieldElement(Element):
@@ -168,8 +170,51 @@ def center_geolocation(geolocations: list[tuple[float, float]]) -> tuple[float, 
     return lat_c * 180 / pi, lon_c * 180 / pi
 
 
-def interpolate_linear(
-    start: GPXTrackPoint, end: GPXTrackPoint, spacing: float
+def interpolate_linear(start_value: T, end_val: T, points: int) -> list[float]:
+    fracs = np.arange(0, points + 1)
+    return np.interp(fracs, [0, points], [start_value, end_val]).tolist()
+
+
+def interpolate_extension(
+    start: GPXTrackPoint,
+    end: GPXTrackPoint,
+    extension: str,
+    n_points: int,
+    interpolation_type: Literal["copy-forward", "meet-center", "linear"],
+    convert_type: Type[T],
+) -> list[None] | list[T]:
+    try:
+        value_start = convert_type(get_extension_value(start, extension))
+    except GPXPointExtensionError:
+        value_start = None
+    try:
+        value_end = convert_type(get_extension_value(end, extension))
+    except GPXPointExtensionError:
+        value_end = None
+
+    if value_start is None or value_end is None:
+        return [None for _ in range(n_points)]
+
+    if interpolation_type == "linear":
+        return [
+            convert_type(v)
+            for v in interpolate_linear(value_start, value_end, n_points - 1)
+        ]
+    elif interpolation_type == "copy-forward":
+        return [value_start for _ in range(n_points - 1)] + [value_end]
+    else:
+        n_second_half = n_points // 2
+        n_first_half = n_points - n_second_half
+        return [value_start for _ in range(n_first_half)] + [
+            value_end for _ in range(n_second_half)
+        ]
+
+
+def interpolate_points(
+    start: GPXTrackPoint,
+    end: GPXTrackPoint,
+    spacing: float,
+    copy_extensions: Literal["copy-forward", "meet-center", "linear"] = "copy-forward",
 ) -> None | list[GPXTrackPoint]:
     """
     Simple linear interpolation between GPXTrackPoint. Supports latitude, longitude
@@ -187,67 +232,85 @@ def interpolate_linear(
         "pp-distance %s | n_points interpol %s ", pp_distance, pp_distance // spacing
     )
 
-    fracs = np.arange(0, (pp_distance // spacing) + 1)
-    lat_int = np.interp(
-        fracs, [0, pp_distance // spacing], [start.latitude, end.latitude]
-    )
-    lng_int = np.interp(
-        fracs, [0, pp_distance // spacing], [start.longitude, end.longitude]
-    )
+    n_points: int = round(pp_distance // spacing)
+
+    lat_int = interpolate_linear(start.latitude, end.latitude, n_points)
+    lng_int = interpolate_linear(start.longitude, end.longitude, n_points)
 
     if start.elevation is None or end.elevation is None:
         elevation_int = len(lng_int) * [None]
     else:
-        elevation_int = np.interp(
-            fracs, [0, pp_distance // spacing], [start.elevation, end.elevation]
-        )
+        elevation_int = interpolate_linear(start.elevation, end.elevation, n_points)
 
     if start.time is None or end.time is None:
         time_int = len(lng_int) * [None]
     else:
-        time_int = np.interp(
-            fracs,
-            [0, pp_distance // spacing],
-            [0, (end.time - start.time).total_seconds()],
+        time_int = interpolate_linear(
+            0, (end.time - start.time).total_seconds(), n_points
         )
+
+    hr_int = interpolate_extension(
+        start, end, "heartrate", n_points + 1, copy_extensions, int
+    )
+    cd_int = interpolate_extension(
+        start, end, "cadence", n_points + 1, copy_extensions, int
+    )
+    pw_int = interpolate_extension(
+        start, end, "power", n_points + 1, copy_extensions, int
+    )
 
     ret_points = []
 
-    for lat, lng, ele, seconds in zip(lat_int, lng_int, elevation_int, time_int):
-        if seconds is not None:
-            time = start.time + timedelta(seconds=seconds)
+    for i in range(len(lat_int)):
+        if time_int[i] is not None:
+            time = start.time + timedelta(seconds=time_int[i])
         else:
             time = None
+
+        this_extensions = {}
+        if hr_int[i] is not None:
+            this_extensions["heartrate"] = hr_int[i]
+        if cd_int[i] is not None:
+            this_extensions["cadence"] = cd_int[i]
+        if pw_int[i] is not None:
+            this_extensions["power"] = pw_int[i]
+
         ret_points.append(
-            GPXTrackPoint(
-                lat,
-                lng,
-                elevation=ele,
-                time=time,
+            get_extended_track_point(
+                lat=lat_int[i],
+                lng=lng_int[i],
+                ele=elevation_int[i],
+                timestamp=time,
+                extensions=this_extensions,
             )
         )
         logger.debug(
             "New point %s / %s / %s / %s -> distance to origin %s",
-            lat,
-            lng,
-            ele,
+            lat_int[i],
+            lng_int[i],
+            elevation_int[i],
             time,
             distance(
                 Position2D(start.latitude, start.longitude),
-                Position2D(lat, lng),
+                Position2D(lat_int[i], lng_int[i]),
             ),
         )
 
     return ret_points
 
 
-def interpolate_segment(segment: GPXTrackSegment, spacing: float) -> GPXTrackSegment:
+def interpolate_segment(
+    segment: GPXTrackSegment,
+    spacing: float,
+    copy_extensions: Literal["copy-forward", "meet-center", "linear"] = "copy-forward",
+) -> GPXTrackSegment:
     """
     Interpolate points in a GPXTrackSegment to achieve a specified spacing.
 
     :param segment: GPXTrackSegment to interpolate.
     :param spacing: Desired spacing between interpolated points.
-
+    :param copy_extension: How should the extenstion (if present) be defined in the
+        interpolated points.
     :return: Interpolated GPXTrackSegment with points spaced according to the specified
         spacing.
     """
@@ -257,10 +320,11 @@ def interpolate_segment(segment: GPXTrackSegment, spacing: float) -> GPXTrackSeg
     for i, (start, end) in enumerate(
         zip(init_points[:-1], init_points[1:])  # noqa: RUF007
     ):
-        new_points = interpolate_linear(
+        new_points = interpolate_points(
             start=start,
             end=end,
             spacing=spacing,
+            copy_extensions=copy_extensions,
         )
 
         if new_points is None:

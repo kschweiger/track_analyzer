@@ -389,17 +389,34 @@ class Track(ABC):
 
         return track_data
 
-    def interpolate_points_in_segment(self, spacing: float, n_segment: int = 0) -> None:
+    def interpolate_points_in_segment(
+        self,
+        spacing: float,
+        n_segment: int = 0,
+        copy_extensions: Literal[
+            "copy-forward", "meet-center", "linear"
+        ] = "copy_forward",
+    ) -> None:
         """
         Add additdion points to a segment by interpolating along the direct line
-        between each point pair according to the passed spacing parameter
+        between each point pair according to the passed spacing parameter. If present,
+        elevation and time will be linearly interpolated. Extensions (Heartrate,
+        Cadence, Power) will be interpolated according to value of copy_extensions.
+        Optionas are:
+
+        - copy the value from the start point of the interpolation (copy-forward)
+        - Use value of start point for first half and last point for second half
+          (meet-center)
+        - Linear interpolation (linear)
+
 
         :param spacing: Minimum distance between points added by the interpolation
-
         :param n_segment: segment in the track to use, defaults to 0
+        :param copy_extension: How should the extenstion (if present) be defined in the
+            interpolated points.
         """
         self.track.segments[n_segment] = interpolate_segment(
-            self.track.segments[n_segment], spacing
+            self.track.segments[n_segment], spacing, copy_extensions=copy_extensions
         )
 
         # Reset saved processed data
@@ -476,6 +493,9 @@ class Track(ABC):
         overlap_threshold: float = 0.75,
         max_queue_normalize: int = 5,
         merge_subsegments: int = 5,
+        extensions_interpolation: Literal[
+            "copy-forward", "meet-center", "linear"
+        ] = "copy_forward",
     ) -> Sequence[tuple[Track, float, bool]]:
         """Find overlap of a segment of the track with a segment in another track.
 
@@ -492,6 +512,8 @@ class Track(ABC):
             between two points falling into same plate bin, defaults to 5
         :param merge_subsegments: Number of points between sub segments allowed
             for merging the segments, defaults to 5
+        :param extensions_interpolation: How should the extenstion (if present) be
+            defined in the interpolated points, defaults to copy-forward
 
         :return: Tuple containing a Track with the overlapping points, the overlap in
             percent, and the direction of the overlap
@@ -500,14 +522,18 @@ class Track(ABC):
 
         segment_self = self.track.segments[n_segment]
         if max_distance_self > width:
-            segment_self = interpolate_segment(segment_self, width / 2)
+            segment_self = interpolate_segment(
+                segment_self, width / 2, copy_extensions=extensions_interpolation
+            )
 
         max_distance_match = match_track.get_max_pp_distance_in_segment(
             match_track_segment
         )
         segment_match = match_track.track.segments[match_track_segment]
         if max_distance_match > width:
-            segment_match = interpolate_segment(segment_match, width / 2)
+            segment_match = interpolate_segment(
+                segment_match, width / 2, copy_extensions=extensions_interpolation
+            )
 
         logger.info("Looking for overlapping segments")
         segment_overlaps = get_segment_overlap(

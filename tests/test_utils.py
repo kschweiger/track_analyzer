@@ -1,5 +1,6 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from math import asin, degrees, isclose
+from typing import Literal, Type
 
 import numpy as np
 import pytest
@@ -14,12 +15,15 @@ from geo_track_analyzer.utils.base import (
     distance,
     format_timedelta,
     get_distances,
+    get_extended_track_point,
     get_extension_value,
     get_latitude_at_distance,
     get_longitude_at_distance,
     get_point_distance,
     get_points_inside_bounds,
     get_segment_base_area,
+    interpolate_extension,
+    interpolate_points,
     split_segment_by_id,
 )
 
@@ -368,3 +372,111 @@ def test_get_point_distance_in_segment(
 )
 def test_format_timedelta(td: timedelta, exp: str) -> None:
     assert format_timedelta(td) == exp
+
+
+@pytest.mark.parametrize(
+    ("elevation_1", "elevation_2", "exp_elevations"),
+    [(None, None, None), (100, 600, [100, 200, 300, 400, 500, 600])],
+)
+@pytest.mark.parametrize(
+    ("seconds_1", "seconds_2", "exp_seconds"),
+    [(None, None, None), (0, 50, [0, 10, 20, 30, 40, 50])],
+)
+def test_interpolate_points(
+    elevation_1: None | int,
+    elevation_2: None | int,
+    exp_elevations: None | list[int],
+    seconds_1: None | int,
+    seconds_2: None | int,
+    exp_seconds: None | list[int],
+) -> None:
+    time_1: None | datetime
+    if seconds_1 is not None:
+        time_1 = datetime(2023, 1, 1, 12, 0, seconds_1)
+    else:
+        time_1 = None
+
+    time_2: None | datetime
+    if seconds_2 is not None:
+        time_2 = datetime(2023, 1, 1, 12, 0, seconds_2)
+    else:
+        time_2 = None
+
+    point_1 = get_extended_track_point(1.100, 1.100, elevation_1, time_1, {})
+    point_2 = get_extended_track_point(1.105, 1.105, elevation_2, time_2, {})
+    ret_points = interpolate_points(point_1, point_2, 150)
+
+    assert ret_points is not None
+    assert len(ret_points) == 6
+
+    exp_vals = [1.100, 1.101, 1.102, 1.103, 1.104, 1.105]
+    assert [p.latitude for p in ret_points] == exp_vals
+    assert [p.longitude for p in ret_points] == exp_vals
+
+    if exp_elevations is not None:
+        assert [p.elevation for p in ret_points] == exp_elevations
+
+    if exp_seconds is not None:
+        exp_times = [datetime(2023, 1, 1, 12, 0, s) for s in exp_seconds]
+        assert [p.time for p in ret_points] == exp_times
+
+
+def test_interpolate_points_with_extensions() -> None:
+    point_1 = get_extended_track_point(
+        1.100, 1.100, None, None, {"heartrate": 100, "cadence": 80, "power": 300}
+    )
+    point_2 = get_extended_track_point(
+        1.105, 1.105, None, None, {"heartrate": 150, "cadence": 90, "power": 350}
+    )
+
+    exp_hr = [100, 100, 100, 100, 100, 150]
+    exp_cd = [80, 80, 80, 80, 80, 90]
+    exp_pw = [300, 300, 300, 300, 300, 350]
+
+    ret_points = interpolate_points(point_1, point_2, 150)
+
+    assert ret_points is not None
+
+    assert [int(get_extension_value(p, "heartrate")) for p in ret_points] == exp_hr
+    assert [int(get_extension_value(p, "cadence")) for p in ret_points] == exp_cd
+    assert [int(get_extension_value(p, "power")) for p in ret_points] == exp_pw
+
+
+@pytest.mark.parametrize(
+    ("interpolation_type", "exp_values"),
+    [
+        ("copy-forward", [100, 100, 100, 100, 100, 150]),
+        ("meet-center", [100, 100, 100, 150, 150, 150]),
+        ("linear", [100, 110, 120, 130, 140, 150]),
+    ],
+)
+@pytest.mark.parametrize("convert_type", [int, float])
+def test_interpolate_extension(
+    interpolation_type: Literal["copy-forward", "meet-center", "linear"],
+    exp_values: list[int],
+    convert_type: Type[int] | Type[float],
+) -> None:
+    point_1 = get_extended_track_point(1.100, 1.100, None, None, {"value": 100})
+    point_2 = get_extended_track_point(1.105, 1.105, None, None, {"value": 150})
+
+    values = interpolate_extension(
+        point_1, point_2, "value", 6, interpolation_type, convert_type
+    )
+
+    assert values is not None
+    assert len(values) == 6
+
+    assert all(isinstance(v, convert_type) for v in values)
+    _exp_values = [convert_type(v) for v in exp_values]
+    assert values == _exp_values
+
+
+@pytest.mark.parametrize(
+    ("ext_1", "ext_2"), [({}, {}), ({"value": 150}, {}), ({}, {"value": 150})]
+)
+def test_interpolate_extension_not_possible(ext_1: dict, ext_2: dict) -> None:
+    point_1 = get_extended_track_point(1.100, 1.100, None, None, {})
+    point_2 = get_extended_track_point(1.105, 1.105, None, None, {"value": 150})
+    assert interpolate_extension(point_1, point_2, "value", 6, "linear", int) == [
+        None for _ in range(6)
+    ]
