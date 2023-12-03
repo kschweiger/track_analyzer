@@ -34,7 +34,7 @@ jobs:
         with:
           name: build-artifacts
           path: dist/
-  publish:
+  publish-index:
     name: Publish Python 🐍 distribution 📦 to PyPI
     runs-on: ubuntu-latest
     needs: build
@@ -49,6 +49,28 @@ jobs:
           pip list
           ls -l
           ls -l dist/
+  publish-github:
+    name: GitHub release 🦾
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+      - name: Setup Python
+        uses: actions/setup-python@master
+      - name: Install git-changelog
+        run: pip install git-changelog
+      - name: Prepare release notes
+        run: git-changelog --release-notes > release-notes.md
+      - name: Download all the dists
+        uses: actions/download-artifact@master
+        with:
+          name: build-artifacts
+          path: dist/
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: release-notes.md
+          files: dist/*
   deploy-doc:
     name: Build and deploy documentation 📚
     runs-on: ubuntu-latest
