@@ -11,7 +11,7 @@ git add pyproject.toml
 git commit -n -m "build: Bumped version to ${VERSION} :bookmark:"
 
 echo "Updating changelog"
-conventional-changelog -i CHANGELOG.md -s -r 2
+git-changelog
 if [[ $? != 0 ]]
 then
   echo "Generating changelog failed. Exiting..."

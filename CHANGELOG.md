@@ -1,377 +1,183 @@
-##  (2023-10-15)
+<!-- insertion marker -->
+<a name="0.4.1"></a>
 
-* build: Bumped version to 0.4.1 :bookmark: ([4c435b4](https://github.com/kschweiger/track_analyzer/commit/4c435b4))
-* refactor(FITTrack): Adapt FITTrack init to reflect that bytes can be passed directly ([7f368ae](https://github.com/kschweiger/track_analyzer/commit/7f368ae))
+## [0.4.1](https://github.com/kschweiger/track_analyzer/compare/0.4.0...0.4.1) (2023-10-15)
 
+### Code Refactoring
 
+- **FITTrack:** Adapt FITTrack init to reflect that bytes can be passed directly ([7f368ae](https://github.com/kschweiger/track_analyzer/commit/7f368ae182251cd25069048bf176d94f11d4bf89))
 
-## 0.4.0 (2023-10-10)
+<a name="0.4.0"></a>
 
-* doc: Added documentation for public Track methods ([ea06619](https://github.com/kschweiger/track_analyzer/commit/ea06619))
-* doc: Updated CHANGELOG.md :memo: ([9be4a16](https://github.com/kschweiger/track_analyzer/commit/9be4a16))
-* build: Bumped version to 0.4.0 :bookmark: ([1e78b80](https://github.com/kschweiger/track_analyzer/commit/1e78b80))
-* feat: Added method to get overall track DataFrame ([5881dd1](https://github.com/kschweiger/track_analyzer/commit/5881dd1))
-* feat: Added plot method for shown different segments in track with segment metrics ([b88a9d2](https://github.com/kschweiger/track_analyzer/commit/b88a9d2))
-* feat: Added plot that shows track on map and enriches the visualization with an additonal metric ([036cfe0](https://github.com/kschweiger/track_analyzer/commit/036cfe0))
-* feat: Added track overview ([731d1ab](https://github.com/kschweiger/track_analyzer/commit/731d1ab))
-* feat: Implemented splitting function ([429763d](https://github.com/kschweiger/track_analyzer/commit/429763d))
-* feat(plot_track_enriched_on_map): Deal with nan's in data used to enrich plot ([ba16c33](https://github.com/kschweiger/track_analyzer/commit/ba16c33))
-* feat(plot_track_with_slope): Function can be run for segments of full tracks ([1a4cc29](https://github.com/kschweiger/track_analyzer/commit/1a4cc29))
-* feat(Track): Added add_segment method ([8c30cb6](https://github.com/kschweiger/track_analyzer/commit/8c30cb6))
-* fix: Fixed issue with cumulative values in precessed track data with multiple segments ([8123a53](https://github.com/kschweiger/track_analyzer/commit/8123a53))
-* fix(_recalc_cumulated_columns): Method did not consider data w/o time entries ([eab717b](https://github.com/kschweiger/track_analyzer/commit/eab717b))
-* refactor: Moved logic for generating the processed track data to processing.py and adapted Track cod ([0f042d0](https://github.com/kschweiger/track_analyzer/commit/0f042d0))
-* refactor: Moved plot method to sub-package ([7a5d6d1](https://github.com/kschweiger/track_analyzer/commit/7a5d6d1))
-* refactor: Moved PointDistance to model.py ([5590f5e](https://github.com/kschweiger/track_analyzer/commit/5590f5e))
-* refactor: processed data are private attributes ([40a353d](https://github.com/kschweiger/track_analyzer/commit/40a353d))
-* refactor: Renamed plot_track_on_map to plot_track_line_on_map ([7997d37](https://github.com/kschweiger/track_analyzer/commit/7997d37))
-* refactor(get_point_distance): Generalized get_point_distance_in_segment for tracks and renamed metho ([9dbc0b7](https://github.com/kschweiger/track_analyzer/commit/9dbc0b7))
-* test: Added test for interactive plots ([a1f7397](https://github.com/kschweiger/track_analyzer/commit/a1f7397))
-* test: Adding test for map visualization methods ([8a80298](https://github.com/kschweiger/track_analyzer/commit/8a80298))
+## [0.4.0](https://github.com/kschweiger/track_analyzer/compare/0.3.2...0.4.0) (2023-10-10)
 
+### Features
 
+- Implemented splitting function ([429763d](https://github.com/kschweiger/track_analyzer/commit/429763dc1379bbc10405609a9ce3d445e6430153))
+- Added plot method for shown different segments in track with segment metrics ([b88a9d2](https://github.com/kschweiger/track_analyzer/commit/b88a9d2160ba7b9100900cd861e7abe71fe64fec))
+- **plot_track_enriched_on_map:** Deal with nan's in data used to enrich plot ([ba16c33](https://github.com/kschweiger/track_analyzer/commit/ba16c33cc7639b1fcd5611f9f04479bf219df008))
+- Added plot that shows track on map and enriches the visualization with an additonal metric ([036cfe0](https://github.com/kschweiger/track_analyzer/commit/036cfe0d28d1e78781b3bcdeb6be4bb8d44831bb))
+- **plot_track_with_slope:** Function can be run for segments of full tracks ([1a4cc29](https://github.com/kschweiger/track_analyzer/commit/1a4cc294ee803ab1e995b5127b79e912b860fee0))
+- Added method to get overall track DataFrame ([5881dd1](https://github.com/kschweiger/track_analyzer/commit/5881dd1cfa8e0fbdcb217266b5344966647b8641))
+- Added track overview ([731d1ab](https://github.com/kschweiger/track_analyzer/commit/731d1abb80f3e34ddf0a79c6ab9313b2b4cc07fa))
+- **Track:** Added add_segment method ([8c30cb6](https://github.com/kschweiger/track_analyzer/commit/8c30cb6638f9471b1bf3b6e9a780fb39a85817cf))
 
-##  (2023-10-10)
+### Bug Fixes
 
-* build: Bumped version to 0.4.0 :bookmark: ([1e78b80](https://github.com/kschweiger/track_analyzer/commit/1e78b80))
-* feat: Added method to get overall track DataFrame ([5881dd1](https://github.com/kschweiger/track_analyzer/commit/5881dd1))
-* feat: Added plot method for shown different segments in track with segment metrics ([b88a9d2](https://github.com/kschweiger/track_analyzer/commit/b88a9d2))
-* feat: Added plot that shows track on map and enriches the visualization with an additonal metric ([036cfe0](https://github.com/kschweiger/track_analyzer/commit/036cfe0))
-* feat: Added track overview ([731d1ab](https://github.com/kschweiger/track_analyzer/commit/731d1ab))
-* feat: Implemented splitting function ([429763d](https://github.com/kschweiger/track_analyzer/commit/429763d))
-* feat(plot_track_enriched_on_map): Deal with nan's in data used to enrich plot ([ba16c33](https://github.com/kschweiger/track_analyzer/commit/ba16c33))
-* feat(plot_track_with_slope): Function can be run for segments of full tracks ([1a4cc29](https://github.com/kschweiger/track_analyzer/commit/1a4cc29))
-* feat(Track): Added add_segment method ([8c30cb6](https://github.com/kschweiger/track_analyzer/commit/8c30cb6))
-* fix: Fixed issue with cumulative values in precessed track data with multiple segments ([8123a53](https://github.com/kschweiger/track_analyzer/commit/8123a53))
-* fix(_recalc_cumulated_columns): Method did not consider data w/o time entries ([eab717b](https://github.com/kschweiger/track_analyzer/commit/eab717b))
-* refactor: Moved logic for generating the processed track data to processing.py and adapted Track cod ([0f042d0](https://github.com/kschweiger/track_analyzer/commit/0f042d0))
-* refactor: Moved plot method to sub-package ([7a5d6d1](https://github.com/kschweiger/track_analyzer/commit/7a5d6d1))
-* refactor: Moved PointDistance to model.py ([5590f5e](https://github.com/kschweiger/track_analyzer/commit/5590f5e))
-* refactor: processed data are private attributes ([40a353d](https://github.com/kschweiger/track_analyzer/commit/40a353d))
-* refactor: Renamed plot_track_on_map to plot_track_line_on_map ([7997d37](https://github.com/kschweiger/track_analyzer/commit/7997d37))
-* refactor(get_point_distance): Generalized get_point_distance_in_segment for tracks and renamed metho ([9dbc0b7](https://github.com/kschweiger/track_analyzer/commit/9dbc0b7))
-* test: Added test for interactive plots ([a1f7397](https://github.com/kschweiger/track_analyzer/commit/a1f7397))
-* test: Adding test for map visualization methods ([8a80298](https://github.com/kschweiger/track_analyzer/commit/8a80298))
-* doc: Added documentation for public Track methods ([ea06619](https://github.com/kschweiger/track_analyzer/commit/ea06619))
+- **_recalc_cumulated_columns:** Method did not consider data w/o time entries ([eab717b](https://github.com/kschweiger/track_analyzer/commit/eab717b29eadce31251942076c24f5ffc590a868))
+- Fixed issue with cumulative values in precessed track data with multiple segments ([8123a53](https://github.com/kschweiger/track_analyzer/commit/8123a5316c68987da5e6df398d9eb4a71ab5f964))
 
+### Code Refactoring
 
+- Moved PointDistance to model.py ([5590f5e](https://github.com/kschweiger/track_analyzer/commit/5590f5e71535ec3fe27d9885fe16acb87358ee7f))
+- Moved plot method to sub-package ([7a5d6d1](https://github.com/kschweiger/track_analyzer/commit/7a5d6d12c864d31d0d27199cb5c034b06b5e8d38))
+- Renamed plot_track_on_map to plot_track_line_on_map ([7997d37](https://github.com/kschweiger/track_analyzer/commit/7997d37e1c42c744fc55d1f50a296e148c13544f))
+- **get_point_distance:** Generalized get_point_distance_in_segment for tracks and renamed method ([9dbc0b7](https://github.com/kschweiger/track_analyzer/commit/9dbc0b7b7606fc490da3de772a0e5da62c68b1fe))
+- Moved logic for generating the processed track data to processing.py and adapted Track code accordingly ([0f042d0](https://github.com/kschweiger/track_analyzer/commit/0f042d036878447b42f020109c9513bbbae437da))
+- processed data are private attributes ([40a353d](https://github.com/kschweiger/track_analyzer/commit/40a353d0c599acbb1e496ff2a5a3403344c9fcbf))
 
-## <small>0.3.2 (2023-09-03)</small>
+<a name="0.3.2"></a>
 
-* doc: Updated CHANGELOG.md :memo: ([5b3c1a7](https://github.com/kschweiger/track_analyzer/commit/5b3c1a7))
-* build: Bumped version to 0.3.2 :bookmark: ([9575242](https://github.com/kschweiger/track_analyzer/commit/9575242))
-* refactor! : Color of additional trace in plot_track_2d can be changed for all. Renamed color_velocit ([00e7264](https://github.com/kschweiger/track_analyzer/commit/00e7264))
+## [0.3.2](https://github.com/kschweiger/track_analyzer/compare/0.3.1...0.3.2) (2023-09-03)
 
+<a name="0.3.1"></a>
 
+## [0.3.1](https://github.com/kschweiger/track_analyzer/compare/0.3.0...0.3.1) (2023-09-03)
 
-##  (2023-09-03)
+### Bug Fixes
 
-* build: Bumped version to 0.3.2 :bookmark: ([9575242](https://github.com/kschweiger/track_analyzer/commit/9575242))
-* refactor! : Color of additional trace in plot_track_2d can be changed for all. Renamed color_velocit ([00e7264](https://github.com/kschweiger/track_analyzer/commit/00e7264))
+- **plot_track_2d:** Deal with nan values in heartrate, cadence, and power ([8620ef7](https://github.com/kschweiger/track_analyzer/commit/8620ef724e89601a9c7b3871140d957100a0ca48))
 
+<a name="0.3.0"></a>
 
+## [0.3.0](https://github.com/kschweiger/track_analyzer/compare/0.2.0...0.3.0) (2023-09-03)
 
-## <small>0.3.1 (2023-09-03)</small>
+### Features
 
-* doc: Updated CHANGELOG.md :memo: ([0a396d1](https://github.com/kschweiger/track_analyzer/commit/0a396d1))
-* build: Bumped version to 0.3.1 :bookmark: ([e90c423](https://github.com/kschweiger/track_analyzer/commit/e90c423))
-* fix(plot_track_2d): Deal with nan values in heartrate, cadence, and power ([8620ef7](https://github.com/kschweiger/track_analyzer/commit/8620ef7))
+- Adding heartrate, cadence, and power to 2d plot ([b303fc3](https://github.com/kschweiger/track_analyzer/commit/b303fc387e537debe2a70fc2be86064800bf6429))
 
+### Code Refactoring
 
+- Renamed FileTrack too GPXFileTrack and FITTrack to FITFileTrack ([3738082](https://github.com/kschweiger/track_analyzer/commit/373808257c5cf31c930933cc44ce5e6c762b1946))
 
-##  (2023-09-03)
+<a name="0.2.0"></a>
 
-* build: Bumped version to 0.3.1 :bookmark: ([e90c423](https://github.com/kschweiger/track_analyzer/commit/e90c423))
-* fix(plot_track_2d): Deal with nan values in heartrate, cadence, and power ([8620ef7](https://github.com/kschweiger/track_analyzer/commit/8620ef7))
+## [0.2.0](https://github.com/kschweiger/track_analyzer/compare/0.1.2...0.2.0) (2023-09-02)
 
+### Features
 
+- Adding heartrate, cadence, and power Track and segment data processing ([dbf02b9](https://github.com/kschweiger/track_analyzer/commit/dbf02b976a97bf3e7abf256c4ff5d257a93cbc7c))
 
-## 0.3.0 (2023-09-03)
+### Code Refactoring
 
-* doc: Updated CHANGELOG.md :memo: ([43f1384](https://github.com/kschweiger/track_analyzer/commit/43f1384))
-* build: Bumped version to 0.3.0 :bookmark: ([3235434](https://github.com/kschweiger/track_analyzer/commit/3235434))
-* refactor: Renamed FileTrack too GPXFileTrack and FITTrack to FITFileTrack ([3738082](https://github.com/kschweiger/track_analyzer/commit/3738082))
-* feat: Adding heartrate, cadence, and power to 2d plot ([b303fc3](https://github.com/kschweiger/track_analyzer/commit/b303fc3))
+- Removed 3.9 support and moved to now typing style ([64dd42f](https://github.com/kschweiger/track_analyzer/commit/64dd42f412ccd99d8e4bd0f20872c74ab5c5760f))
+- Renamed package to track_analyzer ([f6db3bc](https://github.com/kschweiger/track_analyzer/commit/f6db3bc16521163391fc8951973ffe4c7748ab23))
 
+<a name="0.1.2"></a>
 
+## [0.1.2](https://github.com/kschweiger/track_analyzer/compare/0.1.1...0.1.2) (2023-06-11)
 
-##  (2023-09-03)
+### Features
 
-* build: Bumped version to 0.3.0 :bookmark: ([3235434](https://github.com/kschweiger/track_analyzer/commit/3235434))
-* refactor: Renamed FileTrack too GPXFileTrack and FITTrack to FITFileTrack ([3738082](https://github.com/kschweiger/track_analyzer/commit/3738082))
-* feat: Adding heartrate, cadence, and power to 2d plot ([b303fc3](https://github.com/kschweiger/track_analyzer/commit/b303fc3))
+- Added basic support for fit file ([2563996](https://github.com/kschweiger/track_analyzer/commit/2563996009f8aa22f730581b6d5e0b297a142911))
 
+### Bug Fixes
 
+- **calc_elevation_metrics:** Deal with ZeroDivisionError ([8f66763](https://github.com/kschweiger/track_analyzer/commit/8f66763755efe14ef3b71d60fe2466a41698901e))
 
-## 0.2.0 (2023-09-02)
+<a name="0.1.1"></a>
 
-* doc: Updated CHANGELOG.md :memo: ([5998db2](https://github.com/kschweiger/track_analyzer/commit/5998db2))
-* build: Bumped version to 0.2.0 :bookmark: ([f09cb6c](https://github.com/kschweiger/track_analyzer/commit/f09cb6c))
-* feat: Adding heartrate, cadence, and power Track and segment data processing ([dbf02b9](https://github.com/kschweiger/track_analyzer/commit/dbf02b9))
-* refactor: Removed 3.9 support and moved to now typing style ([64dd42f](https://github.com/kschweiger/track_analyzer/commit/64dd42f))
-* refactor: Renamed package to track_analyzer ([f6db3bc](https://github.com/kschweiger/track_analyzer/commit/f6db3bc))
-* chore: Changes to solve type checking errors ([b7aeb99](https://github.com/kschweiger/track_analyzer/commit/b7aeb99))
-* chore: Updated deps ([9b80fed](https://github.com/kschweiger/track_analyzer/commit/9b80fed))
+## [0.1.1](https://github.com/kschweiger/track_analyzer/compare/0.1.0...0.1.1) (2023-04-22)
 
+### Features
 
+- **get_segment_overlap:** Subsegments are merged if spearated by few points ([a33a3bc](https://github.com/kschweiger/track_analyzer/commit/a33a3bc85ad14992394cd064b5b33b40ff27fe01))
 
-##  (2023-09-02)
+<a name="0.1.0"></a>
 
-* build: Bumped version to 0.2.0 :bookmark: ([f09cb6c](https://github.com/kschweiger/track_analyzer/commit/f09cb6c))
-* feat: Adding heartrate, cadence, and power Track and segment data processing ([dbf02b9](https://github.com/kschweiger/track_analyzer/commit/dbf02b9))
-* refactor: Removed 3.9 support and moved to now typing style ([64dd42f](https://github.com/kschweiger/track_analyzer/commit/64dd42f))
-* refactor: Renamed package to track_analyzer ([f6db3bc](https://github.com/kschweiger/track_analyzer/commit/f6db3bc))
-* chore: Changes to solve type checking errors ([b7aeb99](https://github.com/kschweiger/track_analyzer/commit/b7aeb99))
-* chore: Updated deps ([9b80fed](https://github.com/kschweiger/track_analyzer/commit/9b80fed))
+## [0.1.0](https://github.com/kschweiger/track_analyzer/compare/0.0.8...0.1.0) (2023-04-18)
 
+### Features
 
+- Implement methods for finding overlapping subsegments in tracks (#2) ([237b481](https://github.com/kschweiger/track_analyzer/commit/237b4810def7660a2d7d6fe030cd0653e823a64b))
 
-## <small>0.1.2 (2023-06-11)</small>
+<a name="0.0.8"></a>
 
-* doc: Updated CHANGELOG.md :memo: ([4240670](https://github.com/kschweiger/track_analyzer/commit/4240670))
-* build: Bumped version to 0.1.2 :bookmark: ([3b7f01d](https://github.com/kschweiger/track_analyzer/commit/3b7f01d))
-* feat: Added basic support for fit file ([2563996](https://github.com/kschweiger/track_analyzer/commit/2563996))
-* fix(calc_elevation_metrics): Deal with ZeroDivisionError ([8f66763](https://github.com/kschweiger/track_analyzer/commit/8f66763))
+## [0.0.8](https://github.com/kschweiger/track_analyzer/compare/0.0.7...0.0.8) (2023-03-11)
 
+### Features
 
+- **visualize:** Added option to add a x-axis slider to the 2d plots ([34febac](https://github.com/kschweiger/track_analyzer/commit/34febac79f6cd32b8e0f45390f588aa526c09355))
 
-##  (2023-06-11)
+<a name="0.0.7"></a>
 
-* build: Bumped version to 0.1.2 :bookmark: ([3b7f01d](https://github.com/kschweiger/track_analyzer/commit/3b7f01d))
-* feat: Added basic support for fit file ([2563996](https://github.com/kschweiger/track_analyzer/commit/2563996))
-* fix(calc_elevation_metrics): Deal with ZeroDivisionError ([8f66763](https://github.com/kschweiger/track_analyzer/commit/8f66763))
+## [0.0.7](https://github.com/kschweiger/track_analyzer/compare/0.0.6...0.0.7) (2023-03-07)
 
+### Bug Fixes
 
+- Fixed axis titles in elevation plot with slope ([b62547d](https://github.com/kschweiger/track_analyzer/commit/b62547d93087dd24bc00543ae54fb52b05603452))
 
-## <small>0.1.1 (2023-04-22)</small>
+<a name="0.0.6"></a>
 
-* doc: Updated CHANGELOG.md :memo: ([d1139a8](https://github.com/kschweiger/track_analyzer/commit/d1139a8))
-* build: Bumped version to 0.1.1 :bookmark: ([bf837c9](https://github.com/kschweiger/track_analyzer/commit/bf837c9))
-* feat(get_segment_overlap): Subsegments are merged if spearated by few points ([a33a3bc](https://github.com/kschweiger/track_analyzer/commit/a33a3bc))
+## [0.0.6](https://github.com/kschweiger/track_analyzer/compare/0.0.5...0.0.6) (2023-03-07)
 
+### Bug Fixes
 
+- Added tag creation to release.zsh ([817d3a5](https://github.com/kschweiger/track_analyzer/commit/817d3a58cc9dcd8a71dd806e63a8d2fb45a13b18))
 
-##  (2023-04-22)
+<a name="0.0.5"></a>
 
-* build: Bumped version to 0.1.1 :bookmark: ([bf837c9](https://github.com/kschweiger/track_analyzer/commit/bf837c9))
-* feat(get_segment_overlap): Subsegments are merged if spearated by few points ([a33a3bc](https://github.com/kschweiger/track_analyzer/commit/a33a3bc))
+## [0.0.5](https://github.com/kschweiger/track_analyzer/compare/0.0.2...0.0.5) (2023-03-07)
 
+### Features
 
+- Adding function for plotting the elevation profile of a track with slopes (#1) ([e6b54ec](https://github.com/kschweiger/track_analyzer/commit/e6b54ecc919cb397e6e5bab82bdbe797732925ec))
 
-## 0.1.0 (2023-04-18)
+### Bug Fixes
 
-* doc: Updated CHANGELOG.md :memo: ([6aad6a4](https://github.com/kschweiger/track_analyzer/commit/6aad6a4))
-* build: Bumped version to 0.1.0 :bookmark: ([64e24b1](https://github.com/kschweiger/track_analyzer/commit/64e24b1))
-* chore: Removed setup.py (only contained flake8 configuration) ([64d1295](https://github.com/kschweiger/track_analyzer/commit/64d1295))
-* feat: Implement methods for finding overlapping subsegments in tracks (#2) ([237b481](https://github.com/kschweiger/track_analyzer/commit/237b481)), closes [#2](https://github.com/kschweiger/track_analyzer/issues/2)
+- **calc_elevation_metrics:** Fixed possibility for zero division error ([908446a](https://github.com/kschweiger/track_analyzer/commit/908446a5360b75b0ce28a83b3d4bcd10e7b2a63e))
 
+<a name="0.0.2"></a>
 
+## [0.0.2](https://github.com/kschweiger/track_analyzer/compare/0.0.1...0.0.2) (2023-01-30)
 
-##  (2023-04-18)
+### Features
 
-* build: Bumped version to 0.1.0 :bookmark: ([64e24b1](https://github.com/kschweiger/track_analyzer/commit/64e24b1))
-* chore: Removed setup.py (only contained flake8 configuration) ([64d1295](https://github.com/kschweiger/track_analyzer/commit/64d1295))
-* feat: Implement methods for finding overlapping subsegments in tracks (#2) ([237b481](https://github.com/kschweiger/track_analyzer/commit/237b481)), closes [#2](https://github.com/kschweiger/track_analyzer/issues/2)
+- **Track:** Added to_xml method ([10af4e9](https://github.com/kschweiger/track_analyzer/commit/10af4e9fedd230fb2a4103cc8102990ed88fa704))
+- **Track:** Added method for retrieving coordinates, elevations and times of the points in a segment ([be38442](https://github.com/kschweiger/track_analyzer/commit/be38442285a1570a64cade29b06ae9c370605cf8))
+- **Track:** Added linear interpolation method ([23f6d95](https://github.com/kschweiger/track_analyzer/commit/23f6d95c08b6f1dca7f80a9ea4a4fbced21440f2))
+- **plot_track_2d:** Added optional POIs to the plot; Color can be passed as arguement; Updated requires upgrade of plotly to >= 5.11 ([3679319](https://github.com/kschweiger/track_analyzer/commit/3679319111400838d462c1ea16e81add36c59232))
+- **enhancer:** Added enhancer factory; Renamed Exception; Added inplace option to enhance_track method ([47e6054](https://github.com/kschweiger/track_analyzer/commit/47e6054247cb980b6c59d9001cde13a7449b596e))
+- **PyTrack:** Added a Track that is initialized with python objects for points, elevation and time ([2c27312](https://github.com/kschweiger/track_analyzer/commit/2c27312962d1274793bf9fa7be0bc565143f2e72))
 
+### Code Refactoring
 
+- **Track:** Setting cum_distance_moving equal to cum_distance as all points are considered moving in segment data w/o times ([fda1957](https://github.com/kschweiger/track_analyzer/commit/fda1957a2a1d23f88252c28f1e2154a72f6d687f))
+- **OpenTopoElevationEnhancer:** Added skip_checks argument ([194f5cb](https://github.com/kschweiger/track_analyzer/commit/194f5cb6df1eb620d4e1a921c603cb7e68022613))
+- **Track:** Changed default value of the moving in segment data w/o times ([9924113](https://github.com/kschweiger/track_analyzer/commit/99241131691a49221c2d717a8d9a15977be2dbc5))
 
-## <small>0.0.8 (2023-03-11)</small>
+<a name="0.0.1"></a>
 
-* doc: Updated CHANGELOG.md :memo: ([6066453](https://github.com/kschweiger/track_analyzer/commit/6066453))
-* build: Bumped version to 0.0.8 :bookmark: ([935e168](https://github.com/kschweiger/track_analyzer/commit/935e168))
-* feat(visualize): Added option to add a x-axis slider to the 2d plots ([34febac](https://github.com/kschweiger/track_analyzer/commit/34febac))
+## [0.0.1](https://github.com/kschweiger/track_analyzer/compare/68f9de7880d94e285d2227db5724599e8bf501cb...0.0.1) (2022-09-09)
 
+### Features
 
+- Added plotting track on open-street-map ([81c4ed2](https://github.com/kschweiger/track_analyzer/commit/81c4ed2846dc6de2806eeff42b2eb79287781ab9))
+- Added script for approximate the center of a list of latitude, longitude pairs ([58fba8f](https://github.com/kschweiger/track_analyzer/commit/58fba8fea392cd09ca46290ed3f285bd636e31ba))
+- Added plotting functions ([486e4bd](https://github.com/kschweiger/track_analyzer/commit/486e4bd2775d4e0b9cf6e25ae2e2f6e65474164c))
+- **ByteTrack:** Added Track that loads from a byte object ([ff18914](https://github.com/kschweiger/track_analyzer/commit/ff189149191901e85fbc1cde5b9280bbcd2e18ee))
+- Added Elevation enhancer using OpenTopo api ([01d6139](https://github.com/kschweiger/track_analyzer/commit/01d6139cfe0a8af88f5a3ff8a1848adab714bb1e))
+- Added main track analysis class ([a467e43](https://github.com/kschweiger/track_analyzer/commit/a467e430f8af2b550508eda4ad31766e21ec6092))
+- Added classes used to enhance tracks. This commit adds OpenElevationEnhancer that used an open-elevation api the enhance the elevation in a track ([5b5a740](https://github.com/kschweiger/track_analyzer/commit/5b5a7407ea2c3916c82e236b18a524509e107375))
+- Added datacalsses and some basic utility functions ([7d4313e](https://github.com/kschweiger/track_analyzer/commit/7d4313ef975ad78135aa93f1e1c5e298322b90e5))
 
-##  (2023-03-11)
+### Bug Fixes
 
-* build: Bumped version to 0.0.8 :bookmark: ([935e168](https://github.com/kschweiger/track_analyzer/commit/935e168))
-* feat(visualize): Added option to add a x-axis slider to the 2d plots ([34febac](https://github.com/kschweiger/track_analyzer/commit/34febac))
+- Addressed a Value error in the asin calculation ([2f49d19](https://github.com/kschweiger/track_analyzer/commit/2f49d19fda3357f1e7de7da47ae4c1b7eda57bea))
 
+### Code Refactoring
 
-
-## <small>0.0.7 (2023-03-07)</small>
-
-* doc: Updated CHANGELOG.md :memo: ([fc007c2](https://github.com/kschweiger/track_analyzer/commit/fc007c2))
-* build: Bumped version to 0.0.7 :bookmark: ([8e3f518](https://github.com/kschweiger/track_analyzer/commit/8e3f518))
-* fix: Fixed axis titles in elevation plot with slope ([b62547d](https://github.com/kschweiger/track_analyzer/commit/b62547d))
-
-
-
-##  (2023-03-07)
-
-* build: Bumped version to 0.0.7 :bookmark: ([8e3f518](https://github.com/kschweiger/track_analyzer/commit/8e3f518))
-* fix: Fixed axis titles in elevation plot with slope ([b62547d](https://github.com/kschweiger/track_analyzer/commit/b62547d))
-
-
-
-## <small>0.0.6 (2023-03-07)</small>
-
-* doc: Updated CHANGELOG.md :memo: ([24cd42f](https://github.com/kschweiger/track_analyzer/commit/24cd42f))
-* build: Bumped version to 0.0.6 :bookmark: ([3e0bccb](https://github.com/kschweiger/track_analyzer/commit/3e0bccb))
-* fix: Added tag creation to release.zsh ([817d3a5](https://github.com/kschweiger/track_analyzer/commit/817d3a5))
-
-
-
-##  (2023-03-07)
-
-* build: Bumped version to 0.0.6 :bookmark: ([3e0bccb](https://github.com/kschweiger/track_analyzer/commit/3e0bccb))
-* fix: Added tag creation to release.zsh ([817d3a5](https://github.com/kschweiger/track_analyzer/commit/817d3a5))
-
-
-
-## <small>0.0.5 (2023-03-07)</small>
-
-* doc: Updated CHANGELOG.md ([8b80b58](https://github.com/kschweiger/track_analyzer/commit/8b80b58))
-* doc: Updated CHANGELOG.md ([c7db048](https://github.com/kschweiger/track_analyzer/commit/c7db048))
-* doc: Updated CHANGELOG.md :memo: ([4086349](https://github.com/kschweiger/track_analyzer/commit/4086349))
-* doc: Updated CHANGELOG.md :memo: ([9e2f770](https://github.com/kschweiger/track_analyzer/commit/9e2f770))
-* build: Bumped version to 0.0.4 :bookmark: ([658f520](https://github.com/kschweiger/track_analyzer/commit/658f520))
-* build: Bumped version to 0.0.5 :bookmark: ([ef926b6](https://github.com/kschweiger/track_analyzer/commit/ef926b6))
-* build: Migrated to poetry ([7ecdad0](https://github.com/kschweiger/track_analyzer/commit/7ecdad0))
-* build: Moved release script to poetry ([67e443c](https://github.com/kschweiger/track_analyzer/commit/67e443c))
-* build: Updated release script ([4e20eaf](https://github.com/kschweiger/track_analyzer/commit/4e20eaf))
-* feat: Adding function for plotting the elevation profile of a track with slopes (#1) ([e6b54ec](https://github.com/kschweiger/track_analyzer/commit/e6b54ec)), closes [#1](https://github.com/kschweiger/track_analyzer/issues/1)
-* ci: Updated test config ([2dd06ee](https://github.com/kschweiger/track_analyzer/commit/2dd06ee))
-* fix(calc_elevation_metrics): Fixed possibility for zero division error ([908446a](https://github.com/kschweiger/track_analyzer/commit/908446a))
-
-
-
-##  (2023-03-07)
-
-* build: Bumped version to 0.0.4 :bookmark: ([658f520](https://github.com/kschweiger/track_analyzer/commit/658f520))
-* build: Bumped version to 0.0.5 :bookmark: ([ef926b6](https://github.com/kschweiger/track_analyzer/commit/ef926b6))
-* build: Migrated to poetry ([7ecdad0](https://github.com/kschweiger/track_analyzer/commit/7ecdad0))
-* build: Moved release script to poetry ([67e443c](https://github.com/kschweiger/track_analyzer/commit/67e443c))
-* build: Updated release script ([4e20eaf](https://github.com/kschweiger/track_analyzer/commit/4e20eaf))
-* feat: Adding function for plotting the elevation profile of a track with slopes (#1) ([e6b54ec](https://github.com/kschweiger/track_analyzer/commit/e6b54ec)), closes [#1](https://github.com/kschweiger/track_analyzer/issues/1)
-* doc: Updated CHANGELOG.md ([8b80b58](https://github.com/kschweiger/track_analyzer/commit/8b80b58))
-* doc: Updated CHANGELOG.md ([c7db048](https://github.com/kschweiger/track_analyzer/commit/c7db048))
-* doc: Updated CHANGELOG.md :memo: ([9e2f770](https://github.com/kschweiger/track_analyzer/commit/9e2f770))
-* ci: Updated test config ([2dd06ee](https://github.com/kschweiger/track_analyzer/commit/2dd06ee))
-* fix(calc_elevation_metrics): Fixed possibility for zero division error ([908446a](https://github.com/kschweiger/track_analyzer/commit/908446a))
-
-
-
-## <small>0.0.2 (2023-01-30)</small>
-
-* Bump version: 0.0.1 → 0.0.2 ([75a94b3](https://github.com/kschweiger/track_analyzer/commit/75a94b3))
-* feat(enhancer): Added enhancer factory; Renamed Exception; Added inplace option to enhance_track met ([47e6054](https://github.com/kschweiger/track_analyzer/commit/47e6054))
-* feat(plot_track_2d): Added optional POIs to the plot; Color can be passed as arguement; Updated requ ([3679319](https://github.com/kschweiger/track_analyzer/commit/3679319))
-* feat(PyTrack): Added a Track that is initialized with python objects for points, elevation and time ([2c27312](https://github.com/kschweiger/track_analyzer/commit/2c27312))
-* feat(Track): Added linear interpolation method ([23f6d95](https://github.com/kschweiger/track_analyzer/commit/23f6d95))
-* feat(Track): Added method for retrieving coordinates, elevations and times of the points in a segmen ([be38442](https://github.com/kschweiger/track_analyzer/commit/be38442))
-* feat(Track): Added to_xml method ([10af4e9](https://github.com/kschweiger/track_analyzer/commit/10af4e9))
-* refactor(OpenTopoElevationEnhancer): Added skip_checks argument ([194f5cb](https://github.com/kschweiger/track_analyzer/commit/194f5cb))
-* refactor(Track): Changed default value of the moving in segment data w/o times ([9924113](https://github.com/kschweiger/track_analyzer/commit/9924113))
-* refactor(Track): Setting cum_distance_moving equal to cum_distance as all points are considered movi ([fda1957](https://github.com/kschweiger/track_analyzer/commit/fda1957))
-* doc: Updated CHANGELOG.md ([2666ae2](https://github.com/kschweiger/track_analyzer/commit/2666ae2))
-
-
-
-##  (2023-03-06)
-
-* build: Bumped version to 0.0.4 :bookmark: ([658f520](https://github.com/kschweiger/track_analyzer/commit/658f520))
-* build: Migrated to poetry ([7ecdad0](https://github.com/kschweiger/track_analyzer/commit/7ecdad0))
-* build: Moved release script to poetry ([67e443c](https://github.com/kschweiger/track_analyzer/commit/67e443c))
-* build: Updated release script ([4e20eaf](https://github.com/kschweiger/track_analyzer/commit/4e20eaf))
-* doc: Updated CHANGELOG.md ([8b80b58](https://github.com/kschweiger/track_analyzer/commit/8b80b58))
-* doc: Updated CHANGELOG.md ([c7db048](https://github.com/kschweiger/track_analyzer/commit/c7db048))
-* ci: Updated test config ([2dd06ee](https://github.com/kschweiger/track_analyzer/commit/2dd06ee))
-* fix(calc_elevation_metrics): Fixed possibility for zero division error ([908446a](https://github.com/kschweiger/track_analyzer/commit/908446a))
-
-
-
-## <small>0.0.2 (2023-01-30)</small>
-
-* Bump version: 0.0.1 → 0.0.2 ([75a94b3](https://github.com/kschweiger/track_analyzer/commit/75a94b3))
-* feat(enhancer): Added enhancer factory; Renamed Exception; Added inplace option to enhance_track met ([47e6054](https://github.com/kschweiger/track_analyzer/commit/47e6054))
-* feat(plot_track_2d): Added optional POIs to the plot; Color can be passed as arguement; Updated requ ([3679319](https://github.com/kschweiger/track_analyzer/commit/3679319))
-* feat(PyTrack): Added a Track that is initialized with python objects for points, elevation and time ([2c27312](https://github.com/kschweiger/track_analyzer/commit/2c27312))
-* feat(Track): Added linear interpolation method ([23f6d95](https://github.com/kschweiger/track_analyzer/commit/23f6d95))
-* feat(Track): Added method for retrieving coordinates, elevations and times of the points in a segmen ([be38442](https://github.com/kschweiger/track_analyzer/commit/be38442))
-* feat(Track): Added to_xml method ([10af4e9](https://github.com/kschweiger/track_analyzer/commit/10af4e9))
-* refactor(OpenTopoElevationEnhancer): Added skip_checks argument ([194f5cb](https://github.com/kschweiger/track_analyzer/commit/194f5cb))
-* refactor(Track): Changed default value of the moving in segment data w/o times ([9924113](https://github.com/kschweiger/track_analyzer/commit/9924113))
-* refactor(Track): Setting cum_distance_moving equal to cum_distance as all points are considered movi ([fda1957](https://github.com/kschweiger/track_analyzer/commit/fda1957))
-* doc: Updated CHANGELOG.md ([2666ae2](https://github.com/kschweiger/track_analyzer/commit/2666ae2))
-
-
-
-##  (2023-03-06)
-
-* build: Migrated to poetry ([7ecdad0](https://github.com/kschweiger/track_analyzer/commit/7ecdad0))
-* build: Moved release script to poetry ([67e443c](https://github.com/kschweiger/track_analyzer/commit/67e443c))
-* ci: Updated test config ([2dd06ee](https://github.com/kschweiger/track_analyzer/commit/2dd06ee))
-* fix(calc_elevation_metrics): Fixed possibility for zero division error ([908446a](https://github.com/kschweiger/track_analyzer/commit/908446a))
-* doc: Updated CHANGELOG.md ([c7db048](https://github.com/kschweiger/track_analyzer/commit/c7db048))
-
-
-
-## <small>0.0.2 (2023-01-30)</small>
-
-* Bump version: 0.0.1 → 0.0.2 ([75a94b3](https://github.com/kschweiger/track_analyzer/commit/75a94b3))
-* feat(enhancer): Added enhancer factory; Renamed Exception; Added inplace option to enhance_track met ([47e6054](https://github.com/kschweiger/track_analyzer/commit/47e6054))
-* feat(plot_track_2d): Added optional POIs to the plot; Color can be passed as arguement; Updated requ ([3679319](https://github.com/kschweiger/track_analyzer/commit/3679319))
-* feat(PyTrack): Added a Track that is initialized with python objects for points, elevation and time ([2c27312](https://github.com/kschweiger/track_analyzer/commit/2c27312))
-* feat(Track): Added linear interpolation method ([23f6d95](https://github.com/kschweiger/track_analyzer/commit/23f6d95))
-* feat(Track): Added method for retrieving coordinates, elevations and times of the points in a segmen ([be38442](https://github.com/kschweiger/track_analyzer/commit/be38442))
-* feat(Track): Added to_xml method ([10af4e9](https://github.com/kschweiger/track_analyzer/commit/10af4e9))
-* refactor(OpenTopoElevationEnhancer): Added skip_checks argument ([194f5cb](https://github.com/kschweiger/track_analyzer/commit/194f5cb))
-* refactor(Track): Changed default value of the moving in segment data w/o times ([9924113](https://github.com/kschweiger/track_analyzer/commit/9924113))
-* refactor(Track): Setting cum_distance_moving equal to cum_distance as all points are considered movi ([fda1957](https://github.com/kschweiger/track_analyzer/commit/fda1957))
-* doc: Updated CHANGELOG.md ([2666ae2](https://github.com/kschweiger/track_analyzer/commit/2666ae2))
-
-
-
-##  (2023-01-30)
-
-
-
-
-## <small>0.0.2 (2023-01-30)</small>
-
-* Bump version: 0.0.1 → 0.0.2 ([75a94b3](https://github.com/kschweiger/track_analyzer/commit/75a94b3))
-* feat(enhancer): Added enhancer factory; Renamed Exception; Added inplace option to enhance_track met ([47e6054](https://github.com/kschweiger/track_analyzer/commit/47e6054))
-* feat(plot_track_2d): Added optional POIs to the plot; Color can be passed as arguement; Updated requ ([3679319](https://github.com/kschweiger/track_analyzer/commit/3679319))
-* feat(PyTrack): Added a Track that is initialized with python objects for points, elevation and time ([2c27312](https://github.com/kschweiger/track_analyzer/commit/2c27312))
-* feat(Track): Added linear interpolation method ([23f6d95](https://github.com/kschweiger/track_analyzer/commit/23f6d95))
-* feat(Track): Added method for retrieving coordinates, elevations and times of the points in a segmen ([be38442](https://github.com/kschweiger/track_analyzer/commit/be38442))
-* feat(Track): Added to_xml method ([10af4e9](https://github.com/kschweiger/track_analyzer/commit/10af4e9))
-* refactor(OpenTopoElevationEnhancer): Added skip_checks argument ([194f5cb](https://github.com/kschweiger/track_analyzer/commit/194f5cb))
-* refactor(Track): Changed default value of the moving in segment data w/o times ([9924113](https://github.com/kschweiger/track_analyzer/commit/9924113))
-* refactor(Track): Setting cum_distance_moving equal to cum_distance as all points are considered movi ([fda1957](https://github.com/kschweiger/track_analyzer/commit/fda1957))
-* doc: Updated CHANGELOG.md ([2666ae2](https://github.com/kschweiger/track_analyzer/commit/2666ae2))
-
-
-
-##  (2022-09-09)
-
-
-
-
-## <small>0.0.1 (2022-09-09)</small>
-
-* Bump version: 0.0.0 → 0.0.1 ([bf6abe1](https://github.com/kschweiger/track_analyzer/commit/bf6abe1))
-* Moved to setup.cfg+pyproject.toml ([6e94948](https://github.com/kschweiger/track_analyzer/commit/6e94948))
-* chore: Added .gitignore and LICENSE ([2da0fc3](https://github.com/kschweiger/track_analyzer/commit/2da0fc3))
-* chore: Added bump2version to dev.in ([d421cd4](https://github.com/kschweiger/track_analyzer/commit/d421cd4))
-* chore: Added pytest to setup.cfg ([e5baa09](https://github.com/kschweiger/track_analyzer/commit/e5baa09))
-* chore: Inital commit with basic files (setup, requirements, package directory) ([68f9de7](https://github.com/kschweiger/track_analyzer/commit/68f9de7))
-* ci: Added GitHub actions for unit-tests ([04f11e8](https://github.com/kschweiger/track_analyzer/commit/04f11e8))
-* feat: Added classes used to enhance tracks. This commit adds OpenElevationEnhancer that used an open ([5b5a740](https://github.com/kschweiger/track_analyzer/commit/5b5a740))
-* feat: Added datacalsses and some basic utility functions ([7d4313e](https://github.com/kschweiger/track_analyzer/commit/7d4313e))
-* feat: Added Elevation enhancer using OpenTopo api ([01d6139](https://github.com/kschweiger/track_analyzer/commit/01d6139))
-* feat: Added main track analysis class ([a467e43](https://github.com/kschweiger/track_analyzer/commit/a467e43))
-* feat: Added plotting functions ([486e4bd](https://github.com/kschweiger/track_analyzer/commit/486e4bd))
-* feat: Added plotting track on open-street-map ([81c4ed2](https://github.com/kschweiger/track_analyzer/commit/81c4ed2))
-* feat: Added script for approximate the center of a list of latitude, longitude pairs ([58fba8f](https://github.com/kschweiger/track_analyzer/commit/58fba8f))
-* feat(ByteTrack): Added Track that loads from a byte object ([ff18914](https://github.com/kschweiger/track_analyzer/commit/ff18914))
-* refactor: Moved tests ([14b447a](https://github.com/kschweiger/track_analyzer/commit/14b447a))
-* refactor: Refactored _get_processed_data_for_segment to use a DataFrame ([9921d4a](https://github.com/kschweiger/track_analyzer/commit/9921d4a))
-* refactor(visualize): Minor changes to plot2d ([a5d15ab](https://github.com/kschweiger/track_analyzer/commit/a5d15ab))
-* feature(OpenTopoElevationEnhancer): Added api health and dataset checks ([99f13bb](https://github.com/kschweiger/track_analyzer/commit/99f13bb))
-* fix: Addressed a Value error in the asin calculation ([2f49d19](https://github.com/kschweiger/track_analyzer/commit/2f49d19))
-
-
+- **visualize:** Minor changes to plot2d ([a5d15ab](https://github.com/kschweiger/track_analyzer/commit/a5d15ab725622a726b462ae72f2fc7476083325b))
+- Moved tests ([14b447a](https://github.com/kschweiger/track_analyzer/commit/14b447aa98623962c3e8462004d3aa806002dfd9))
+- Refactored _get_processed_data_for_segment to use a DataFrame ([9921d4a](https://github.com/kschweiger/track_analyzer/commit/9921d4aef714e4611be559e457ad1afe39819929))
 

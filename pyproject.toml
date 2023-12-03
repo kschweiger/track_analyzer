@@ -4,6 +4,11 @@ version = "0.4.1"
 description = "Analyze geospacial data tracks"
 authors = ["Korbinian Schweiger <korbinian.schweiger@gmail.com>"]
 license = "MIT"
+classifiers = [
+    "Topic :: Scientific/Engineering :: GIS",
+    "Topic :: Scientific/Engineering :: Visualization",
+]
+keywords = ["fit", "gpx", "visualization", "analysis"]
 readme = "README.md"
 packages = [{ include = "geo_track_analyzer" }]
 
@@ -28,6 +33,7 @@ types-requests = "^2.31.0.10"
 ruff = "^0.1.6"
 ipython = "^8.17.2"
 bpython = "^0.24"
+git-changelog = "^2.4.0"
 
 
 [tool.poetry.group.test.dependencies]
@@ -73,3 +79,8 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "coloredlogs.*"
 ignore_missing_imports = true
+
+[tool.git-changelog]
+output = "CHANGELOG.md"
+convention = "conventional"
+template = "angular"

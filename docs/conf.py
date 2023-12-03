@@ -1,6 +1,8 @@
 import os
 import sys
 
+import requests
+
 print(os.path.abspath(".."))
 sys.path.insert(0, os.path.abspath(".."))
 # Configuration file for the Sphinx documentation builder.
@@ -26,6 +28,7 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.githubpages",
     "sphinx_rtd_theme",
+    "sphinx_github_changelog",
 ]
 autodoc_default_options = {"members": True, "inherited-members": True}
 autosummary_generate = True
@@ -35,6 +38,22 @@ templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 pygments_style = "sphinx"
+
+
+def get_latest_tag() -> str:
+    """Query GitHub API to get the most recent git tag"""
+    url = "https://api.github.com/repos/kschweiger/track_analyzer/tags"
+    response = requests.get(url)
+    response.raise_for_status()
+    return response.json()[0]["name"]
+
+
+_latest_tag = get_latest_tag()
+# The short X.Y version.
+version = _latest_tag
+# The full version, including alpha/beta/rc tags.
+release = _latest_tag
+
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
@@ -56,4 +75,12 @@ html_theme_options = {
     "navigation_depth": 4,
     "includehidden": True,
     "titles_only": False,
+}
+
+html_context = {
+    "display_github": True,  # Integrate GitHub
+    "github_user": "kschweiger",  # Username
+    "github_repo": "track_analyzer",  # Repo name
+    "github_version": "main",  # Version
+    "conf_py_path": "/docs/",  # Path in the checkout to the docs root
 }

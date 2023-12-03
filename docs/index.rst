@@ -28,7 +28,21 @@ Contents
 --------
 
 .. toctree::
+   :caption: Introduction
+   :maxdepth: 2
+
    usage
+
+.. toctree::
+   :caption: Details
+   :maxdepth: 2
+
    visualizations
    comparison
+
+.. toctree::
+   :caption: Reference
+   :maxdepth: 2
+
    api
+   releases
