@@ -1511,6 +1511,22 @@ lint = ["docutils-stubs", "flake8 (>=3.5.0)", "flake8-simplify", "isort", "mypy 
 test = ["cython (>=3.0)", "filelock", "html5lib", "pytest (>=4.6)", "setuptools (>=67.0)"]
 
 [[package]]
+name = "sphinx-github-changelog"
+version = "1.2.1"
+description = "Build a sphinx changelog from GitHub Releases"
+optional = false
+python-versions = ">=3.7,<4.0"
+files = [
+    {file = "sphinx_github_changelog-1.2.1-py3-none-any.whl", hash = "sha256:27b8906220c8010f116b61c90980f84d12f9446fb144f7c575c124e9c92e6c46"},
+    {file = "sphinx_github_changelog-1.2.1.tar.gz", hash = "sha256:20affb353bf02c89b868c2e5b9c61693dd22f3d2b2e134063c49f9e0d69352a5"},
+]
+
+[package.dependencies]
+docutils = "*"
+requests = "*"
+Sphinx = "*"
+
+[[package]]
 name = "sphinx-rtd-theme"
 version = "1.3.0"
 description = "Read the Docs theme for Sphinx"
@@ -1781,4 +1797,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.13"
-content-hash = "f1ff577056fdac8bd71f934c45977eb580986ffe7aa7b49b2743b01bc6eefa32"
+content-hash = "c3711d5bcb443eecc6287a4d9f34fe902ed1e696f325803f40cc31acf33d425b"

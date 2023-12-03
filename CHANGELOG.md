@@ -1,6 +1,7 @@
 <!-- insertion marker -->
-<a name="Unreleased"></a>
-## Unreleased ([compare](https://github.com/kschweiger/track_analyzer/compare/0.4.1...HEAD)) (2023-12-03)
+<a name="0.5.0"></a>
+
+## [0.5.0](https://github.com/kschweiger/track_analyzer/compare/0.4.1...0.5.0) (2023-12-03)
 
 ### Features
 
@@ -19,7 +20,6 @@
 
 - Renamed package to geo-track-analyzer ([13779ef](https://github.com/kschweiger/track_analyzer/commit/13779eff5622d3351cb0143419adf7bf0e902acf))
 
-<!-- insertion marker -->
 <a name="0.4.1"></a>
 
 ## [0.4.1](https://github.com/kschweiger/track_analyzer/compare/0.4.0...0.4.1) (2023-10-15)
