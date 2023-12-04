@@ -11,6 +11,8 @@ classifiers = [
 keywords = ["fit", "gpx", "visualization", "analysis"]
 readme = "README.md"
 packages = [{ include = "geo_track_analyzer" }]
+documentation = "https://kschweiger.github.io/track_analyzer/"
+repository = "https://github.com/kschweiger/track_analyzer"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
@@ -49,6 +51,16 @@ sphinx-github-changelog = "^1.2.1"
 
 [tool.poetry.scripts]
 extract_fit_track = 'geo_track_analyzer.cli.extract_track:main'
+
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "primary"
+
+
+[[tool.poetry.source]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+priority = "primary"
 
 [build-system]
 requires = ["poetry-core"]
