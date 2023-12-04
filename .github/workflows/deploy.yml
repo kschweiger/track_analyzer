@@ -34,8 +34,8 @@ jobs:
         with:
           name: build-artifacts
           path: dist/
-  publish-index:
-    name: Publish Python 🐍 distribution 📦 to PyPI
+  publish-test-index:
+    name: Publish Python 🐍 distribution 📦 to Test-PyPI
     runs-on: ubuntu-latest
     needs: build
     steps:
@@ -61,6 +61,45 @@ jobs:
           ls -l
           ls -l dist/
           poetry publish -r testpypi
+  install-test-package:
+    name: Install 📦 from Test-PyPI
+    runs-on: ubuntu-latest
+    needs: publish-test-index
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install package
+        run: |
+          pip install --no-cache-dir --extra-index-url https://pypi.org/simple/ -i https://test.pypi.org/simple/ geo-track-analyzer
+  publish-index:
+    name: Publish Python 🐍 distribution 📦 to PyPI
+    runs-on: ubuntu-latest
+    needs: [install-test-package,publish-github]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v2
+      - name: Set repo settings
+        run : |
+          poetry source add pypi
+          poetry config pypi-token.pypi "${{ secrets.PYPI_API_KEY }}"
+      - name: Download all the dists
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+          path: dist/
+      - name: Publish dist
+        run: |
+          ls -l
+          ls -l dist/
+          poetry publish --dry-run
   publish-github:
     name: GitHub release 🦾
     runs-on: ubuntu-latest
