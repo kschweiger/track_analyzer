@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "geo-track-analyzer"
-version = "0.5.3"
+version = "1.0.0"
 description = "Analyze geospacial data tracks"
 authors = ["Korbinian Schweiger <korbinian.schweiger@gmail.com>"]
 license = "MIT"
