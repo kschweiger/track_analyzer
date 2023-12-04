@@ -99,7 +99,7 @@ jobs:
         run: |
           ls -l
           ls -l dist/
-          poetry publish --dry-run
+          poetry publish
   publish-github:
     name: GitHub release 🦾
     runs-on: ubuntu-latest
