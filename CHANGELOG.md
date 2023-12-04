@@ -1,4 +1,8 @@
 <!-- insertion marker -->
+<a name="1.0.0"></a>
+
+## [1.0.0](https://github.com/kschweiger/track_analyzer/compare/0.5.3...1.0.0) (2023-12-04)
+
 <a name="0.5.3"></a>
 
 ## [0.5.3](https://github.com/kschweiger/track_analyzer/compare/0.5.2...0.5.3) (2023-12-04)
