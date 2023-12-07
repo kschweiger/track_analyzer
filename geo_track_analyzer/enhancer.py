@@ -63,7 +63,7 @@ class ElevationEnhancer(Enhancer):
 
 @final
 class OpenTopoElevationEnhancer(ElevationEnhancer):
-    """Use the/a OpenElevation API (https://opentopodata.org) to enhance a GPX track
+    """Use the/a OpenTopoData API (https://opentopodata.org) to enhance a GPX track
     with elevation information."""
 
     def __init__(

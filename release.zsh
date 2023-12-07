@@ -18,7 +18,7 @@ then
   exit 1
 fi
 git add CHANGELOG.md
-git commit -n -m "doc: Updated CHANGELOG.md :memo:"
+git commit -n -m "chore: Updated CHANGELOG.md :memo:"
 
 git tag ${VERSION}
 

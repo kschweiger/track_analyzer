@@ -1,4 +1,6 @@
 [![Testing](https://github.com/kschweiger/track_analyzer/actions/workflows/test.yml/badge.svg)](https://github.com/kschweiger/track_analyzer/actions/workflows/test.yml)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/geo-track-analyzer)
+![PyPI - License](https://img.shields.io/pypi/l/geo-track-analyzer)
 ![PyPI - Version](https://img.shields.io/pypi/v/geo-track-analyzer)
 
 

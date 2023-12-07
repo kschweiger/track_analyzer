@@ -39,6 +39,7 @@ Contents
 
    visualizations
    comparison
+   enhancer
 
 .. toctree::
    :caption: Reference
