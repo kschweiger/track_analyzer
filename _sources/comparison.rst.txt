@@ -11,9 +11,9 @@ Finding sub-segments in tracks
 ------------------------------
 
 A segments in a ``Track`` can be compared to another segment via the  :func:`~geo_track_analyzer.GPXFileTrack.find_overlap_with_segment` method.
-The idea for this method is, that segment in the Track is the base against which the passed Segment is checked. On a match, overlapping segment
-from the orignal track is returned. Additionally the overlap ratio and the direction is included (``False`` means both segments are running in the
-same direction).
+The idea for this method is, that segment in the Track is the base against which the passed Segment is checked. This can be used to implemented
+features similar to Segments in Strava. On a match, overlapping segment from the orignal track is returned. Additionally the overlap ratio and
+the direction is included (``False`` means both segments are running in the same direction).
 
 .. note::
 
