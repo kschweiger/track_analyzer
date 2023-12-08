@@ -58,7 +58,11 @@
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Release notes</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Release notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#release-1-0-0">1.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#release-0-5-1">0.5.1</a></li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -87,14 +91,37 @@
              
   <section id="release-notes">
 <h1>Release notes<a class="headerlink" href="#release-notes" title="Link to this heading"></a></h1>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Changelog was not built because <code class="docutils literal notranslate"><span class="pre">sphinx_github_changelog_token</span></code> parameter is missing in the documentation configuration.</p>
-</div>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>Find the project changelog <a class="reference external" href="https://your-project.readthedocs.io/en/stable/#changelog">here</a>.</p>
-</div>
+<section id="release-1-0-0">
+<h2>1.0.0<a class="headerlink" href="#release-1-0-0" title="Link to this heading"></a></h2>
+<p><em>Released on 2023-12-04 - <a class="reference external" href="https://github.com/kschweiger/track_analyzer/releases/tag/1.0.0">GitHub</a> - <a class="reference external" href="https://pypi.org/project/your-project/1.0.0/">PyPI</a></em></p>
+<p><a name="user-content-1.0.0"></a></p>
+<h2><a href="https://github.com/kschweiger/track_analyzer/compare/0.5.3...1.0.0">1.0.0</a> (2023-12-04)</h2>
+<p>Release of first non-development version of the package on PyPi 🎉</p>
+<p><a name="user-content-0.5.3"></a></p>
+<p><strong>Full Changelog</strong>: <a class="commit-link" href="https://github.com/kschweiger/track_analyzer/compare/0.5.3...1.0.0"><tt>0.5.3...1.0.0</tt></a></p></section>
+<section id="release-0-5-1">
+<h2>0.5.1<a class="headerlink" href="#release-0-5-1" title="Link to this heading"></a></h2>
+<p><em>Released on 2023-12-03 - <a class="reference external" href="https://github.com/kschweiger/track_analyzer/releases/tag/0.5.1">GitHub</a> - <a class="reference external" href="https://pypi.org/project/your-project/0.5.1/">PyPI</a></em></p>
+<p><a name="user-content-0.5.1"></a></p>
+<h2><a href="https://github.com/kschweiger/track_analyzer/compare/0.5.0...0.5.1">0.5.1</a> (2023-12-03)</h2>
+<p><a name="user-content-0.5.0"></a></p>
+<h2><a href="https://github.com/kschweiger/track_analyzer/compare/0.4.1...0.5.0">0.5.0</a> (2023-12-03)</h2>
+<h3>Features</h3>
+<ul>
+<li>Interpolation includes extentions heartrate, cadence, power (<a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2012584148" data-permission-text="Title is private" data-url="https://github.com/kschweiger/track_analyzer/issues/13" data-hovercard-type="issue" data-hovercard-url="/kschweiger/track_analyzer/issues/13/hovercard" href="https://github.com/kschweiger/track_analyzer/issues/13">#13</a>) (<a href="https://github.com/kschweiger/track_analyzer/commit/e777fa1505b28fc3e626ecb0fdcaba23ebaa0231">e777fa1</a>)</li>
+<li><strong>visualize.map:</strong> Adding map_style and line_width for map plot functions (<a href="https://github.com/kschweiger/track_analyzer/commit/0beaec264093dd03c11e3e755a9b70d7aa6dbcb1">0beaec2</a>)</li>
+<li><strong>Track:</strong> Adding split method (<a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2010178326" data-permission-text="Title is private" data-url="https://github.com/kschweiger/track_analyzer/issues/11" data-hovercard-type="pull_request" data-hovercard-url="/kschweiger/track_analyzer/pull/11/hovercard" href="https://github.com/kschweiger/track_analyzer/pull/11">#11</a>) (<a href="https://github.com/kschweiger/track_analyzer/commit/3ac4a427f2a46300c6aba56f58b44a6a5e953e51">3ac4a42</a>)</li>
+<li><strong>Track:</strong> Added plot method (<a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2003026193" data-permission-text="Title is private" data-url="https://github.com/kschweiger/track_analyzer/issues/9" data-hovercard-type="pull_request" data-hovercard-url="/kschweiger/track_analyzer/pull/9/hovercard" href="https://github.com/kschweiger/track_analyzer/pull/9">#9</a>) (<a href="https://github.com/kschweiger/track_analyzer/commit/d71b88821ae48b6b6bf2348ddad8793ad21a5f74">d71b888</a>)</li>
+</ul>
+<h3>Bug Fixes</h3>
+<ul>
+<li><strong>plot_segments_on_map:</strong> Plot now works with tracks w/o time (<a href="https://github.com/kschweiger/track_analyzer/commit/4789ddb300ceadd1907a9ab402a11a5068703581">4789ddb</a>)</li>
+<li>Track DataFrame with multiple segments was missing datapoints (<a href="https://github.com/kschweiger/track_analyzer/commit/975f1f9f5e695fe11cd1c38740692aa4282a62dd">975f1f9</a>)</li>
+</ul>
+<h3>Code Refactoring</h3>
+<ul>
+<li>Renamed package to geo-track-analyzer (<a href="https://github.com/kschweiger/track_analyzer/commit/13779eff5622d3351cb0143419adf7bf0e902acf">13779ef</a>)</li>
+</ul></section>
 </section>
 
 
