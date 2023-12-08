@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<gpx version="1.1"
+  creator="route/track editor on http://www.wanderreitkarte.de"
+  xmlns="http://www.topografix.com/GPX/1/1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.topografix.com/GPX/1/1
+  http://www.topografix.com/GPX/1/1/gpx.xsd">
+<trk>
+	<name>camps_elise</name>
+<trkseg>
+	<trkpt lat="48.86928" lon="2.30918">
+		<name>I1</name>
+	</trkpt>
+	<trkpt lat="48.87012" lon="2.30652">
+		<name>I2</name>
+	</trkpt>
+	<trkpt lat="48.87053" lon="2.30529">
+		<name>I3</name>
+	</trkpt>
+	<trkpt lat="48.87142" lon="2.30244">
+		<name>I4</name>
+	</trkpt>
+	<trkpt lat="48.87185" lon="2.30113">
+		<name>I5</name>
+	</trkpt>
+	<trkpt lat="48.87191" lon="2.30092">
+		<name>I6</name>
+	</trkpt>
+	<trkpt lat="48.87237" lon="2.29951">
+		<name>I7</name>
+	</trkpt>
+	<trkpt lat="48.87313" lon="2.29707">
+		<name>I8</name>
+	</trkpt>
+</trkseg>
+</trk>
+</gpx>

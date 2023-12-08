@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<gpx version="1.1"
+  creator="route/track editor on http://www.wanderreitkarte.de"
+  xmlns="http://www.topografix.com/GPX/1/1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.topografix.com/GPX/1/1
+  http://www.topografix.com/GPX/1/1/gpx.xsd">
+<trk>
+	<name>segment_2</name>
+<trkseg>
+	<trkpt lat="48.87228" lon="2.29526">
+		<name>I1</name>
+	</trkpt>
+	<trkpt lat="48.87114" lon="2.29547">
+		<name>I2</name>
+	</trkpt>
+	<trkpt lat="48.87049" lon="2.29557">
+		<name>I3</name>
+	</trkpt>
+	<trkpt lat="48.87011" lon="2.29567">
+		<name>I4</name>
+	</trkpt>
+	<trkpt lat="48.86951" lon="2.29576">
+		<name>I5</name>
+	</trkpt>
+	<trkpt lat="48.86835" lon="2.29572">
+		<name>I6</name>
+	</trkpt>
+	<trkpt lat="48.86793" lon="2.29570">
+		<name>I7</name>
+	</trkpt>
+	<trkpt lat="48.86774" lon="2.29572">
+		<name>I8</name>
+	</trkpt>
+	<trkpt lat="48.86723" lon="2.29537">
+		<name>I9</name>
+	</trkpt>
+	<trkpt lat="48.86495" lon="2.29407">
+		<name>I10</name>
+	</trkpt>
+</trkseg>
+</trk>
+</gpx>

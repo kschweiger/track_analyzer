@@ -8,7 +8,7 @@ on:
 jobs:
   deploy-doc:
     name: Build and deploy documentation 📚
-    if: startsWith(github.event.head_commit.message, 'doc:')
+    if: startsWith(github.event.head_commit.message, 'doc')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
