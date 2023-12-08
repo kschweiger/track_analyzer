@@ -358,3 +358,59 @@ def plot_segments_on_map(
     )
 
     return fig
+
+
+def plot_tracks_on_map(
+    datas: list[pd.DataFrame],
+    names: list[str],
+    *,
+    zoom: int = 13,
+    height: None | int = None,
+    width: None | int = None,
+    line_width: float = 2.5,
+    colors: None | list[str] = None,
+    map_style: str = "open-street-map",
+    **kwargs,
+) -> Figure:
+    fig = go.Figure()
+
+    all_points = []
+    for i, (data, name) in enumerate(zip(datas, names)):
+        mask = data.moving
+        plot_data = data[mask]
+
+        mod_line: dict[str, float | str | int] = {"width": line_width}
+        if colors is not None:
+            mod_line["color"] = colors[i]
+
+        fig.add_trace(
+            go.Scattermapbox(
+                lat=plot_data["latitude"],
+                lon=plot_data["longitude"],
+                mode="lines",
+                # hovertemplate="%{text} ",
+                # text=len(frame) * [text],
+                line=mod_line,
+                name=name,
+            )
+        )
+        all_points.extend(
+            [(r["latitude"], r["longitude"]) for r in data[mask].to_dict("records")]
+        )
+
+    center_lat, center_lon = center_geolocation(all_points)
+
+    fig.update_layout(
+        margin={"r": 57, "t": 5, "l": 49, "b": 5},
+        mapbox={
+            "style": map_style,
+            "zoom": zoom,
+            "center": {"lon": center_lon, "lat": center_lat},
+        },
+        height=height,
+        hovermode="closest",
+        width=width,
+        showlegend=False,
+    )
+
+    return fig

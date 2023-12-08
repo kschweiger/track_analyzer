@@ -30,6 +30,7 @@ jobs:
           source .venv/bin/activate
           pip list
           cd docs/
+          export SPHINX_GITHUB_CHANGELOG_TOKEN=${{ secrets.SPHINX_GITHUB_CHANGELOG_TOKEN }}
           python generate_visualization_examples.py
           make html
       - uses: actions/upload-artifact@v1

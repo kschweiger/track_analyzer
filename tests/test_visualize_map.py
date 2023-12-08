@@ -7,6 +7,7 @@ from geo_track_analyzer.visualize.map import (
     plot_segments_on_map,
     plot_track_enriched_on_map,
     plot_track_line_on_map,
+    plot_tracks_on_map,
 )
 
 
@@ -98,5 +99,15 @@ def test_plot_segments_on_map_pos_ele_only(track_for_test: Track) -> None:
     data.heartrate = None
 
     figure = plot_segments_on_map(data, average_only=False)
+
+    assert isinstance(figure, go.Figure)
+
+
+@pytest.mark.parametrize("colors", [None, ["green", "blue"]])
+def test_plot_tracks_on_map(track_for_test: Track, colors: None | list[str]) -> None:
+    data_1 = track_for_test.get_segment_data(0)
+    data_2 = track_for_test.get_segment_data(1)
+
+    figure = plot_tracks_on_map([data_1, data_2], ["Name 1", "Name 2"], colors=colors)
 
     assert isinstance(figure, go.Figure)
