@@ -27,6 +27,7 @@ def test_open_elevation_enhancer_api_exceptions() -> None:
         enhancer.get_elevation_data([])
 
 
+@pytest.mark.dependency()
 def test_opentopo_elevation_enhancer() -> None:
     sleep(2)
     enhancer = OpenTopoElevationEnhancer()
@@ -38,9 +39,10 @@ def test_opentopo_elevation_enhancer() -> None:
     assert ret_data == [44.59263610839844, 113.41450500488281]
 
 
+@pytest.mark.dependency(depends=["test_opentopo_elevation_enhancer"])
 @pytest.mark.skipif(os.environ.get("TEST_ENV") == "CI", reason="Not tested on CI")
 def test_opentopo_elevation_enhancer_splitting() -> None:
-    sleep(2)
+    sleep(5)
     enhancer = OpenTopoElevationEnhancer()
 
     query_data = [(48.8588897, 2.320041), (41.161758, -8.583933)]
