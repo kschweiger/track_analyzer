@@ -1,10 +1,18 @@
 import os
 from time import sleep
+from typing import Type
 
 import gpxpy
 import pytest
+from gpxpy.gpx import GPXTrack
+from pytest_mock import MockerFixture
 
-from geo_track_analyzer.enhancer import OpenElevationEnhancer, OpenTopoElevationEnhancer
+from geo_track_analyzer.enhancer import (
+    EnhancerType,
+    OpenElevationEnhancer,
+    OpenTopoElevationEnhancer,
+    get_enhancer,
+)
 from geo_track_analyzer.exceptions import APIResponseError
 
 
@@ -52,7 +60,9 @@ def test_opentopo_elevation_enhancer_splitting() -> None:
     assert ret_data == [44.59263610839844, 113.41450500488281]
 
 
-def enhancer_test_track(mocker, inplace) -> None:
+def enhancer_test_track(
+    mocker: MockerFixture, inplace: bool
+) -> tuple[GPXTrack, GPXTrack]:
     enhancer = OpenTopoElevationEnhancer(skip_checks=True)
 
     mock_get_data = mocker.Mock()
@@ -75,7 +85,7 @@ def enhancer_test_track(mocker, inplace) -> None:
     return gpx_track, enhancer.enhance_track(gpx_track, inplace=inplace)
 
 
-def test_enhancer_enhance_track(mocker) -> None:
+def test_enhancer_enhance_track(mocker: MockerFixture) -> None:
     orig_track, enhanced_track = enhancer_test_track(mocker, False)
 
     assert orig_track != enhanced_track
@@ -87,7 +97,7 @@ def test_enhancer_enhance_track(mocker) -> None:
     assert enhanced_track.segments[0].points[1].elevation == 275
 
 
-def test_enhancer_enhance_track_inplace(mocker) -> None:
+def test_enhancer_enhance_track_inplace(mocker: MockerFixture) -> None:
     orig_track, enhanced_track = enhancer_test_track(mocker, True)
 
     assert orig_track == enhanced_track
@@ -100,3 +110,16 @@ def test_enhancer_enhance_track_inplace(mocker) -> None:
 
     assert enhanced_track.segments[0].points[0].elevation == 250
     assert enhanced_track.segments[0].points[1].elevation == 275
+
+
+@pytest.mark.parametrize(
+    ("in_arg", "ret_type"),
+    [
+        (EnhancerType.OPENELEVATION, OpenElevationEnhancer),
+        (EnhancerType.OPENTOPOELEVATION, OpenTopoElevationEnhancer),
+        ("OpenElevation", OpenElevationEnhancer),
+        ("OpenTopoElevation", OpenTopoElevationEnhancer),
+    ],
+)
+def test_get_enhancer(in_arg: EnhancerType | str, ret_type: Type) -> None:
+    assert get_enhancer(in_arg) == ret_type
