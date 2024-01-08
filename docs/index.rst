@@ -40,6 +40,7 @@ Contents
    visualizations
    comparison
    enhancer
+   cli
 
 .. toctree::
    :caption: Reference
