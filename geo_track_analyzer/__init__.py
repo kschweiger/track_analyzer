@@ -1,6 +1,7 @@
 from .enhancer import (
     ElevationEnhancer,
     Enhancer,
+    EnhancerType,
     OpenElevationEnhancer,
     OpenTopoElevationEnhancer,
     get_enhancer,
@@ -14,6 +15,7 @@ __all__ = [
     "PyTrack",
     "SegmentTrack",
     "Track",
+    "EnhancerType",
     "ElevationEnhancer",
     "Enhancer",
     "OpenElevationEnhancer",

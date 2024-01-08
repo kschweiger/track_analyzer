@@ -1,7 +1,9 @@
 from datetime import datetime
+from typing import Type, final
 
 import pytest
 
+from geo_track_analyzer.enhancer import ElevationEnhancer
 from geo_track_analyzer.track import PyTrack, Track
 
 
@@ -131,3 +133,20 @@ def track_for_test_3_segments() -> Track:
     )
 
     return track
+
+
+@pytest.fixture()
+def mock_elevation_enhancer() -> Type[ElevationEnhancer]:
+    @final
+    class MockEnhancer(ElevationEnhancer):
+        def __init__(self, url: str, *args, **kwargs) -> None:
+            self.passed_kwargs = kwargs
+            self.passed_args = args
+            self.url = url
+
+        def get_elevation_data(
+            self, input_coordinates: list[tuple[float, float]]
+        ) -> list[float]:
+            return [100.0 + i for i in range(len(input_coordinates))]
+
+    return MockEnhancer

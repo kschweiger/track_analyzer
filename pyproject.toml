@@ -23,7 +23,10 @@ requests = "^2.31.0"
 plotly = "^5.18.0"
 pandas = "^2.1.4"
 fitparse = "^1.2.0"
+
+[tool.poetry.group.cli.dependencies]
 click = "^8.1.7"
+rich = "^13.7.0"
 
 [tool.poetry.group.dev]
 optional = true
@@ -57,7 +60,8 @@ sphinx-rtd-theme = "^2.0.0"
 sphinx-github-changelog = "^1.2.1"
 
 [tool.poetry.scripts]
-extract_fit_track = 'geo_track_analyzer.cli.extract_track:main'
+extract-fit_track = 'geo_track_analyzer.cli.extract_track:main'
+enhance-elevation = 'geo_track_analyzer.cli.update_elevation:main'
 
 [[tool.poetry.source]]
 name = "PyPI"
@@ -79,7 +83,7 @@ testpaths = ["tests/"]
 [tool.ruff]
 select = ["E", "F", "I", "PD", "PT", "NPY", "N", "W", "RET", "ANN", "RUF"]
 unfixable = ["F841", "RUF005", "RUF015"]
-ignore = ["ANN101", "RUF009", "E731", "RET505", "ANN002", "ANN003"]
+ignore = ["ANN101", "RUF009", "E731", "RET505", "ANN002", "ANN003", "RUF005"]
 ignore-init-module-imports = true
 target-version = "py310"
 

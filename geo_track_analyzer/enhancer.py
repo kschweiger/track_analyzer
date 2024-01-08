@@ -4,7 +4,8 @@ Enhance gpx tracks with external data. E.g. elevation data
 import json
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, Literal, Mapping, Type, final
+from enum import Enum
+from typing import Dict, Mapping, Type, final
 
 import requests
 from gpxpy.gpx import GPXTrack
@@ -19,8 +20,17 @@ from geo_track_analyzer.exceptions import (
 logger = logging.getLogger(__name__)
 
 
+class EnhancerType(str, Enum):
+    OPENTOPOELEVATION = "OpenTopoElevation"
+    OPENELEVATION = "OpenElevation"
+
+
 class Enhancer(ABC):
     """Base class for GPX Track enhancement"""
+
+    @abstractmethod
+    def __init__(self, url: str) -> None:
+        pass
 
     @abstractmethod
     def enhance_track(self, track: GPXTrack, inplace: bool = False) -> GPXTrack:
@@ -203,16 +213,16 @@ class OpenElevationEnhancer(ElevationEnhancer):
             raise APIResponseError(resp.text)
 
 
-def get_enhancer(name: Literal["OpenTopoElevation", "OpenElevation"]) -> Type[Enhancer]:
+def get_enhancer(name: EnhancerType) -> Type[Enhancer]:
     """Get a Enhance object for a specific enpoint by passing a distinct name
 
     :param name: Name of enhancer. Chose OpenTopoElevation or OpenElevation
     :raises NotImplementedError: If an invalid name is passed
     :return: An Enhancer object
     """
-    if name == "OpenTopoElevation":
+    if name == EnhancerType.OPENTOPOELEVATION:
         return OpenTopoElevationEnhancer
-    elif name == "OpenElevation":
+    elif name == EnhancerType.OPENELEVATION:
         return OpenElevationEnhancer
     else:
         raise NotImplementedError("Can not return Enhancer for name %s" % name)
