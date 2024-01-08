@@ -4,7 +4,7 @@ Enhance gpx tracks with external data. E.g. elevation data
 import json
 import logging
 from abc import ABC, abstractmethod
-from enum import StrEnum
+from enum import Enum
 from typing import Dict, Mapping, Type, final
 
 import requests
@@ -20,7 +20,7 @@ from geo_track_analyzer.exceptions import (
 logger = logging.getLogger(__name__)
 
 
-class EnhancerType(StrEnum):
+class EnhancerType(str, Enum):
     OPENTOPOELEVATION = "OpenTopoElevation"
     OPENELEVATION = "OpenElevation"
 
