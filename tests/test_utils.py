@@ -5,6 +5,7 @@ from typing import Literal, Type
 import numpy as np
 import pytest
 from gpxpy.gpx import GPXTrack, GPXTrackPoint, GPXTrackSegment
+from pytest_mock import MockerFixture
 
 from geo_track_analyzer.model import PointDistance, Position2D, Position3D
 from geo_track_analyzer.track import PyTrack
@@ -29,8 +30,8 @@ from geo_track_analyzer.utils.base import (
 
 
 def test_distance_far() -> None:
-    p1 = Position2D(51.5073219, -0.1276474)  # London
-    p2 = Position2D(48.8588897, 2.320041)  # Paris
+    p1 = Position2D(latitude=51.5073219, longitude=-0.1276474)  # London
+    p2 = Position2D(latitude=48.8588897, longitude=2.320041)  # Paris
 
     d = distance(p1, p2)
 
@@ -38,23 +39,23 @@ def test_distance_far() -> None:
 
 
 def test_distance_close() -> None:
-    p1 = Position2D(48.86104740612081, 2.3356136263202165)
-    p2 = Position2D(48.861134753323505, 2.335389661859064)
+    p1 = Position2D(latitude=48.86104740612081, longitude=2.3356136263202165)
+    p2 = Position2D(latitude=48.861134753323505, longitude=2.335389661859064)
 
     d = distance(p1, p2)
 
     assert int(d) == 19
 
 
-def test_calc_elevation_metrics(mocker) -> None:
+def test_calc_elevation_metrics(mocker: MockerFixture) -> None:
     mocker.patch("geo_track_analyzer.utils.base.distance", return_value=150)
 
     positions = [
-        Position3D(0, 0, 100),
-        Position3D(0, 0, 200),
-        Position3D(0, 0, 275),
-        Position3D(0, 0, 175),
-        Position3D(0, 0, 125),
+        Position3D(latitude=0, longitude=0, elevation=100),
+        Position3D(latitude=0, longitude=0, elevation=200),
+        Position3D(latitude=0, longitude=0, elevation=275),
+        Position3D(latitude=0, longitude=0, elevation=175),
+        Position3D(latitude=0, longitude=0, elevation=125),
     ]
 
     metrics = calc_elevation_metrics(positions)
@@ -76,11 +77,11 @@ def test_calc_elevation_metrics(mocker) -> None:
     assert len(metrics.slopes) == len(positions)
 
 
-def test_calc_elevation_metrics_nan(mocker) -> None:
+def test_calc_elevation_metrics_nan(mocker: MockerFixture) -> None:
     mocker.patch("geo_track_analyzer.utils.base.distance", return_value=150)
     positions = [
-        Position3D(0, 0, 100),
-        Position3D(0, 0, 1000),
+        Position3D(latitude=0, longitude=0, elevation=100),
+        Position3D(latitude=0, longitude=0, elevation=1000),
     ]
 
     metrics = calc_elevation_metrics(positions)
@@ -92,7 +93,9 @@ def test_calc_elevation_metrics_nan(mocker) -> None:
     ("coords", "exp_lat", "exp_lon"),
     [([(10, 0), (20, 0)], 15, 0), ([(0, 10), (0, 20)], 0, 15)],
 )
-def test_center_geolocation(coords, exp_lat, exp_lon) -> None:
+def test_center_geolocation(
+    coords: list[tuple[float, float]], exp_lat: float, exp_lon: float
+) -> None:
     ret_lat, ret_lon = center_geolocation(coords)
     assert isclose(ret_lat, exp_lat)
     assert isclose(ret_lon, exp_lon)
@@ -152,9 +155,16 @@ def test_get_segment_base_area_lat_line() -> None:
     ("value", "distance", "to_east", "exp_value"),
     [(47.996, 111.2, True, 47.997), (47.996, 111.2, False, 47.995)],
 )
-def test_get_latitude_at_distance(value, distance, to_east, exp_value) -> None:
+def test_get_latitude_at_distance(
+    value: float, distance: float, to_east: bool, exp_value: float
+) -> None:
     assert (
-        round(get_latitude_at_distance(Position2D(value, 1), distance, to_east), 3)
+        round(
+            get_latitude_at_distance(
+                Position2D(latitude=value, longitude=1), distance, to_east
+            ),
+            3,
+        )
         == exp_value
     )
 
@@ -163,10 +173,15 @@ def test_get_latitude_at_distance(value, distance, to_east, exp_value) -> None:
     ("value", "distance", "to_north", "exp_value"),
     [(7.854, 74.41, True, 7.855), (7.854, 74.41, False, 7.853)],
 )
-def test_get_longitude_at_distance(value, distance, to_north, exp_value) -> None:
+def test_get_longitude_at_distance(
+    value: float, distance: float, to_north: bool, exp_value: float
+) -> None:
     assert (
         round(
-            get_longitude_at_distance(Position2D(47.996, value), distance, to_north), 3
+            get_longitude_at_distance(
+                Position2D(latitude=47.996, longitude=value), distance, to_north
+            ),
+            3,
         )
         == exp_value
     )
@@ -179,7 +194,9 @@ def test_get_longitude_at_distance(value, distance, to_north, exp_value) -> None
         ([[0, 1], [1, 1], [2, 2]], [[1, 1]], (3, 1)),
     ],
 )
-def test_get_distance(v1_point, v2_points, exp_shape) -> None:
+def test_get_distance(
+    v1_point: list[list[int]], v2_points: list[list[int]], exp_shape: tuple[int, int]
+) -> None:
     distances = get_distances(np.array(v1_point), np.array(v2_points))
 
     assert isinstance(distances, np.ndarray)
@@ -200,16 +217,34 @@ def test_get_distance_computation() -> None:
     indiv_values = np.array(
         [
             [
-                distance(Position2D(*v1_points[0]), Position2D(*v2_points[0])),
-                distance(Position2D(*v1_points[0]), Position2D(*v2_points[1])),
+                distance(
+                    Position2D(latitude=v1_points[0][0], longitude=v1_points[0][1]),
+                    Position2D(latitude=v2_points[0][0], longitude=v2_points[0][1]),
+                ),
+                distance(
+                    Position2D(latitude=v1_points[0][0], longitude=v1_points[0][1]),
+                    Position2D(latitude=v2_points[1][0], longitude=v2_points[1][1]),
+                ),
             ],
             [
-                distance(Position2D(*v1_points[1]), Position2D(*v2_points[0])),
-                distance(Position2D(*v1_points[1]), Position2D(*v2_points[1])),
+                distance(
+                    Position2D(latitude=v1_points[1][0], longitude=v1_points[1][1]),
+                    Position2D(latitude=v2_points[0][0], longitude=v2_points[0][1]),
+                ),
+                distance(
+                    Position2D(latitude=v1_points[1][0], longitude=v1_points[1][1]),
+                    Position2D(latitude=v2_points[1][0], longitude=v2_points[1][1]),
+                ),
             ],
             [
-                distance(Position2D(*v1_points[2]), Position2D(*v2_points[0])),
-                distance(Position2D(*v1_points[2]), Position2D(*v2_points[1])),
+                distance(
+                    Position2D(latitude=v1_points[2][0], longitude=v1_points[2][1]),
+                    Position2D(latitude=v2_points[0][0], longitude=v2_points[0][1]),
+                ),
+                distance(
+                    Position2D(latitude=v1_points[2][0], longitude=v1_points[2][1]),
+                    Position2D(latitude=v2_points[1][0], longitude=v2_points[1][1]),
+                ),
             ],
         ]
     )
@@ -241,7 +276,11 @@ def test_get_distance_computation() -> None:
         ),
     ],
 )
-def test_get_points_inside_bounds(points, bounds, exp_array) -> None:
+def test_get_points_inside_bounds(
+    points: list[tuple[int, int]],
+    bounds: tuple[float, float, float, float],
+    exp_array: list[tuple[int, bool]],
+) -> None:
     test_segment = GPXTrackSegment()
     for lat, lng in points:
         test_segment.points.append(GPXTrackPoint(lat, lng))

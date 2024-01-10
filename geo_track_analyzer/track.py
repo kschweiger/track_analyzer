@@ -191,7 +191,11 @@ class Track(ABC):
             max_elevation = data.elevation.max()
             min_elevation = data.elevation.min()
             position_3d = [
-                Position3D(rec["latitude"], rec["longitude"], rec["elevation"])
+                Position3D(
+                    latitude=rec["latitude"],
+                    longitude=rec["longitude"],
+                    elevation=rec["elevation"],
+                )
                 for rec in data.to_dict("records")
                 if not np.isnan(rec["elevation"])
             ]
@@ -201,16 +205,16 @@ class Track(ABC):
             downhill = elevation_metrics.downhill
 
         return SegmentOverview(
-            time,
-            total_time,
-            distance,
-            total_distance,
-            max_speed,
-            avg_speed,
-            max_elevation,
-            min_elevation,
-            uphill,
-            downhill,
+            moving_time_seconds=time,
+            total_time_seconds=total_time,
+            moving_distance=distance,
+            total_distance=total_distance,
+            max_velocity=max_speed,
+            avg_velocity=avg_speed,
+            max_elevation=max_elevation,
+            min_elevation=min_elevation,
+            uphill_elevation=uphill,
+            downhill_elevation=downhill,
         )
 
     def get_closest_point(

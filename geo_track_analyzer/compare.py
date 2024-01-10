@@ -80,12 +80,12 @@ def derive_plate_bins(
     # Find the total distance in latitude and longitude directrons to find the number of
     # bins that need be generated bas ed on the pass gridwidth
     distance_latitude_total = gird_width + distance(
-        Position2D(bounds_min_latitude, bounds_min_longitude),
-        Position2D(bounds_max_latitude, bounds_min_longitude),
+        Position2D(latitude=bounds_min_latitude, longitude=bounds_min_longitude),
+        Position2D(latitude=bounds_max_latitude, longitude=bounds_min_longitude),
     )
     distance_longitude_total = gird_width + distance(
-        Position2D(bounds_min_latitude, bounds_min_longitude),
-        Position2D(bounds_min_latitude, bounds_max_longitude),
+        Position2D(latitude=bounds_min_latitude, longitude=bounds_min_longitude),
+        Position2D(latitude=bounds_min_latitude, longitude=bounds_max_longitude),
     )
 
     n_bins_latitude = int(round(distance_latitude_total / gird_width))
@@ -95,20 +95,27 @@ def derive_plate_bins(
     # the edge of these bends need to be half the grid width from the original
     # lower left bound
     lower_edge_latitude = get_latitude_at_distance(
-        Position2D(bounds_min_latitude, bounds_min_longitude), gird_width / 2, False
+        Position2D(latitude=bounds_min_latitude, longitude=bounds_min_longitude),
+        gird_width / 2,
+        False,
     )
     lower_edge_longitude = get_longitude_at_distance(
-        Position2D(bounds_min_latitude, bounds_min_longitude), gird_width / 2, False
+        Position2D(latitude=bounds_min_latitude, longitude=bounds_min_longitude),
+        gird_width / 2,
+        False,
     )
 
     # Generate the bin edges by starting from the lower left edge and adding new
     # points with distance gid_width
     bins_latitude = [(lower_edge_latitude, lower_edge_longitude)]
     for _ in range(n_bins_latitude):
+        _this_lat, _this_lon = bins_latitude[-1]
         bins_latitude.append(
             (
                 get_latitude_at_distance(
-                    Position2D(*bins_latitude[-1]), gird_width, True
+                    Position2D(latitude=_this_lat, longitude=_this_lon),
+                    gird_width,
+                    True,
                 ),
                 lower_edge_longitude,
             )
@@ -116,11 +123,14 @@ def derive_plate_bins(
 
     bins_longitude = [(lower_edge_latitude, lower_edge_longitude)]
     for _ in range(n_bins_longitude):
+        _this_lat, _this_lon = bins_longitude[-1]
         bins_longitude.append(
             (
                 lower_edge_latitude,
                 get_longitude_at_distance(
-                    Position2D(*bins_longitude[-1]), gird_width, True
+                    Position2D(latitude=_this_lat, longitude=_this_lon),
+                    gird_width,
+                    True,
                 ),
             )
         )

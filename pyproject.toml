@@ -23,6 +23,7 @@ requests = "^2.31.0"
 plotly = "^5.18.0"
 pandas = "^2.1.4"
 fitparse = "^1.2.0"
+pydantic = "^2.5.3"
 
 [tool.poetry.group.cli.dependencies]
 click = "^8.1.7"

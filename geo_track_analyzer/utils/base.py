@@ -115,7 +115,7 @@ def calc_elevation_metrics(
         else:
             slopes.append(degrees(asin(o_by_h)))
 
-    return ElevationMetrics(uphill, abs(downhill), slopes)
+    return ElevationMetrics(uphill=uphill, downhill=abs(downhill), slopes=slopes)
 
 
 def parse_level(this_level: Union[int, str]) -> tuple[int, Callable]:
@@ -222,8 +222,8 @@ def interpolate_points(
     """
 
     pp_distance = distance(
-        Position2D(start.latitude, start.longitude),
-        Position2D(end.latitude, end.longitude),
+        Position2D(latitude=start.latitude, longitude=start.longitude),
+        Position2D(latitude=end.latitude, longitude=end.longitude),
     )
     if pp_distance < 2 * spacing:
         return None
@@ -291,8 +291,8 @@ def interpolate_points(
             elevation_int[i],
             time,
             distance(
-                Position2D(start.latitude, start.longitude),
-                Position2D(lat_int[i], lng_int[i]),
+                Position2D(latitude=start.latitude, longitude=start.longitude),
+                Position2D(latitude=lat_int[i], longitude=lng_int[i]),
             ),
         )
 
@@ -355,13 +355,13 @@ def get_segment_base_area(segment: GPXTrackSegment) -> float:
 
     # After check_bounds this always works
     latitude_distance = distance(
-        Position2D(bounds.max_latitude, bounds.min_longitude),  # type: ignore
-        Position2D(bounds.min_latitude, bounds.min_longitude),  # type: ignore
+        Position2D(latitude=bounds.max_latitude, longitude=bounds.min_longitude),  # type: ignore
+        Position2D(latitude=bounds.min_latitude, longitude=bounds.min_longitude),  # type: ignore
     )
 
     longitude_distance = distance(
-        Position2D(bounds.min_latitude, bounds.max_longitude),  # type: ignore
-        Position2D(bounds.min_latitude, bounds.min_longitude),  # type: ignore
+        Position2D(latitude=bounds.min_latitude, longitude=bounds.max_longitude),  # type: ignore
+        Position2D(latitude=bounds.min_latitude, longitude=bounds.min_longitude),  # type: ignore
     )
 
     return latitude_distance * longitude_distance
