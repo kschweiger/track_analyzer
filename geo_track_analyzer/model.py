@@ -1,8 +1,11 @@
-from dataclasses import dataclass
+from typing import Annotated
 
 import numpy as np
 from gpxpy.gpx import GPXTrackPoint
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic_numpy import np_array_pydantic_annotated_typing
+
+from geo_track_analyzer.utils.internal import GPXTrackPointAfterValidator
 
 
 class Model(BaseModel):
@@ -100,8 +103,7 @@ class SegmentOverview(Model):
         return self
 
 
-@dataclass
-class SegmentOverlap:
+class SegmentOverlap(Model):
     """Represent the overlap between two segments"""
 
     overlap: float
@@ -110,16 +112,16 @@ class SegmentOverlap:
     inverse: bool
     """Match direction of the segment relative to the base"""
 
-    plate: np.ndarray
+    plate: np_array_pydantic_annotated_typing(data_type=np.float32, dimensions=2)
     """2D representation of the segment overlap"""
 
-    start_point: GPXTrackPoint
+    start_point: Annotated[GPXTrackPoint, GPXTrackPointAfterValidator]
     """First point matching the base segment """
 
     start_idx: int
     """Index of the first point in match segment"""
 
-    end_point: GPXTrackPoint
+    end_point: Annotated[GPXTrackPoint, GPXTrackPointAfterValidator]
     """Last point matching the base segment """
 
     end_idx: int
@@ -138,11 +140,10 @@ class SegmentOverlap:
         return ret_str
 
 
-@dataclass
-class PointDistance:
-    """Represents a distance calculation to a point in a GPX track."""
+class PointDistance(Model):
+    """Represents a distance calculati  on to a point in a GPX track."""
 
-    point: GPXTrackPoint
+    point: Annotated[GPXTrackPoint, GPXTrackPointAfterValidator]
     """The nearest point on the track."""
 
     distance: float

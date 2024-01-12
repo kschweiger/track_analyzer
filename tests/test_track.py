@@ -14,7 +14,7 @@ from geo_track_analyzer.exceptions import (
 )
 from geo_track_analyzer.model import SegmentOverview
 from geo_track_analyzer.track import ByteTrack, GPXFileTrack, PyTrack, Track
-from geo_track_analyzer.utils.base import get_extension_value
+from geo_track_analyzer.utils.internal import get_extension_value
 from tests import resources
 
 

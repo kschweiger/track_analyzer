@@ -10,14 +10,11 @@ from pytest_mock import MockerFixture
 from geo_track_analyzer.model import PointDistance, Position2D, Position3D
 from geo_track_analyzer.track import PyTrack
 from geo_track_analyzer.utils.base import (
-    ExtensionFieldElement,
     calc_elevation_metrics,
     center_geolocation,
     distance,
     format_timedelta,
     get_distances,
-    get_extended_track_point,
-    get_extension_value,
     get_latitude_at_distance,
     get_longitude_at_distance,
     get_point_distance,
@@ -26,6 +23,11 @@ from geo_track_analyzer.utils.base import (
     interpolate_extension,
     interpolate_points,
     split_segment_by_id,
+)
+from geo_track_analyzer.utils.internal import (
+    ExtensionFieldElement,
+    get_extended_track_point,
+    get_extension_value,
 )
 
 

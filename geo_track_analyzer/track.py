@@ -25,10 +25,10 @@ from geo_track_analyzer.processing import (
 )
 from geo_track_analyzer.utils.base import (
     calc_elevation_metrics,
-    get_extended_track_point,
     get_point_distance,
     interpolate_segment,
 )
+from geo_track_analyzer.utils.internal import get_extended_track_point
 from geo_track_analyzer.visualize import (
     plot_segments_on_map,
     plot_track_2d,

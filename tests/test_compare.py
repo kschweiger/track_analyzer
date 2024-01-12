@@ -170,8 +170,20 @@ def test_get_segment_overlap(
     mocker.patch(
         "geo_track_analyzer.compare.get_point_distance",
         side_effect=[
-            PointDistance(GPXTrackPoint(1, 1), 10, 0, 0, 0),
-            PointDistance(GPXTrackPoint(2, 2), 10, 3, 0, 3),
+            PointDistance(
+                point=GPXTrackPoint(1, 1),
+                distance=10,
+                point_idx_abs=0,
+                segment_idx=0,
+                segment_point_idx=0,
+            ),
+            PointDistance(
+                point=GPXTrackPoint(2, 2),
+                distance=10,
+                point_idx_abs=3,
+                segment_idx=0,
+                segment_point_idx=3,
+            ),
         ],
     )
 
