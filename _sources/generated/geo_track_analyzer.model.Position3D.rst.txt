@@ -14,6 +14,29 @@
    .. autosummary::
    
       ~Position3D.__init__
+      ~Position3D.construct
+      ~Position3D.copy
+      ~Position3D.dict
+      ~Position3D.from_orm
+      ~Position3D.json
+      ~Position3D.model_construct
+      ~Position3D.model_copy
+      ~Position3D.model_dump
+      ~Position3D.model_dump_json
+      ~Position3D.model_json_schema
+      ~Position3D.model_parametrized_name
+      ~Position3D.model_post_init
+      ~Position3D.model_rebuild
+      ~Position3D.model_validate
+      ~Position3D.model_validate_json
+      ~Position3D.model_validate_strings
+      ~Position3D.parse_file
+      ~Position3D.parse_obj
+      ~Position3D.parse_raw
+      ~Position3D.schema
+      ~Position3D.schema_json
+      ~Position3D.update_forward_refs
+      ~Position3D.validate
    
    
 
@@ -23,6 +46,11 @@
 
    .. autosummary::
    
+      ~Position3D.model_computed_fields
+      ~Position3D.model_config
+      ~Position3D.model_extra
+      ~Position3D.model_fields
+      ~Position3D.model_fields_set
       ~Position3D.elevation
       ~Position3D.latitude
       ~Position3D.longitude

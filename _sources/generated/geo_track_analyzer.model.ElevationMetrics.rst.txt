@@ -14,6 +14,29 @@
    .. autosummary::
    
       ~ElevationMetrics.__init__
+      ~ElevationMetrics.construct
+      ~ElevationMetrics.copy
+      ~ElevationMetrics.dict
+      ~ElevationMetrics.from_orm
+      ~ElevationMetrics.json
+      ~ElevationMetrics.model_construct
+      ~ElevationMetrics.model_copy
+      ~ElevationMetrics.model_dump
+      ~ElevationMetrics.model_dump_json
+      ~ElevationMetrics.model_json_schema
+      ~ElevationMetrics.model_parametrized_name
+      ~ElevationMetrics.model_post_init
+      ~ElevationMetrics.model_rebuild
+      ~ElevationMetrics.model_validate
+      ~ElevationMetrics.model_validate_json
+      ~ElevationMetrics.model_validate_strings
+      ~ElevationMetrics.parse_file
+      ~ElevationMetrics.parse_obj
+      ~ElevationMetrics.parse_raw
+      ~ElevationMetrics.schema
+      ~ElevationMetrics.schema_json
+      ~ElevationMetrics.update_forward_refs
+      ~ElevationMetrics.validate
    
    
 
@@ -23,6 +46,11 @@
 
    .. autosummary::
    
+      ~ElevationMetrics.model_computed_fields
+      ~ElevationMetrics.model_config
+      ~ElevationMetrics.model_extra
+      ~ElevationMetrics.model_fields
+      ~ElevationMetrics.model_fields_set
       ~ElevationMetrics.uphill
       ~ElevationMetrics.downhill
       ~ElevationMetrics.slopes

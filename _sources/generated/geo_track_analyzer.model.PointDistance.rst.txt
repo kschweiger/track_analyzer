@@ -14,6 +14,29 @@
    .. autosummary::
    
       ~PointDistance.__init__
+      ~PointDistance.construct
+      ~PointDistance.copy
+      ~PointDistance.dict
+      ~PointDistance.from_orm
+      ~PointDistance.json
+      ~PointDistance.model_construct
+      ~PointDistance.model_copy
+      ~PointDistance.model_dump
+      ~PointDistance.model_dump_json
+      ~PointDistance.model_json_schema
+      ~PointDistance.model_parametrized_name
+      ~PointDistance.model_post_init
+      ~PointDistance.model_rebuild
+      ~PointDistance.model_validate
+      ~PointDistance.model_validate_json
+      ~PointDistance.model_validate_strings
+      ~PointDistance.parse_file
+      ~PointDistance.parse_obj
+      ~PointDistance.parse_raw
+      ~PointDistance.schema
+      ~PointDistance.schema_json
+      ~PointDistance.update_forward_refs
+      ~PointDistance.validate
    
    
 
@@ -23,6 +46,11 @@
 
    .. autosummary::
    
+      ~PointDistance.model_computed_fields
+      ~PointDistance.model_config
+      ~PointDistance.model_extra
+      ~PointDistance.model_fields
+      ~PointDistance.model_fields_set
       ~PointDistance.point
       ~PointDistance.distance
       ~PointDistance.point_idx_abs

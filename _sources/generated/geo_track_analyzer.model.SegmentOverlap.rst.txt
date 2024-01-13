@@ -14,6 +14,29 @@
    .. autosummary::
    
       ~SegmentOverlap.__init__
+      ~SegmentOverlap.construct
+      ~SegmentOverlap.copy
+      ~SegmentOverlap.dict
+      ~SegmentOverlap.from_orm
+      ~SegmentOverlap.json
+      ~SegmentOverlap.model_construct
+      ~SegmentOverlap.model_copy
+      ~SegmentOverlap.model_dump
+      ~SegmentOverlap.model_dump_json
+      ~SegmentOverlap.model_json_schema
+      ~SegmentOverlap.model_parametrized_name
+      ~SegmentOverlap.model_post_init
+      ~SegmentOverlap.model_rebuild
+      ~SegmentOverlap.model_validate
+      ~SegmentOverlap.model_validate_json
+      ~SegmentOverlap.model_validate_strings
+      ~SegmentOverlap.parse_file
+      ~SegmentOverlap.parse_obj
+      ~SegmentOverlap.parse_raw
+      ~SegmentOverlap.schema
+      ~SegmentOverlap.schema_json
+      ~SegmentOverlap.update_forward_refs
+      ~SegmentOverlap.validate
    
    
 
@@ -23,6 +46,11 @@
 
    .. autosummary::
    
+      ~SegmentOverlap.model_computed_fields
+      ~SegmentOverlap.model_config
+      ~SegmentOverlap.model_extra
+      ~SegmentOverlap.model_fields
+      ~SegmentOverlap.model_fields_set
       ~SegmentOverlap.overlap
       ~SegmentOverlap.inverse
       ~SegmentOverlap.plate

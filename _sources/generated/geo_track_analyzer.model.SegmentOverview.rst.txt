@@ -14,6 +14,30 @@
    .. autosummary::
    
       ~SegmentOverview.__init__
+      ~SegmentOverview.construct
+      ~SegmentOverview.copy
+      ~SegmentOverview.dict
+      ~SegmentOverview.from_orm
+      ~SegmentOverview.json
+      ~SegmentOverview.model_construct
+      ~SegmentOverview.model_copy
+      ~SegmentOverview.model_dump
+      ~SegmentOverview.model_dump_json
+      ~SegmentOverview.model_json_schema
+      ~SegmentOverview.model_parametrized_name
+      ~SegmentOverview.model_post_init
+      ~SegmentOverview.model_rebuild
+      ~SegmentOverview.model_validate
+      ~SegmentOverview.model_validate_json
+      ~SegmentOverview.model_validate_strings
+      ~SegmentOverview.parse_file
+      ~SegmentOverview.parse_obj
+      ~SegmentOverview.parse_raw
+      ~SegmentOverview.schema
+      ~SegmentOverview.schema_json
+      ~SegmentOverview.set_km_attr
+      ~SegmentOverview.update_forward_refs
+      ~SegmentOverview.validate
    
    
 
@@ -23,6 +47,11 @@
 
    .. autosummary::
    
+      ~SegmentOverview.model_computed_fields
+      ~SegmentOverview.model_config
+      ~SegmentOverview.model_extra
+      ~SegmentOverview.model_fields
+      ~SegmentOverview.model_fields_set
       ~SegmentOverview.moving_time_seconds
       ~SegmentOverview.total_time_seconds
       ~SegmentOverview.moving_distance
