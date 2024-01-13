@@ -93,9 +93,14 @@ class GPXTrackPointAfterValidator:
                 elif key in cls.valid_str_params:
                     conv_dict[key] = str(val)
                 elif key in cls.valid_dt_params:
-                    conv_dict[key] = datetime.fromisoformat(val)
+                    try:
+                        conv_dict[key] = datetime.fromisoformat(val)
+                    except TypeError:
+                        raise ValueError(
+                            f"Value for {key} must valid isoformatted string"
+                        )
                 else:
-                    raise KeyError(f"{key} is no valid parameter for GPXTrackPoint")
+                    raise ValueError(f"{key} is no valid parameter for GPXTrackPoint")
 
             pnt = GPXTrackPoint(
                 **{k: v for k, v in conv_dict.items() if k not in cls.extensions}

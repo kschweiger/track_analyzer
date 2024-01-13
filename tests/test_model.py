@@ -109,6 +109,25 @@ def test_gpx_validation(point: GPXTrackPoint, exp_dict: dict) -> None:
             assert model_data["point"][key] == json_data["point"][key]
 
 
+def test_gep_validation_form_dict() -> None:
+    exp = GPXTrackPoint(
+        latitude=1.0,
+        longitude=1.0,
+        elevation=100.0,
+    )
+    test_model = TestModel(
+        **{
+            "point": {
+                "latitude": 1.0,
+                "longitude": 1.0,
+                "elevation": 100.0,
+            }
+        }
+    )
+    for key in ["latitude", "longitude", "elevation"]:
+        assert getattr(test_model.point, key) == getattr(exp, key)
+
+
 def test_gpx_with_exstensions() -> None:
     point = GPXTrackPoint(latitude=1.0, longitude=1.0, elevation=100.0)
     point.extensions.append(ExtensionFieldElement(name="heartrate", text="100"))
@@ -126,7 +145,12 @@ def test_gpx_with_exstensions() -> None:
 
 @pytest.mark.parametrize(
     "data",
-    [{"time": "asds"}, {"time": 1}, {"latitude": "aa"}],
+    [
+        {"point": {"time": "asds"}},
+        {"point": {"time": 1}},
+        {"point": {"latitude": "a"}},
+        {"point": {"bodus": "a"}},
+    ],
 )
 def test_gpx_validation_errors(data: dict[str, Any]) -> None:
     with pytest.raises(ValidationError):
