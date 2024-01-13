@@ -105,7 +105,9 @@ class GPXTrackPointAfterValidator:
             pnt = GPXTrackPoint(
                 **{k: v for k, v in conv_dict.items() if k not in cls.extensions}
             )
-            for key, val in {k: v for k, v in conv_dict.items() if k in cls.extensions}:
+            for key, val in {
+                k: v for k, v in conv_dict.items() if k in cls.extensions
+            }.items():
                 pnt.extensions.append(ExtensionFieldElement(name=key, text=str(val)))
 
             return pnt

@@ -1,4 +1,5 @@
 import json
+from copy import copy
 from datetime import datetime
 from typing import Annotated, Any
 
@@ -87,6 +88,10 @@ def test_point_distance_init() -> None:
                 "time": datetime(2024, 1, 1, 12).isoformat(),
             },
         ),
+        (
+            GPXTrackPoint(latitude=1.0, longitude=1.0, name="some name"),
+            {"latitude": 1.0, "longitude": 1.0, "name": "some name"},
+        ),
     ],
 )
 def test_gpx_validation(point: GPXTrackPoint, exp_dict: dict) -> None:
@@ -109,23 +114,47 @@ def test_gpx_validation(point: GPXTrackPoint, exp_dict: dict) -> None:
             assert model_data["point"][key] == json_data["point"][key]
 
 
-def test_gep_validation_form_dict() -> None:
-    exp = GPXTrackPoint(
-        latitude=1.0,
-        longitude=1.0,
-        elevation=100.0,
-    )
+def test_gep_validation_from_dict() -> None:
+    exp = GPXTrackPoint(latitude=1.0, longitude=1.0, elevation=100.0, name="some name")
     test_model = TestModel(
         **{
             "point": {
                 "latitude": 1.0,
                 "longitude": 1.0,
                 "elevation": 100.0,
+                "name": "some name",
             }
         }
     )
-    for key in ["latitude", "longitude", "elevation"]:
+    for key in ["latitude", "longitude", "elevation", "name"]:
         assert getattr(test_model.point, key) == getattr(exp, key)
+
+    assert not test_model.point.extensions
+
+
+def test_gep_validation_from_dict_w_ext() -> None:
+    exp_extensions = {
+        "heartrate": "100.0",
+        "power": "300.0",
+        "cadence": "80.0",
+    }
+    test_model = TestModel(
+        **{
+            "point": {
+                "heartrate": 100.0,
+                "power": 300.0,
+                "cadence": 80.0,
+            }
+        }
+    )
+
+    for ext in test_model.point.extensions:
+        for tag, text in copy(exp_extensions).items():
+            if ext.tag == tag:
+                assert ext.text == text
+                exp_extensions.pop(tag)
+
+    assert not exp_extensions
 
 
 def test_gpx_with_exstensions() -> None:
