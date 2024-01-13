@@ -1,8 +1,7 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 from math import acos, asin, atan2, cos, degrees, pi, sin, sqrt
-from typing import Callable, Dict, Literal, Type, TypeVar, Union
-from xml.etree.ElementTree import Element
+from typing import Callable, Literal, Type, TypeVar, Union
 
 import coloredlogs
 import numpy as np
@@ -20,16 +19,14 @@ from geo_track_analyzer.model import (
     Position2D,
     Position3D,
 )
+from geo_track_analyzer.utils.internal import (
+    get_extended_track_point,
+    get_extension_value,
+)
 
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T", float, int)
-
-
-class ExtensionFieldElement(Element):
-    def __init__(self, name: str, text: str) -> None:
-        super().__init__(name)
-        self.text = text
 
 
 def distance(pos1: Position2D, pos2: Position2D) -> float:
@@ -115,7 +112,7 @@ def calc_elevation_metrics(
         else:
             slopes.append(degrees(asin(o_by_h)))
 
-    return ElevationMetrics(uphill, abs(downhill), slopes)
+    return ElevationMetrics(uphill=uphill, downhill=abs(downhill), slopes=slopes)
 
 
 def parse_level(this_level: Union[int, str]) -> tuple[int, Callable]:
@@ -222,8 +219,8 @@ def interpolate_points(
     """
 
     pp_distance = distance(
-        Position2D(start.latitude, start.longitude),
-        Position2D(end.latitude, end.longitude),
+        Position2D(latitude=start.latitude, longitude=start.longitude),
+        Position2D(latitude=end.latitude, longitude=end.longitude),
     )
     if pp_distance < 2 * spacing:
         return None
@@ -291,8 +288,8 @@ def interpolate_points(
             elevation_int[i],
             time,
             distance(
-                Position2D(start.latitude, start.longitude),
-                Position2D(lat_int[i], lng_int[i]),
+                Position2D(latitude=start.latitude, longitude=start.longitude),
+                Position2D(latitude=lat_int[i], longitude=lng_int[i]),
             ),
         )
 
@@ -355,13 +352,13 @@ def get_segment_base_area(segment: GPXTrackSegment) -> float:
 
     # After check_bounds this always works
     latitude_distance = distance(
-        Position2D(bounds.max_latitude, bounds.min_longitude),  # type: ignore
-        Position2D(bounds.min_latitude, bounds.min_longitude),  # type: ignore
+        Position2D(latitude=bounds.max_latitude, longitude=bounds.min_longitude),  # type: ignore
+        Position2D(latitude=bounds.min_latitude, longitude=bounds.min_longitude),  # type: ignore
     )
 
     longitude_distance = distance(
-        Position2D(bounds.min_latitude, bounds.max_longitude),  # type: ignore
-        Position2D(bounds.min_latitude, bounds.min_longitude),  # type: ignore
+        Position2D(latitude=bounds.min_latitude, longitude=bounds.max_longitude),  # type: ignore
+        Position2D(latitude=bounds.min_latitude, longitude=bounds.min_longitude),  # type: ignore
     )
 
     return latitude_distance * longitude_distance
@@ -570,41 +567,6 @@ def check_bounds(bounds: None | GPXBounds) -> None:
         or bounds.max_longitude is None
     ):
         raise InvalidBoundsError("Bounds %s are invalid", bounds)
-
-
-def get_extension_value(point: GPXTrackPoint, key: str) -> str:
-    for ext in point.extensions:
-        if ext.tag == key:
-            if ext.text is None:
-                GPXPointExtensionError("Key %s was not initilized with a value" % key)
-            return ext.text  # type: ignore
-
-    raise GPXPointExtensionError("Key %s could not be found" % key)
-
-
-def get_extended_track_point(
-    lat: float,
-    lng: float,
-    ele: None | float,
-    timestamp: None | datetime,
-    extensions: Dict[str, Union[str, float, int]],
-) -> GPXTrackPoint:
-    """
-    Create a GPXTrackPoint with extended data fields.
-
-    :param lat: Latitude of the track point.
-    :param lng: Longitude of the track point.
-    :param ele: Elevation of the track point (None if not available).
-    :param timestamp: Timestamp of the track point (None if not available).
-    :param extensions: Dictionary of extended data fields (key-value pairs).
-
-    :return: GPXTrackPoint with specified attributes and extended data fields.
-    """
-    this_point = GPXTrackPoint(lat, lng, elevation=ele, time=timestamp)
-    for key, value in extensions.items():
-        this_point.extensions.append(ExtensionFieldElement(name=key, text=str(value)))
-
-    return this_point
 
 
 def format_timedelta(td: timedelta) -> str:

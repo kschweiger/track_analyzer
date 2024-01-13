@@ -1,11 +1,18 @@
-from dataclasses import dataclass, field
+from typing import Annotated
 
 import numpy as np
 from gpxpy.gpx import GPXTrackPoint
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic_numpy import np_array_pydantic_annotated_typing
+
+from geo_track_analyzer.utils.internal import GPXTrackPointAfterValidator
 
 
-@dataclass
-class Position2D:
+class Model(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+
+class Position2D(Model):
     """Position in a 2D latitude / longitude space"""
 
     latitude: float
@@ -15,7 +22,6 @@ class Position2D:
     """Longitude of the point"""
 
 
-@dataclass
 class Position3D(Position2D):
     """Position in a 3D latitude / longitude / elevation space"""
 
@@ -23,8 +29,7 @@ class Position3D(Position2D):
     """Elevation of the point"""
 
 
-@dataclass
-class ElevationMetrics:
+class ElevationMetrics(Model):
     """Collection of elevation related metrics"""
 
     uphill: float
@@ -37,8 +42,7 @@ class ElevationMetrics:
     """Slopes between points in a uphill/downhill section"""
 
 
-@dataclass
-class SegmentOverview:
+class SegmentOverview(Model):
     """Collection of metrics for a Segment"""
 
     moving_time_seconds: float
@@ -74,19 +78,20 @@ class SegmentOverview:
     """Elevation traveled downhill in m"""
 
     # Attributes that will be calculated from primary attributes
-    moving_distance_km: None | float = field(init=False)
+    moving_distance_km: float = Field(default=-1)
     """moving_distance converted the km"""
 
-    total_distance_km: None | float = field(init=False)
+    total_distance_km: float = Field(default=-1)
     """total_distance converted the km"""
 
-    max_velocity_kmh: None | float = field(init=False)
+    max_velocity_kmh: None | float = Field(default=None)
     """max_velocity converted the km/h"""
 
-    avg_velocity_kmh: None | float = field(init=False)
+    avg_velocity_kmh: None | float = Field(default=None)
     """avg_speed converted the km/h"""
 
-    def __post_init__(self) -> None:
+    @model_validator(mode="after")
+    def set_km_attr(self) -> "SegmentOverview":
         self.moving_distance_km = self.moving_distance / 1000
         self.total_distance_km = self.total_distance / 1000
         self.max_velocity_kmh = (
@@ -95,10 +100,10 @@ class SegmentOverview:
         self.avg_velocity_kmh = (
             None if self.avg_velocity is None else 3.6 * self.avg_velocity
         )
+        return self
 
 
-@dataclass
-class SegmentOverlap:
+class SegmentOverlap(Model):
     """Represent the overlap between two segments"""
 
     overlap: float
@@ -107,16 +112,16 @@ class SegmentOverlap:
     inverse: bool
     """Match direction of the segment relative to the base"""
 
-    plate: np.ndarray
+    plate: np_array_pydantic_annotated_typing(data_type=np.float32, dimensions=2)
     """2D representation of the segment overlap"""
 
-    start_point: GPXTrackPoint
+    start_point: Annotated[GPXTrackPoint, GPXTrackPointAfterValidator]
     """First point matching the base segment """
 
     start_idx: int
     """Index of the first point in match segment"""
 
-    end_point: GPXTrackPoint
+    end_point: Annotated[GPXTrackPoint, GPXTrackPointAfterValidator]
     """Last point matching the base segment """
 
     end_idx: int
@@ -135,11 +140,10 @@ class SegmentOverlap:
         return ret_str
 
 
-@dataclass
-class PointDistance:
-    """Represents a distance calculation to a point in a GPX track."""
+class PointDistance(Model):
+    """Represents a distance calculati  on to a point in a GPX track."""
 
-    point: GPXTrackPoint
+    point: Annotated[GPXTrackPoint, GPXTrackPointAfterValidator]
     """The nearest point on the track."""
 
     distance: float

@@ -219,7 +219,7 @@ def test_get_processed_track_data_connect_segments_full(
     )
 
 
-def test_compare_pp_distance_to_processed_track(track_for_test) -> None:
+def test_compare_pp_distance_to_processed_track(track_for_test: Track) -> None:
     data = track_for_test.get_track_data()
 
     points = []
@@ -230,8 +230,10 @@ def test_compare_pp_distance_to_processed_track(track_for_test) -> None:
     for i in range(len(points) - 1):
         distances_for_sum.append(
             distance(
-                Position2D(points[i].latitude, points[i].longitude),
-                Position2D(points[i + 1].latitude, points[i + 1].longitude),
+                Position2D(latitude=points[i].latitude, longitude=points[i].longitude),
+                Position2D(
+                    latitude=points[i + 1].latitude, longitude=points[i + 1].longitude
+                ),
             )
         )
 
