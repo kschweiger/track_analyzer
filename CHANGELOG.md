@@ -1,4 +1,14 @@
 <!-- insertion marker -->
+<a name="1.1.0"></a>
+
+## [1.1.0](https://github.com/kschweiger/track_analyzer/compare/1.0.0...1.1.0) (2024-01-13)
+
+### Features
+
+- Convert model dataclasses to pydantic models  (#16) ([488600b](https://github.com/kschweiger/track_analyzer/commit/488600b9e069a3a4234abb20d09469ea508629a9))
+- enhance-elevation cli (#15) ([9318d93](https://github.com/kschweiger/track_analyzer/commit/9318d93612ad3aa01673c385a8d8cae36487d5d3))
+- **visualize:** Adding function for plotting data of multiple tracks ([9b96054](https://github.com/kschweiger/track_analyzer/commit/9b96054e1fe5b75e682954e2db5de01ac1e6da06))
+
 <a name="1.0.0"></a>
 
 ## [1.0.0](https://github.com/kschweiger/track_analyzer/compare/0.5.3...1.0.0) (2023-12-04)
