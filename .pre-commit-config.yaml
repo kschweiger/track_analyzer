@@ -28,7 +28,7 @@ repos:
       - id: poetry-lock
         args: ["--no-update"]
       - id: poetry-export
-        args: ["-f", "requirements.txt", "-o", "requirements/prod.txt", "--without-hashes"]
+        args: ["-f", "requirements.txt", "-o", "requirements/prod.txt", "--without-hashes", "--all-extras"]
       - id: poetry-export
         args: ["-f", "requirements.txt", "-o", "requirements/test.txt", "--without-hashes", "--only", "test"]
       - id: poetry-export

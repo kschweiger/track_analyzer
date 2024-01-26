@@ -8,6 +8,8 @@
 
 The focus of this package lies on analyzing and visualizing tracks of cycling or similar activities. Depending on the usecase settings like `stopped_speed_threshold` or `max_speed_percentile` may not be appropriate.
 
+Installing the package with **cli** extra, I.e. using `pip install geo-track-analyzer[cli]`, add utility tools. See the [documentation](https://kschweiger.github.io/track_analyzer/cli.html) for details.
+
 ## From files
 
 Tracks my be initialized from ``.gpx`` and ``.fit`` files using the ``GPXFileTrack`` and ``FITTrack`` object, respectively.
