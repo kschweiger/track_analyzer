@@ -1,3 +1,4 @@
+from .cli import extract_track, update_elevation
 from .enhancer import (
     ElevationEnhancer,
     Enhancer,
@@ -21,4 +22,6 @@ __all__ = [
     "OpenElevationEnhancer",
     "OpenTopoElevationEnhancer",
     "get_enhancer",
+    "update_elevation",
+    "extract_track",
 ]

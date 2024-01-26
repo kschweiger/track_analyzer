@@ -10,6 +10,8 @@ To use Geo-Track-Analyzer, first install it using pip:
 
    $ pip install geo-track-analyzer
 
+Installing the package with **cli** extra, I.e. using ``pip install geo-track-analyzer[cli]``, add utility tools. See the :ref:`Command line interfaces` page for details.
+
 Analyze geospacial tracks
 -------------------------
 
