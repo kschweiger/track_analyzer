@@ -7,7 +7,7 @@ def generate_error_text(entry_point: str) -> str:
 
 
 try:
-    from .update_elevation import main as update_elevation
+    from ._update_elevation import main as update_elevation
 except ImportError:
 
     def update_elevation() -> None:
@@ -18,7 +18,7 @@ except ImportError:
 
 
 try:
-    from .extract_track import main as extract_track
+    from ._extract_track import main as extract_track
 except ImportError:
 
     def extract_track() -> None:

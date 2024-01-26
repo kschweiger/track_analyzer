@@ -5,8 +5,8 @@ import pytest
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
-from geo_track_analyzer.cli.update_elevation import convert_kwargs
-from geo_track_analyzer.cli.update_elevation import main as update_elevation
+from geo_track_analyzer.cli._update_elevation import convert_kwargs
+from geo_track_analyzer.cli._update_elevation import main as update_elevation
 from geo_track_analyzer.enhancer import ElevationEnhancer
 from geo_track_analyzer.track import GPXFileTrack, PyTrack
 
@@ -82,7 +82,7 @@ def test_update_elevation_succ(
     mock_elevation_enhancer: Type[ElevationEnhancer],
 ) -> None:
     mocker.patch(
-        "geo_track_analyzer.cli.update_elevation.get_enhancer",
+        "geo_track_analyzer.cli._update_elevation.get_enhancer",
         return_value=mock_elevation_enhancer,
     )
 
