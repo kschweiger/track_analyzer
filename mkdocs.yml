@@ -1,0 +1,89 @@
+site_name: geo-track-analyzer
+site_description: Toolbox for analyzing and visualizing geo data tracks
+site_author: Korbinian Schweiger
+repo_url: https://github.com/kschweiger/track_analyzer
+repo_name: kschweiger/track_analyzer
+
+nav:
+  - Getting Started: index.md
+  - Usage:
+      - Visualization: visualizations.md
+      - Comparison: comparison.md
+      - Enhancer: enhancer.md
+      - CLI: cli.md
+  - API Reference:
+      - Track Reference: api_tracks.md
+      - Model Reference: api_model.md
+      - Enhancer Reference: api_enhancer.md
+      - Visualization Reference: api_visualizations.md
+      - Comparison Reference: api_comparison.md
+  - Miscellaneous:
+      - Changelog: changelog.md
+
+theme:
+  name: material
+  icon:
+    repo: fontawesome/brands/git-alt
+  font:
+    text: Roboto
+    code: Roboto Mono
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+  features:
+    - content.action.edit
+    - content.code.copy
+    - content.tabs.link
+    - content.tooltips
+    - navigation.expand
+    - navigation.footer
+    - navigation.instant
+    - navigation.sections
+    - navigation.tabs
+    - navigation.tabs.sticky
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - mkdocs-click
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.snippets
+  - pymdownx.magiclink:
+      repo_url_shortener: true
+      repo_url_shorthand: true
+      social_url_shortener: true
+      social_url_shorthand: true
+      normalize_issue_symbols: true
+      provider: github
+      user: kschweiger
+      repo: track_analyzer
+  - toc:
+      toc_depth: 3
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: sphinx
+            inherited_members: true
+            show_root_heading: true
+            show_symbol_type_heading: true
+            show_root_full_path: false
+            docstring_options:
+              ignore_init_summary: false
+            merge_init_into_class: true

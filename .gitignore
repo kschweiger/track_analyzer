@@ -140,3 +140,4 @@ experiments
 .ruff_cache
 .coveragerc
 cov.xml
+*.html
