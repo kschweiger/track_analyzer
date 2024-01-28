@@ -1,4 +1,13 @@
 <!-- insertion marker -->
+<a name="1.2.0"></a>
+
+## [1.2.0](https://github.com/kschweiger/track_analyzer/compare/1.1.2...1.2.0) (2024-01-28)
+
+### Code Refactoring
+
+- **get_closest_point:** n_segment type hint and docstring reflects that full track can be used ([453d0dd](https://github.com/kschweiger/track_analyzer/commit/453d0dd77ee386f36671265c98ea406db872b2e5))
+- cli tools are available via extra cli (#17) ([712e59c](https://github.com/kschweiger/track_analyzer/commit/712e59c42ccc32027387a87a05268ec2b3a9200b))
+
 <a name="1.1.2"></a>
 
 ## [1.1.2](https://github.com/kschweiger/track_analyzer/compare/1.1.1...1.1.2) (2024-01-14)
