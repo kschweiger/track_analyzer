@@ -1,6 +1,0 @@
-﻿geo\_track\_analyzer.visualize.plot\_track\_3d
-==============================================
-
-.. currentmodule:: geo_track_analyzer.visualize
-
-.. autofunction:: plot_track_3d

@@ -1,6 +1,0 @@
-﻿geo\_track\_analyzer.visualize.plot\_track\_with\_slope
-=======================================================
-
-.. currentmodule:: geo_track_analyzer.visualize
-
-.. autofunction:: plot_track_with_slope

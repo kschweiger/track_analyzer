@@ -1,6 +1,0 @@
-﻿geo\_track\_analyzer.compare.get\_segment\_overlap
-==================================================
-
-.. currentmodule:: geo_track_analyzer.compare
-
-.. autofunction:: get_segment_overlap

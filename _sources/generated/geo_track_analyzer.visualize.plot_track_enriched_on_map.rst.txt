@@ -1,6 +1,0 @@
-﻿geo\_track\_analyzer.visualize.plot\_track\_enriched\_on\_map
-=============================================================
-
-.. currentmodule:: geo_track_analyzer.visualize
-
-.. autofunction:: plot_track_enriched_on_map

@@ -1,6 +1,0 @@
-﻿geo\_track\_analyzer.get\_enhancer
-==================================
-
-.. currentmodule:: geo_track_analyzer
-
-.. autofunction:: get_enhancer
