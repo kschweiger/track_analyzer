@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from math import asin, degrees, isclose
+from time import perf_counter
 from typing import Literal, Type
 
 import numpy as np
@@ -13,6 +14,7 @@ from geo_track_analyzer.utils.base import (
     calc_elevation_metrics,
     center_geolocation,
     distance,
+    distance_to_location,
     format_timedelta,
     get_distances,
     get_latitude_at_distance,
@@ -521,3 +523,45 @@ def test_interpolate_extension_not_possible(ext_1: dict, ext_2: dict) -> None:
     assert interpolate_extension(point_1, point_2, "value", 6, "linear", int) == [
         None for _ in range(6)
     ]
+
+
+@pytest.mark.parametrize("n_points", [500, 1000, 1500, 10_000])
+def test_closest_point_timing(n_points) -> None:
+    from gpxpy.geo import Location
+
+    def run(track: PyTrack, point: tuple[float, float]) -> None:
+        track.track.get_nearest_location(Location(*point))
+
+    def run_vec(track: PyTrack, point: tuple[float, float]) -> None:
+        arr = np.array(
+            [(p.latitude, p.longitude) for p in track.track.segments[0].points]
+        )
+        distances = distance_to_location(arr, point)
+        np.argmin(distances)
+
+    curr_coords = (1.0, 1.0)
+    offset = 0.0001
+    pts = [curr_coords]
+    for _ in range(n_points - 1):
+        lat, lng = curr_coords
+        curr_coords = (lat + offset, lng + offset)
+        pts.append(curr_coords)
+    track = PyTrack(points=pts, elevations=None, times=None)
+
+    points = track.track.segments[0].points
+    loc = points[len(points) // 2]
+
+    pre = perf_counter()
+    run(track, (loc.latitude, loc.longitude))
+    time_gpxpy = perf_counter() - pre
+
+    pre = perf_counter()
+    run_vec(track, (loc.latitude, loc.longitude))
+    time_distance_to_location = perf_counter() - pre
+
+    pre = perf_counter()
+    track.get_closest_point(0, loc.latitude, loc.longitude)
+    time_closest_point = perf_counter() - pre
+
+    assert time_gpxpy > time_distance_to_location
+    assert time_gpxpy > time_closest_point

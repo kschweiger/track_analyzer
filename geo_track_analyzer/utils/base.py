@@ -428,6 +428,37 @@ def get_distances(v1: npt.NDArray, v2: npt.NDArray) -> npt.NDArray:
     return dp_km * 1000
 
 
+def distance_to_location(
+    v: npt.NDArray[np.float64], loc: tuple[float, float]
+) -> npt.NDArray[np.float64]:
+    """
+    Calculate the distance (in meters) between a passed lat/long location and each
+    element in a vector of lat/long coordinates using the Haversine formula.
+
+    :param v: A numpy array with shape (X, 2) with latitude, longitude coordinates
+    :param loc: Tuple of latitude and longitude values caracterizing a location
+    :return: Vector of distances between each point in the passed array and the passed
+        location. Distance is returned in meters
+    """
+    _, rows = v.shape
+    if rows != 2:
+        raise RuntimeError("Pass an array with a (X, 2) shape")
+
+    lats = v[:, 0:1]
+    longs = v[:, 1:2]
+
+    p_lat, p_long = loc
+
+    p = pi / 180
+    a = (
+        0.5
+        - np.cos((p_lat - lats) * pi) / 2
+        + np.cos(lats * p) * np.cos(p_lat * p) * (1 - np.cos((p_long - longs) * p)) / 2
+    )
+
+    return 12742 * np.arcsin(np.sqrt(a)) * 1000
+
+
 def get_point_distance(
     track: GPXTrack, segment_idx: None | int, latitude: float, longitude: float
 ) -> PointDistance:

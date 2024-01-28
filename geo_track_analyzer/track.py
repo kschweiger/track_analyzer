@@ -218,12 +218,14 @@ class Track(ABC):
         )
 
     def get_closest_point(
-        self, n_segment: int, latitude: float, longitude: float
+        self, n_segment: None | int, latitude: float, longitude: float
     ) -> PointDistance:
         """
-        Get closest point in a segment to the passed latitude and longitude
+        Get closest point in a segment or track to the passed latitude and longitude
+        corrdinate
 
-        :param n_segment: Index of the segment
+        :param n_segment: Index of the segment. If None is passed the whole track is
+            considered
         :param latitude: Latitude to check
         :param longitude: Longitude to check
 
