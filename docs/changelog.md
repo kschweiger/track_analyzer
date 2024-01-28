@@ -1,3 +1,4 @@
+For a more detailed changelog see [CHANGELOG](https://github.com/kschweiger/track_analyzer/blob/main/CHANGELOG.md) on GitHub
 ## [1.1.2](https://github.com/kschweiger/track_analyzer/releases/tag/1.1.2)
 ### [1.1.2](https://github.com/kschweiger/track_analyzer/compare/1.0.0...1.1.2) (2024-01-14)
 

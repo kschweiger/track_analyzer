@@ -42,7 +42,9 @@ def main() -> None:
 
     data = json.loads(data_.content)
 
-    data_for_md = []
+    data_for_md = [
+        "For a more detailed changelog see [CHANGELOG](https://github.com/kschweiger/track_analyzer/blob/main/CHANGELOG.md) on GitHub"
+    ]
 
     for release in data:
         data_for_md.append(
