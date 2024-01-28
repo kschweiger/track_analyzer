@@ -1,32 +1,27 @@
-Usage
-=====
+# Usage
 
-Installation
-------------
+## Installation
 
 To use Geo-Track-Analyzer, first install it using pip:
 
-.. code-block:: console
+```shell
+pip install geo-track-analyzer
+```
 
-   $ pip install geo-track-analyzer
+Installing the package with **cli** extra, I.e. using `pip install geo-track-analyzer[cli]`, add utility tools. See the [Command line interfaces](cli.md) page for details.
 
-Installing the package with **cli** extra, I.e. using ``pip install geo-track-analyzer[cli]``, add utility tools. See the :ref:`Command line interfaces` page for details.
 
-Analyze geospacial tracks
--------------------------
+## Analyze geospacial tracks
 
-The focus of this package lies on analyzing and visualizing tracks of cycling or similar activities. Depending on the usecase settings like ``stopped_speed_threshold`` or ``max_speed_percentile`` may not be appropriate.
+The focus of this package lies on analyzing and visualizing tracks of cycling or similar activities. Depending on the usecase settings like `stopped_speed_threshold` or `max_speed_percentile` may not be appropriate.
 
-Initialize a track
-~~~~~~~~~~~~~~~~~~
+### Initialize a track
 
-Tracks my be initialized from ``.gpx`` and ``.fit`` files using the ``GPXFileTrack`` and ``FITTrack`` object, respectively.
+Tracks my be initialized from `.gpx` and `.fit` files using the [`GPXFileTrack`][geo_track_analyzer.track.GPXFileTrack] and [`FITTrack`][geo_track_analyzer.track.FITTrack] object, respectively.
 
 Furhtermore the Track can be initialized programmatically from python objects inside your code using
 
-.. code-block:: python
-    :linenos:
-
+```python
     PyTrack(
         points: list[tuple[float, float]] = ...,
         elevations: None | list[float] = ...,
@@ -35,9 +30,9 @@ Furhtermore the Track can be initialized programmatically from python objects in
         cadence: None | list[int] = None,
         power: None | list[int] = None,
     )
+```
 
-Extracting track data
-~~~~~~~~~~~~~~~~~~~~~
+### Extracting track data
 
 The data of the track can be extracted into a pandas DataFrame object with the columns:
 
@@ -55,13 +50,13 @@ The data of the track can be extracted into a pandas DataFrame object with the c
 * *cum_distance*: Cummulated distance in track/segement in meters.
 * *cum_distance_moving*:  Cummulated moving distance in track/segement in meters.
 * *cum_distance_stopped*:  Cummulated stopped distance in track/segement in meters.
-* *moving*: Bool flag specifing if the ``stopped_speed_threshold`` was exceeded for the point.
+* *moving*: Bool flag specifing if the `stopped_speed_threshold` was exceeded for the point.
 
 Because some values are relative to previous points, the first point in the segment is not represented in this dataframe.
 
 ----------------
 
-Furthermore an summary of the segments and tracks can be generated in the form of a :class:`~geo_track_analyzer.model.SegmentOverview` containing:
+Furthermore an summary of the segments and tracks can be generated in the form of a [`SegmentOverview`][geo_track_analyzer.model.SegmentOverview] containing:
 
 * Time in seconds (moving and totoal)
 * Distance in meters and km (moving and totoal)
@@ -69,9 +64,9 @@ Furthermore an summary of the segments and tracks can be generated in the form o
 * Maximum and minimum elevation in meters
 * Uphill and downhill elevation in meters
 
-Visualizing the track
-~~~~~~~~~~~~~~~~~~~~~
+### Visualizing the track
 
-Visualizations of a track can be generated via the :func:`~geo_track_analyzer.GPXFileTrack.plot` method via the ``kind`` parameter. Additionally the
-track data can be extracted with the :func:`~geo_track_analyzer.GPXFileTrack.get_track_data` or :func:`~geo_track_analyzer.GPXFileTrack.get_segment_data`
-methods and using the functions in the :ref:`Visualizations`.
+
+Visualizations of a track can be generated via the [`Track.plot`][geo_track_analyzer.GPXFileTrack.plot] method via the `kind` parameter. Additionally the
+track data can be extracted with the [`Track.get_track_data`][geo_track_analyzer.GPXFileTrack.get_track_data] or [`Track.get_segment_data`][geo_track_analyzer.GPXFileTrack.get_segment_data]
+methods and using the functions in the [Visualizations](visualizations.md).

@@ -24,24 +24,23 @@ jobs:
           poetry config virtualenvs.in-project true --local
       - name: Install dependencies
         run: |
-          poetry install --with doc
+          poetry install --all-extras --with doc
       - name: Build the documentation
         run: |
           source .venv/bin/activate
           pip list
-          cd docs/
-          export SPHINX_GITHUB_CHANGELOG_TOKEN=${{ secrets.SPHINX_GITHUB_CHANGELOG_TOKEN }}
-          python generate_visualization_examples.py
-          make html
-      - uses: actions/upload-artifact@v1
+          python docs/dump_github_releases.py
+          python docs/generate_visualization_examples.py
+          mkdocs build
+      - uses: actions/upload-artifact@master
         with:
           name: DocumentationHTML
-          path: docs/_build/html/
+          path: site/
 
       - name: Commit documentation changes
         run: |
           git clone https://github.com/kschweiger/track_analyzer.git --branch gh-pages --single-branch gh-pages
-          cp -r docs/_build/html/* gh-pages/
+          cp -r site/* gh-pages/
           cd gh-pages
           touch .nojekyll
           git config --local user.email "action@github.com"

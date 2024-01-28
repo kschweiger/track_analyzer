@@ -59,9 +59,10 @@ pytest-sugar = "^0.9.7"
 optional = true
 
 [tool.poetry.group.doc.dependencies]
-sphinx = "^7.2.6"
-sphinx-rtd-theme = "^2.0.0"
-sphinx-github-changelog = "^1.2.1"
+mkdocs = "^1.5.3"
+mkdocs-material = "^9.5.5"
+mkdocstrings = { extras = ["python"], version = "^0.24.0" }
+mkdocs-click = "^0.8.1"
 
 [tool.poetry.scripts]
 extract-fit-track = 'geo_track_analyzer:extract_track'
