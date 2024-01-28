@@ -9,7 +9,7 @@
 
 The focus of this package lies on analyzing and visualizing tracks of cycling or similar activities. Depending on the usecase settings like `stopped_speed_threshold` or `max_speed_percentile` may not be appropriate.
 
-Installing the package with **cli** extra, I.e. using `pip install geo-track-analyzer[cli]`, add utility tools. See the [documentation](https://kschweiger.github.io/track_analyzer/cli.html) for details.
+Installing the package with **cli** extra, I.e. using `pip install geo-track-analyzer[cli]`, add utility tools. See the [documentation](https://kschweiger.github.io/track_analyzer/cli/) for details.
 
 ## From files
 
@@ -64,4 +64,4 @@ Furthermore an summary of the segments and tracks can be generated in the form o
 
 ## Visualizing the track
 
-Visualizations of a track can be generated via the `plot` method and the ``kind`` parameter. See [documentation](https://kschweiger.github.io/track_analyzer/visualizations.html) for further details and examples how to use the visualizations.
+Visualizations of a track can be generated via the `plot` method and the ``kind`` parameter. See [documentation](https://kschweiger.github.io/track_analyzer/visualizations/) for further details and examples how to use the visualizations.
