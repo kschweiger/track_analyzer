@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
+from itertools import pairwise
 from typing import Dict, Literal, Sequence, final
 
 import gpxpy
@@ -25,6 +26,7 @@ from geo_track_analyzer.processing import (
 )
 from geo_track_analyzer.utils.base import (
     calc_elevation_metrics,
+    fill_list,
     get_point_distance,
     interpolate_segment,
 )
@@ -975,6 +977,7 @@ class FITTrack(Track):
         source: str | bytes,
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
+        strict_elevation_loading: bool = False,
     ) -> None:
         """Load a .fit file and extract the data into a Track object.
         NOTE: Tested with Wahoo devices only
@@ -984,6 +987,8 @@ class FITTrack(Track):
             as moving, defaults to 1
         :param max_speed_percentile: Points with speed outside of the percentile are not
             counted when analyzing the track, defaults to 95
+        :param strict_elevation_loading: If set, only points are added to the track that
+            have a valid elevation,defaults to False
         """
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
@@ -1003,8 +1008,11 @@ class FITTrack(Track):
         points, elevations, times = [], [], []
         heartrates, cadences, powers = [], [], []
 
-        for record in fit_data.get_messages("record"):  # type: ignore
+        split_at = [0]
+        for record in fit_data.get_messages(("record", "lap")):  # type: ignore
             record: DataMessage  # type: ignore
+            if record.mesg_type.name == "lap":
+                split_at.append(len(points))
             lat = record.get_value("position_lat")
             long = record.get_value("position_long")
             ele = record.get_value("enhanced_altitude")
@@ -1014,7 +1022,11 @@ class FITTrack(Track):
             cad = record.get_value("cadence")
             pw = record.get_value("power")
 
-            if any([v is None for v in [lat, long, ele, ts]]):
+            check_vals = [lat, long, ts]
+            if strict_elevation_loading:
+                check_vals.append(ele)
+
+            if any([v is None for v in check_vals]):
                 logger.debug(
                     "Found records with None value in lat/long/elevation/timestamp "
                     " - %s/%s/%s/%s",
@@ -1033,10 +1045,11 @@ class FITTrack(Track):
             cadences.append(cad)
             powers.append(pw)
 
+        if not strict_elevation_loading and set(elevations) != {None}:
+            elevations = fill_list(elevations)
+
         try:
-            session_data: DataMessage = list(fit_data.get_messages("session"))[
-                -1
-            ]  # type: ignore
+            session_data: DataMessage = list(fit_data.get_messages("session"))[-1]  # type: ignore
         except IndexError:
             logger.debug("Could not load session data from fit file")
         else:
@@ -1051,27 +1064,39 @@ class FITTrack(Track):
                 "max_velocity": session_data.get_value("max_speed"),
             }
 
+        if len(split_at) == 1:
+            split_at.append(len(points))
+
         gpx = GPX()
 
         gpx_track = GPXTrack()
         gpx.tracks.append(gpx_track)
 
-        gpx_segment = GPXTrackSegment()
-        gpx_track.segments.append(gpx_segment)
+        for start_idx, end_idx in pairwise(split_at):
+            gpx_segment = GPXTrackSegment()
 
-        for (lat, lng), ele, time, hr, cad, pw in zip(
-            points, elevations, times, heartrates, cadences, powers
-        ):
-            this_extensions = {}
-            if hr is not None:
-                this_extensions["heartrate"] = hr
-            if cad is not None:
-                this_extensions["cadence"] = cad
-            if pw is not None:
-                this_extensions["power"] = pw
-            this_point = get_extended_track_point(lat, lng, ele, time, this_extensions)
+            for (lat, lng), ele, time, hr, cad, pw in zip(
+                points[start_idx:end_idx],
+                elevations[start_idx:end_idx],
+                times[start_idx:end_idx],
+                heartrates[start_idx:end_idx],
+                cadences[start_idx:end_idx],
+                powers[start_idx:end_idx],
+            ):
+                this_extensions = {}
+                if hr is not None:
+                    this_extensions["heartrate"] = hr
+                if cad is not None:
+                    this_extensions["cadence"] = cad
+                if pw is not None:
+                    this_extensions["power"] = pw
+                this_point = get_extended_track_point(
+                    lat, lng, ele, time, this_extensions
+                )
 
-            gpx_segment.points.append(this_point)
+                gpx_segment.points.append(this_point)
+
+            gpx_track.segments.append(gpx_segment)
 
         self._track = gpx.tracks[0]
 

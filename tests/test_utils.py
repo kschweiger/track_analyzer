@@ -15,6 +15,7 @@ from geo_track_analyzer.utils.base import (
     center_geolocation,
     distance,
     distance_to_location,
+    fill_list,
     format_timedelta,
     get_distances,
     get_latitude_at_distance,
@@ -565,3 +566,17 @@ def test_closest_point_timing(n_points) -> None:
 
     assert time_gpxpy > time_distance_to_location
     assert time_gpxpy > time_closest_point
+
+
+@pytest.mark.parametrize(
+    ("values", "exp_values"),
+    [
+        ([None, None, 1, 2], [1, 1, 1, 2]),
+        ([1, 2, None, None], [1, 2, 2, 2]),
+        ([None, None, 1, 2, None, None], [1, 1, 1, 2, 2, 2]),
+        ([1, None, None, 4], [1, 2, 3, 4]),
+        ([1, None, None, 4, None, None, 7], [1, 2, 3, 4, 5, 6, 7]),
+    ],
+)
+def test_fill_list(values: list[None | float], exp_values: list[float]) -> None:
+    assert fill_list(values) == exp_values

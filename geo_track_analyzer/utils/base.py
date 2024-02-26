@@ -108,7 +108,7 @@ def calc_elevation_metrics(
             o_by_h = 0
         # Addressing **ValueError: math domain error**
         if o_by_h > 1 or o_by_h < -1:
-            slopes.append(np.NaN)
+            slopes.append(np.nan)
         else:
             slopes.append(degrees(asin(o_by_h)))
 
@@ -618,3 +618,62 @@ def format_timedelta(td: timedelta) -> str:
         hours += 24 * td.days
 
     return "{0:02d}:{1:02d}:{2:02d}".format(hours, minutes, seconds)
+
+
+def fill_list(values: list[None | float]) -> list[float]:
+    """Fills None values in a list with appropriate values. Leading (trailing) None
+    values will be replace with first (last) real values. None in between real values
+    will be linearly interpolated
+
+    :param values: A list containing float values or None.
+
+    :returns: A new list with all None values filled.
+
+    Example:
+        >>> filled_list = fill_list([None, 10.0, None, 20.0, None])
+        >>> print(filled_list)  # Output: [10.0, 10.0, 15.0, 20.0, 20.0]
+    """
+    if set(values) == {None}:
+        raise RuntimeError("At least on value must be not none")
+
+    # Deal with leading None values
+    if values[0] is None:
+        logger.debug("Filling leading missing elevation values")
+        first_real_elevation = next((x for x in values if x is not None), None)
+        idx = 0
+        while values[idx] is None:
+            values[idx] = first_real_elevation
+            idx += 1
+
+    # Deal with trailing None values
+    if values[-1] is None:
+        idx = len(values) - 1
+        trailing_none = []
+        while values[idx] is None:
+            trailing_none.append(idx)
+            idx -= 1
+        fill_value = values[idx]
+        for _idx in trailing_none:
+            values[_idx] = fill_value
+    # Deal with values in between
+    if None in values:
+        consecutive_none_indices = []
+        start_index = None
+        for i, value in enumerate(values):
+            if value is None:
+                if start_index is None:
+                    start_index = i
+            else:
+                if start_index is not None:
+                    consecutive_none_indices.append((start_index, i))
+                    start_index = None
+        for idx_start, idx_end in consecutive_none_indices:
+            new_values = interpolate_linear(
+                values[idx_start - 1], values[idx_end], idx_end - idx_start + 1
+            )
+            for rp_idx, rp_value in enumerate(new_values[1:-1]):
+                values[idx_start + rp_idx] = rp_value
+
+    if None in values:
+        raise RuntimeError
+    return values  # type: ignore
