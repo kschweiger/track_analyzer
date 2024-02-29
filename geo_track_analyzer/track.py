@@ -403,7 +403,7 @@ class Track(ABC):
         n_segment: int = 0,
         copy_extensions: Literal[
             "copy-forward", "meet-center", "linear"
-        ] = "copy_forward",
+        ] = "copy-forward",
     ) -> None:
         """
         Add additdion points to a segment by interpolating along the direct line
@@ -503,7 +503,7 @@ class Track(ABC):
         merge_subsegments: int = 5,
         extensions_interpolation: Literal[
             "copy-forward", "meet-center", "linear"
-        ] = "copy_forward",
+        ] = "copy-forward",
     ) -> Sequence[tuple[Track, float, bool]]:
         """Find overlap of a segment of the track with a segment in another track.
 
@@ -580,7 +580,7 @@ class Track(ABC):
             "profile", "profile-slope", "map-line", "map-line-enhanced", "map-segments"
         ],
         *,
-        segment: None | int = None,
+        segment: None | int | list[int] = None,
         reduce_pp_intervals: None | int = None,
         **kwargs,
     ) -> Figure:
@@ -605,7 +605,8 @@ class Track(ABC):
             - map-segments: Visualize coordinates on the map split into segments.
               Pass keyword args for
               :func:`~geo_track_analyzer.visualize.plot_segments_on_map`
-        :param segment: Select a specific segment, defaults to None
+        :param segment: Select a specific segment, multiple segments or all segmenets,
+            defaults to None
         :param reduce_pp_intervals: Optionally pass a distance in m which is used to
             reduce the points in a track, defaults to None
         :raises VisualizationSetupError: If the plot prequisites are not met
@@ -637,12 +638,24 @@ class Track(ABC):
                 intervals=reduce_pp_intervals,
                 connect_segments="full" if kind in connect_segment_full else "forward",
             )
-        else:
+        elif isinstance(segment, int):
             from geo_track_analyzer.utils.track import extract_segment_data_for_plot
 
             data = extract_segment_data_for_plot(
                 track=self,
                 segment=segment,
+                kind=kind,
+                require_elevation=require_elevation,
+                intervals=reduce_pp_intervals,
+            )
+        else:
+            from geo_track_analyzer.utils.track import (
+                extract_multiple_segment_data_for_plot,
+            )
+
+            data = extract_multiple_segment_data_for_plot(
+                track=self,
+                segments=segment,
                 kind=kind,
                 require_elevation=require_elevation,
                 intervals=reduce_pp_intervals,

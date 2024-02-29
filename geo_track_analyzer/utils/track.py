@@ -45,6 +45,44 @@ def extract_track_data_for_plot(
     return data
 
 
+def extract_multiple_segment_data_for_plot(
+    track: Track,
+    segments: list[int],
+    kind: str,
+    require_elevation: list[str],
+    intervals: None | int = None,
+    connect_segments: Literal["full", "forward"] = "forward",
+) -> pd.DataFrame:
+    """Extract the data for a two or more segments from a Track as DataFrame for
+    plotting.
+
+    :param track: Track object
+    :param segments: Indices of the segments to be extracted
+    :param kind: Kind of plot
+    :param require_elevation: List of kinds of plots that require elevation data to be
+        present in the Track
+    :param intervals: Optionally reduce the pp-distance in the track, defaults to None
+
+    :return: DataFrame
+    """
+    if len(segments) < 2:
+        raise VisualizationSetupError("Pass at least two segment ids")
+    if max(segments) >= track.n_segments or min(segments) < 0:
+        raise VisualizationSetupError(
+            f"Passed ids must be between 0 and {len(segments)-1}. Got {segments}"
+        )
+
+    data = extract_track_data_for_plot(
+        track=track,
+        kind=kind,
+        require_elevation=require_elevation,
+        intervals=intervals,
+        connect_segments=connect_segments,
+    )
+
+    return data[data.segment.isin(segments)]
+
+
 def extract_segment_data_for_plot(
     track: Track,
     segment: int,

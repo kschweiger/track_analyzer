@@ -384,12 +384,15 @@ def test_pytrack_add_segement() -> None:
 
 
 def test_track_overiew(
-    two_segment_py_data: tuple[tuple[list, list, list], tuple[list, list, list]]
+    two_segment_py_data: tuple[tuple[list, list, list], tuple[list, list, list]],
 ) -> None:
-    (segment_1_points, segment_1_elevations, segment_1_times), (
-        segment_2_points,
-        segment_2_elevations,
-        segment_2_times,
+    (
+        (segment_1_points, segment_1_elevations, segment_1_times),
+        (
+            segment_2_points,
+            segment_2_elevations,
+            segment_2_times,
+        ),
     ) = two_segment_py_data
 
     track = PyTrack(segment_1_points, segment_1_elevations, segment_1_times)
@@ -409,10 +412,13 @@ def test_track_data(
     two_segment_py_data: tuple[tuple[list, list, list], tuple[list, list, list]],
     conn_segments: str,
 ) -> None:
-    (segment_1_points, segment_1_elevations, segment_1_times), (
-        segment_2_points,
-        segment_2_elevations,
-        segment_2_times,
+    (
+        (segment_1_points, segment_1_elevations, segment_1_times),
+        (
+            segment_2_points,
+            segment_2_elevations,
+            segment_2_times,
+        ),
     ) = two_segment_py_data
 
     track = PyTrack(segment_1_points, segment_1_elevations, segment_1_times)
@@ -528,8 +534,8 @@ def test_plot_segment_indepenent(
     track = ByteTrack(
         (resource_files / "Freiburger_Münster_nach_Schau_Ins_Land.gpx").read_bytes()
     )
-
     fig = track.plot(kind, segment=segment, reduce_pp_intervals=intervals)
+
     assert isinstance(fig, Figure)
 
 
@@ -547,5 +553,25 @@ def test_plot_segment_plot(kind: str) -> None:
     track.split((47.9805, 7.84799))
 
     fig = track.plot(kind)  # type: ignore
+
+    assert isinstance(fig, Figure)
+
+
+@pytest.mark.parametrize(
+    "kind",
+    ["map-segments"],
+)
+def test_plot_multi_segment_plot(kind: str) -> None:
+    resource_files = importlib.resources.files(resources)
+
+    track = ByteTrack(
+        (resource_files / "Freiburger_Münster_nach_Schau_Ins_Land.gpx").read_bytes()
+    )
+
+    track.split((47.9805, 7.84799))
+    track.split((47.95591, 7.86402))
+    track.split((47.940, 7.8682))
+
+    fig = track.plot(kind, segment=[1, 2])  # type: ignore
 
     assert isinstance(fig, Figure)
