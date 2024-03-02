@@ -49,3 +49,10 @@ if __name__ == "__main__":
         "docs/snippets/examples/visualization/map_line_enhanced_interpolated.html",
         full_html=False,
     )
+
+    track_w_segments.plot(
+        kind="profile", show_segment_borders=True, width=None, height=None
+    ).write_html(
+        "docs/snippets/examples/visualization/profile_w_segment_borders.html",
+        full_html=False,
+    )
