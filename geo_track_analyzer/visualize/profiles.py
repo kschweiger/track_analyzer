@@ -28,7 +28,7 @@ def _add_segment_borders(data: pd.DataFrame, fig: Figure, color: None | str) -> 
     for idx, segment_border_idx in enumerate(
         data.index[data["segment"] != data["segment"].shift()].to_list()
     ):
-        border_x = data.iloc[segment_border_idx].cum_distance_moving
+        border_x = data.loc[segment_border_idx].cum_distance_moving
         fig.add_vline(
             x=border_x,
             # Hide line but keep abbitiation for first segment
