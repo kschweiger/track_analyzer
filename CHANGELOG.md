@@ -1,4 +1,12 @@
 <!-- insertion marker -->
+<a name="1.3.1"></a>
+
+## [1.3.1](https://github.com/kschweiger/track_analyzer/compare/1.3.0...1.3.1) (2024-03-02)
+
+### Bug Fixes
+
+- **visualization:** Segment borders in profile plots are now drawn at the correct points ([f5b71b9](https://github.com/kschweiger/track_analyzer/commit/f5b71b92b4491c9205c11e2a1b4a06e2706b597b))
+
 <a name="1.3.0"></a>
 
 ## [1.3.0](https://github.com/kschweiger/track_analyzer/compare/1.2.0...1.3.0) (2024-03-02)
