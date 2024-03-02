@@ -31,6 +31,13 @@ Internally this will call the  [`plot_track_with_slope`][geo_track_analyzer.visu
 
 Color scale and min/max slope can be configured using the `slope_gradient_color`, `min_slope`,  and `max_slope` arguments as documented in [`plot_track_with_slope`][geo_track_analyzer.visualize.plot_track_with_slope].
 
+### Displaying segments/laps in profile plots
+
+Plots of kinds `profile-slope` and `profile` can show the segments (or laps) in a track by passing the `show_segment_borders` argument.
+This add a vertical line at the distance corresponding to the first point in the segment. The color of the lien can be modified with by
+passing `color_segment_border` with a valid color string for plotly.
+
+--8<-- "docs/snippets//examples/visualization/profile_w_segment_borders.html"
 
 ## Map Visualizations
 

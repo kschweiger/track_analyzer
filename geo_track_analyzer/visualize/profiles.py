@@ -11,6 +11,35 @@ from geo_track_analyzer.visualize.utils import get_slope_colors
 logger = logging.getLogger(__name__)
 
 
+def _check_segment_availability(data: pd.DataFrame) -> bool:
+    if "segment" not in data.columns:
+        logger.warning(
+            "Got show_segments but segments are not part of the data. "
+            "Disabling segment borders."
+        )
+        return False
+    if len(data.segment.unique()) == 1:
+        logger.warning("Only a single segment in the data. Disabling segment borders.")
+        return False
+    return True
+
+
+def _add_segment_borders(data: pd.DataFrame, fig: Figure, color: None | str) -> None:
+    for idx, segment_border_idx in enumerate(
+        data.index[data["segment"] != data["segment"].shift()].to_list()
+    ):
+        border_x = data.iloc[segment_border_idx].cum_distance_moving
+        fig.add_vline(
+            x=border_x,
+            # Hide line but keep abbitiation for first segment
+            line_width=3 if idx > 0 else 0,
+            line_dash="dash",
+            line_color="darkslategray" if color is None else color,
+            annotation_text=f"Segment {data.iloc[segment_border_idx].segment}",
+            annotation_borderpad=5,
+        )
+
+
 def plot_track_2d(
     data: pd.DataFrame,
     *,
@@ -18,6 +47,7 @@ def plot_track_2d(
     include_heartrate: bool = False,
     include_cadence: bool = False,
     include_power: bool = False,
+    show_segment_borders: bool = False,
     strict_data_selection: bool = False,
     height: None | int = 600,
     width: None | int = 1800,
@@ -25,6 +55,7 @@ def plot_track_2d(
     color_elevation: None | str = None,
     color_additional_trace: None | str = None,
     color_poi: None | str = None,
+    color_segment_border: None | str = None,
     slider: bool = False,
     **kwargs,
 ) -> Figure:
@@ -36,6 +67,8 @@ def plot_track_2d(
     :param include_heartrate: Plot heart rate as second y-axis, defaults to False
     :param include_cadence: Plot cadence as second y-axis, defaults to False
     :param include_power: Plot power as second y-axis, defaults to False
+    :param show_segment_borders: If True show vertical lines between segments in track,
+        defaults to False. If no segments are present in data, no error is raised.
     :param strict_data_selection: If True only included that passing the minimum speed
         requirements of the Track, defaults to False
     :param height: Height of the plot, defaults to 600
@@ -47,6 +80,8 @@ def plot_track_2d(
     :param color_additional_trace: Color of velocity/heartrate/cadence/power as str
         interpretable by plotly, defaults to None
     :param color_poi: Color of the pois as str interpretable by plotly, defaults to None
+    :param color_segment_border: Color of the segment border lines as str interpretable
+        by plotly, defaults to None
     :param slider: Should a slide be included in the plot to zoom into the x-axis,
         defaults to False
     :raises VisualizationSetupError: If more than one of include_velocity,
@@ -72,12 +107,14 @@ def plot_track_2d(
             "Only one of include_velocity, include_heartrate, include_cadence, "
             "and include_power can be set to True"
         )
-
     mask = data.moving
     if strict_data_selection:
         mask = mask & data.in_speed_percentile
 
     data_for_plot = data[mask]
+
+    if show_segment_borders:
+        show_segment_borders = _check_segment_availability(data_for_plot)
 
     if data_for_plot.elevation.isna().all():
         raise VisualizationSetupError("Can not plot profile w/o elevation information")
@@ -90,6 +127,14 @@ def plot_track_2d(
             mode="lines",
             name="Elevation [m]",
             fill="tozeroy",
+            text=[
+                "<b>Lat</b>: {lat:4.6f}°<br><b>Lon</b>: {lon:4.6f}°<br>".format(
+                    lon=rcrd["longitude"], lat=rcrd["latitude"]
+                )
+                for rcrd in data_for_plot.to_dict("records")
+            ],
+            hovertemplate="<b>Distance</b>: %{x:.1f} km <br><b>Elevation</b>: "
+            + "%{y:.1f} m <br>%{text}<extra></extra>",
         ),
         secondary_y=False,
     )
@@ -183,6 +228,9 @@ def plot_track_2d(
                 ),
             )
 
+    if show_segment_borders:
+        _add_segment_borders(data_for_plot, fig, color_segment_border)
+
     fig.update_layout(
         showlegend=False, autosize=False, margin={"r": 0, "t": 0, "l": 0, "b": 0}
     )
@@ -221,9 +269,11 @@ def plot_track_with_slope(
     slope_gradient_color: tuple[str, str, str] = ("#0000FF", "#00FF00", "#FF0000"),
     min_slope: int = -18,
     max_slope: int = 18,
+    show_segment_borders: bool = False,
     height: None | int = 600,
     width: None | int = 1800,
     slider: bool = False,
+    color_segment_border: None | str = None,
     **kwargs,
 ) -> Figure:
     """Elevation profile with slopes between points.
@@ -235,10 +285,14 @@ def plot_track_with_slope(
         displayed slope, defaults to -18
     :param max_slope: Maximum  slope for the gradient also acts as ceiling for the
         displayed slope, defaults to 18
+    :param show_segment_borders: If True show vertical lines between segments in track,
+        defaults to False. If no segments are present in data, no error is raised.
     :param height: Height of the plot, defaults to 600
     :param width: Width of the plot, defaults to 1800
     :param slider: Should a slide be included in the plot to zoom into the x-axis,
         defaults to False
+    :param color_segment_border: Color of the segment border lines as str interpretable
+        by plotly, defaults to None
     :raises VisualizationSetupError: If elevation data is missing in the data
 
     :return: Plotly Figure object
@@ -251,6 +305,9 @@ def plot_track_with_slope(
 
     if data.elevation.isna().all():
         raise VisualizationSetupError("Can not plot profile w/o elevation information")
+
+    if show_segment_borders:
+        show_segment_borders = _check_segment_availability(data)
 
     elevations = data.elevation.to_list()
     diff_elevation = [0]
@@ -313,6 +370,9 @@ def plot_track_with_slope(
                 hovertemplate=f"Slope: {slope_val} %",
             )
         )
+
+    if show_segment_borders:
+        _add_segment_borders(data, fig, color_segment_border)
 
     fig.update_layout(
         showlegend=False, autosize=False, margin={"r": 0, "t": 0, "l": 0, "b": 0}
