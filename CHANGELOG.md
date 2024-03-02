@@ -1,4 +1,14 @@
 <!-- insertion marker -->
+<a name="1.3.0"></a>
+
+## [1.3.0](https://github.com/kschweiger/track_analyzer/compare/1.2.0...1.3.0) (2024-03-02)
+
+### Features
+
+- **visualization:** Profile plots can display borders between segments/laps in track ([2c18cd8](https://github.com/kschweiger/track_analyzer/commit/2c18cd84d2ad3880fde4d06fb0af48a8fc21bc4d))
+- **Track:** plot method can be constrained to a subset of segments (#19) ([56adca4](https://github.com/kschweiger/track_analyzer/commit/56adca406731eb8b85d169c519228623711b88f0))
+- **FITTrack:** Save laps as segments and deal with missing elevation data ([9beb65a](https://github.com/kschweiger/track_analyzer/commit/9beb65adbd461de82ef962cfc805940ebb66f93f))
+
 <a name="1.2.0"></a>
 
 ## [1.2.0](https://github.com/kschweiger/track_analyzer/compare/1.1.2...1.2.0) (2024-01-28)
