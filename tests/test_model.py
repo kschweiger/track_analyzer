@@ -13,6 +13,8 @@ from geo_track_analyzer.model import (
     PointDistance,
     SegmentOverlap,
     SegmentOverview,
+    ZoneInterval,
+    Zones,
 )
 from geo_track_analyzer.utils.internal import (
     ExtensionFieldElement,
@@ -200,3 +202,64 @@ def test_segment_overlap_init() -> None:
     )
 
     assert isinstance(overlap.plate, np.ndarray)
+
+
+@pytest.mark.parametrize(("start", "end"), [(None, 100), (100, 200), (200, None)])
+def test_zone_interval(start: None | int, end: None | int) -> None:
+    zi = ZoneInterval(start=start, end=end)
+    assert zi.start == start
+    assert zi.end == end
+
+
+def test_zone_interval_start_end_validation() -> None:
+    with pytest.raises(ValidationError):
+        ZoneInterval(start=None, end=None)
+
+
+def test_zone_interval_pos_int_validation() -> None:
+    with pytest.raises(ValidationError):
+        ZoneInterval(start=-10, end=20)
+
+
+def test_zones() -> None:
+    Zones(
+        intervals=[
+            ZoneInterval(start=None, end=100),
+            ZoneInterval(start=100, end=200),
+            ZoneInterval(start=200, end=None),
+        ]
+    )
+
+
+def test_zones_intervals_validation() -> None:
+    with pytest.raises(ValidationError, match="At least two intervals are required"):
+        Zones(intervals=[ZoneInterval(start=100, end=200)])
+
+
+@pytest.mark.parametrize(
+    ("first_start", "last_end"), [(50, None), (None, 300), (50, 300)]
+)
+def test_zones_first_last_interval_model_validation(
+    first_start: None | int, last_end: None | int
+) -> None:
+    with pytest.raises(ValidationError, match=r"(.*) must (.*) with None"):
+        Zones(
+            intervals=[
+                ZoneInterval(start=first_start, end=100),
+                ZoneInterval(start=100, end=200),
+                ZoneInterval(start=200, end=last_end),
+            ]
+        )
+
+
+def test_zones_consecutive_intervals_validation() -> None:
+    with pytest.raises(
+        ValidationError, match="Consecutive intervals mit start/end with the same value"
+    ):
+        Zones(
+            intervals=[
+                ZoneInterval(start=None, end=100),
+                ZoneInterval(start=120, end=200),
+                ZoneInterval(start=200, end=None),
+            ]
+        )
