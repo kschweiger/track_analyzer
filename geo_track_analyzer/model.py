@@ -2,7 +2,14 @@ from typing import Annotated
 
 import numpy as np
 from gpxpy.gpx import GPXTrackPoint
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    PositiveInt,
+    field_validator,
+    model_validator,
+)
 from pydantic_numpy import np_array_pydantic_annotated_typing
 
 from geo_track_analyzer.utils.internal import GPXTrackPointAfterValidator
@@ -90,7 +97,7 @@ class SegmentOverview(Model):
     avg_velocity_kmh: None | float = Field(default=None)
     """avg_speed converted the km/h"""
 
-    @model_validator(mode="after")
+    @model_validator(mode="after")  # type: ignore
     def set_km_attr(self) -> "SegmentOverview":
         self.moving_distance_km = self.moving_distance / 1000
         self.total_distance_km = self.total_distance / 1000
@@ -112,7 +119,7 @@ class SegmentOverlap(Model):
     inverse: bool
     """Match direction of the segment relative to the base"""
 
-    plate: np_array_pydantic_annotated_typing(data_type=np.float32, dimensions=2)
+    plate: np_array_pydantic_annotated_typing(data_type=np.float32, dimensions=2)  # type: ignore
     """2D representation of the segment overlap"""
 
     start_point: Annotated[GPXTrackPoint, GPXTrackPointAfterValidator]
@@ -166,3 +173,41 @@ class PointDistance(Model):
             f"segment_idx={self.segment_idx}, "
             f"segment_point_idx={self.segment_point_idx})"
         )
+
+
+class ZoneInterval(Model):
+    start: None | PositiveInt
+    end: None | PositiveInt
+
+    @model_validator(mode="after")  # type: ignore
+    def check_zone_is_valid(self) -> "ZoneInterval":
+        if self.start is None and self.end is None:
+            raise ValueError("start and end can not both be None")
+        return self
+
+
+class Zones(Model):
+    intervals: list[ZoneInterval]
+    meta_info: None | str = None
+
+    @field_validator("intervals")
+    @classmethod
+    def at_least_two_intervals(cls, v: list) -> list:
+        if len(v) < 2:
+            raise ValueError("At least two intervals are required")
+        return v
+
+    @model_validator(mode="after")  # type: ignore
+    def check_intervals(self) -> "Zones":
+        if self.intervals[0].start is not None:
+            raise ValueError("First interval must start with None")
+        if self.intervals[-1].end is not None:
+            raise ValueError("Last interval must end with None")
+        prev_interval = self.intervals[0]
+        for interval in self.intervals[1:]:
+            if interval.start != prev_interval.end:
+                raise ValueError(
+                    "Consecutive intervals mit start/end with the same value"
+                )
+            prev_interval = interval
+        return self
