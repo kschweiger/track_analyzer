@@ -6,9 +6,10 @@ import pandas as pd
 import pytest
 from gpxpy.gpx import GPXTrack
 
-from geo_track_analyzer.model import Position2D
+from geo_track_analyzer.model import Position2D, ZoneInterval, Zones
 from geo_track_analyzer.processing import (
     _recalc_cumulated_columns,
+    add_zones_to_dataframe,
     get_processed_segment_data,
     get_processed_track_data,
     split_data,
@@ -240,3 +241,34 @@ def test_compare_pp_distance_to_processed_track(track_for_test: Track) -> None:
     cum_distance = np.cumsum(distances_for_sum)
 
     assert 0.99 < cum_distance[-1] / data.cum_distance.iloc[-1] < 1.01
+
+
+def test_add_zones_to_dataframe() -> None:
+    data = pd.DataFrame({"heartrate": [100, 100, 120, None, 100, 140, 200, None, None]})
+    zones = Zones(
+        intervals=[
+            ZoneInterval(start=None, end=110),
+            ZoneInterval(start=110, end=130),
+            ZoneInterval(start=130, end=150),
+            ZoneInterval(start=150, end=None),
+        ]
+    )
+
+    data = add_zones_to_dataframe(data, "heartrate", zones)
+
+    assert "heartrate_zones" in data.keys()
+    assert data["heartrate_zones"].equals(
+        pd.Series(
+            [
+                "Zone 1",
+                "Zone 1",
+                "Zone 2",
+                np.nan,
+                "Zone 1",
+                "Zone 3",
+                "Zone 4",
+                np.nan,
+                np.nan,
+            ]
+        )
+    )

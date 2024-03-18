@@ -3,7 +3,9 @@ from typing import Literal
 import pandas as pd
 
 from geo_track_analyzer.exceptions import VisualizationSetupError
+from geo_track_analyzer.model import Zones
 from geo_track_analyzer.processing import (
+    add_zones_to_dataframe,
     get_processed_segment_data,
     get_processed_track_data,
 )
@@ -16,6 +18,9 @@ def extract_track_data_for_plot(
     require_elevation: list[str],
     intervals: None | int = None,
     connect_segments: Literal["full", "forward"] = "forward",
+    heartrate_zones: None | Zones = None,
+    power_zones: None | Zones = None,
+    cadence_zones: None | Zones = None,
 ) -> pd.DataFrame:
     """Extract the data from a Track as DataFrame for plotting.
 
@@ -42,6 +47,13 @@ def extract_track_data_for_plot(
         _track, connect_segments=connect_segments
     )
 
+    if heartrate_zones is not None:
+        data = add_zones_to_dataframe(data, "heartrate", heartrate_zones)
+    if power_zones is not None:
+        data = add_zones_to_dataframe(data, "heartrate", power_zones)
+    if cadence_zones is not None:
+        data = add_zones_to_dataframe(data, "heartrate", cadence_zones)
+
     return data
 
 
@@ -52,6 +64,9 @@ def extract_multiple_segment_data_for_plot(
     require_elevation: list[str],
     intervals: None | int = None,
     connect_segments: Literal["full", "forward"] = "forward",
+    heartrate_zones: None | Zones = None,
+    power_zones: None | Zones = None,
+    cadence_zones: None | Zones = None,
 ) -> pd.DataFrame:
     """Extract the data for a two or more segments from a Track as DataFrame for
     plotting.
@@ -78,6 +93,9 @@ def extract_multiple_segment_data_for_plot(
         require_elevation=require_elevation,
         intervals=intervals,
         connect_segments=connect_segments,
+        heartrate_zones=heartrate_zones,
+        power_zones=power_zones,
+        cadence_zones=cadence_zones,
     )
 
     return data[data.segment.isin(segments)]
@@ -89,6 +107,9 @@ def extract_segment_data_for_plot(
     kind: str,
     require_elevation: list[str],
     intervals: None | int = None,
+    heartrate_zones: None | Zones = None,
+    power_zones: None | Zones = None,
+    cadence_zones: None | Zones = None,
 ) -> pd.DataFrame:
     """Extract the data for a segment from a Track as DataFrame for plotting.
 
@@ -118,4 +139,12 @@ def extract_segment_data_for_plot(
             segement.reduce_points(intervals)
 
     _, _, _, _, data = get_processed_segment_data(segement)
+
+    if heartrate_zones is not None:
+        data = add_zones_to_dataframe(data, "heartrate", heartrate_zones)
+    if power_zones is not None:
+        data = add_zones_to_dataframe(data, "heartrate", power_zones)
+    if cadence_zones is not None:
+        data = add_zones_to_dataframe(data, "heartrate", cadence_zones)
+
     return data

@@ -7,7 +7,9 @@ import pandas as pd
 from gpxpy.gpx import GPXTrack, GPXTrackPoint, GPXTrackSegment
 
 from geo_track_analyzer.exceptions import GPXPointExtensionError
+from geo_track_analyzer.model import Zones
 from geo_track_analyzer.utils.internal import get_extension_value
+from geo_track_analyzer.utils.model import format_zones_for_digitize
 
 logger = logging.getLogger(__name__)
 
@@ -393,5 +395,19 @@ def split_data(
 
     if last_split != data.index.max() + 1:
         data.loc[last_split : data.index.max() + 1, "segment"] = i_segement
+
+    return data
+
+
+def add_zones_to_dataframe(
+    data: pd.DataFrame, metric: Literal["heartrate", "power", "cadence"], zones: Zones
+) -> pd.DataFrame:
+    zone_bins, names = format_zones_for_digitize(zones)
+
+    metric_data = data[metric][~data[metric].isna()]
+    binned_metric = pd.Series(
+        np.digitize(metric_data, zone_bins), index=metric_data.index
+    )
+    data[f"{metric}_zones"] = binned_metric.apply(lambda v: names[v - 1])
 
     return data
