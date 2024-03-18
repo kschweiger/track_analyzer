@@ -19,7 +19,7 @@ from geo_track_analyzer.exceptions import (
     TrackTransformationError,
     VisualizationSetupError,
 )
-from geo_track_analyzer.model import PointDistance, Position3D, SegmentOverview
+from geo_track_analyzer.model import PointDistance, Position3D, SegmentOverview, Zones
 from geo_track_analyzer.processing import (
     get_processed_segment_data,
     get_processed_track_data,
@@ -51,7 +51,12 @@ class Track(ABC):
     """
 
     def __init__(
-        self, stopped_speed_threshold: float, max_speed_percentile: int
+        self,
+        stopped_speed_threshold: float,
+        max_speed_percentile: int,
+        heartrate_zones: None | Zones = None,
+        power_zones: None | Zones = None,
+        cadence_zones: None | Zones = None,
     ) -> None:
         logger.debug(
             "Using threshold for stopped speed: %s km/h", stopped_speed_threshold
@@ -66,10 +71,13 @@ class Track(ABC):
 
         self.session_data: Dict[str, str | int | float] = {}
 
+        self.heartrate_zones = heartrate_zones
+        self.power_zones = power_zones
+        self.cadence_zones = cadence_zones
+
     @property
     @abstractmethod
-    def track(self) -> GPXTrack:
-        ...
+    def track(self) -> GPXTrack: ...
 
     @property
     def n_segments(self) -> int:
@@ -722,6 +730,9 @@ class GPXFileTrack(Track):
         n_track: int = 0,
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
+        heartrate_zones: None | Zones = None,
+        power_zones: None | Zones = None,
+        cadence_zones: None | Zones = None,
     ) -> None:
         """Initialize a Track object from a gpx file
 
@@ -736,6 +747,9 @@ class GPXFileTrack(Track):
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
             max_speed_percentile=max_speed_percentile,
+            heartrate_zones=heartrate_zones,
+            power_zones=power_zones,
+            cadence_zones=cadence_zones,
         )
 
         logger.info("Loading gpx track from file %s", gpx_file)
@@ -764,6 +778,9 @@ class ByteTrack(Track):
         n_track: int = 0,
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
+        heartrate_zones: None | Zones = None,
+        power_zones: None | Zones = None,
+        cadence_zones: None | Zones = None,
     ) -> None:
         """Initialize a Track object from a gpx file
 
@@ -777,6 +794,9 @@ class ByteTrack(Track):
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
             max_speed_percentile=max_speed_percentile,
+            heartrate_zones=heartrate_zones,
+            power_zones=power_zones,
+            cadence_zones=cadence_zones,
         )
 
         gpx = gpxpy.parse(bytefile)
@@ -802,6 +822,9 @@ class PyTrack(Track):
         power: None | list[int] = None,
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
+        heartrate_zones: None | Zones = None,
+        power_zones: None | Zones = None,
+        cadence_zones: None | Zones = None,
     ) -> None:
         """A geospacial data track initialized from python objects
 
@@ -821,6 +844,9 @@ class PyTrack(Track):
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
             max_speed_percentile=max_speed_percentile,
+            heartrate_zones=heartrate_zones,
+            power_zones=power_zones,
+            cadence_zones=cadence_zones,
         )
 
         gpx = GPX()
@@ -954,6 +980,9 @@ class SegmentTrack(Track):
         segment: GPXTrackSegment,
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
+        heartrate_zones: None | Zones = None,
+        power_zones: None | Zones = None,
+        cadence_zones: None | Zones = None,
     ) -> None:
         """Wrap a GPXTrackSegment into a Track object
 
@@ -966,6 +995,9 @@ class SegmentTrack(Track):
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
             max_speed_percentile=max_speed_percentile,
+            heartrate_zones=heartrate_zones,
+            power_zones=power_zones,
+            cadence_zones=cadence_zones,
         )
         gpx = GPX()
 
@@ -991,6 +1023,9 @@ class FITTrack(Track):
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
         strict_elevation_loading: bool = False,
+        heartrate_zones: None | Zones = None,
+        power_zones: None | Zones = None,
+        cadence_zones: None | Zones = None,
     ) -> None:
         """Load a .fit file and extract the data into a Track object.
         NOTE: Tested with Wahoo devices only
@@ -1006,6 +1041,9 @@ class FITTrack(Track):
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
             max_speed_percentile=max_speed_percentile,
+            heartrate_zones=heartrate_zones,
+            power_zones=power_zones,
+            cadence_zones=cadence_zones,
         )
 
         if isinstance(source, str):

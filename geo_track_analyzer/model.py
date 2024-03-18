@@ -178,6 +178,7 @@ class PointDistance(Model):
 class ZoneInterval(Model):
     start: None | PositiveInt
     end: None | PositiveInt
+    name: None | str = None
 
     @model_validator(mode="after")  # type: ignore
     def check_zone_is_valid(self) -> "ZoneInterval":
@@ -192,9 +193,15 @@ class Zones(Model):
 
     @field_validator("intervals")
     @classmethod
-    def at_least_two_intervals(cls, v: list) -> list:
+    def at_least_two_intervals(cls, v: list[ZoneInterval]) -> list:
         if len(v) < 2:
             raise ValueError("At least two intervals are required")
+
+        none_names = [interval for interval in v if interval.name is None]
+
+        if len(none_names) > 0 and len(none_names) != len(v):
+            raise ValueError("Set either no names of intervals or all names")
+
         return v
 
     @model_validator(mode="after")  # type: ignore

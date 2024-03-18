@@ -8,7 +8,13 @@ import pytest
 from gpxpy.gpx import GPXTrack, GPXTrackPoint, GPXTrackSegment
 from pytest_mock import MockerFixture
 
-from geo_track_analyzer.model import PointDistance, Position2D, Position3D
+from geo_track_analyzer.model import (
+    PointDistance,
+    Position2D,
+    Position3D,
+    ZoneInterval,
+    Zones,
+)
 from geo_track_analyzer.track import PyTrack
 from geo_track_analyzer.utils.base import (
     calc_elevation_metrics,
@@ -32,6 +38,7 @@ from geo_track_analyzer.utils.internal import (
     get_extended_track_point,
     get_extension_value,
 )
+from geo_track_analyzer.utils.model import format_zones_for_digitize
 
 
 def test_distance_far() -> None:
@@ -580,3 +587,30 @@ def test_closest_point_timing(n_points) -> None:
 )
 def test_fill_list(values: list[None | float], exp_values: list[float]) -> None:
     assert fill_list(values) == exp_values
+
+
+@pytest.mark.parametrize(
+    ("names", "exp_names"),
+    [
+        ([None, None, None], ["Zone 1", "Zone 2", "Zone 3"]),
+        (
+            ["Some Zone 1", "Some Zone 2", "Some Zone 3"],
+            ["Some Zone 1", "Some Zone 2", "Some Zone 3"],
+        ),
+    ],
+)
+def test_format_zones_for_digitize(
+    names: list[None] | list[str], exp_names: list[str]
+) -> None:
+    zones = Zones(
+        intervals=[
+            ZoneInterval(start=None, end=100, name=names[0]),
+            ZoneInterval(start=100, end=150, name=names[1]),
+            ZoneInterval(start=150, end=None, name=names[2]),
+        ],
+    )
+
+    vals, ret_names = format_zones_for_digitize(zones)
+
+    assert ret_names == exp_names
+    assert (vals == np.array([-np.inf, 100, 150, np.inf])).all()

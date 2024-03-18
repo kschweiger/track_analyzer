@@ -263,3 +263,16 @@ def test_zones_consecutive_intervals_validation() -> None:
                 ZoneInterval(start=200, end=None),
             ]
         )
+
+
+def test_zones_names_mixed_error() -> None:
+    with pytest.raises(
+        ValidationError, match="Set either no names of intervals or all names"
+    ):
+        Zones(
+            intervals=[
+                ZoneInterval(start=None, end=100, name="A"),
+                ZoneInterval(start=120, end=200),
+                ZoneInterval(start=200, end=None),
+            ]
+        )
