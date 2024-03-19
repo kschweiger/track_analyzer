@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 from plotly.graph_objs import Figure
 
 from geo_track_analyzer.exceptions import VisualizationSetupError
+from geo_track_analyzer.visualize.constants import DEFAULT_BAR_COLORS
 
 
 def _preprocess_data(
@@ -50,6 +51,18 @@ def _aggregate_zone_data(
         raise NotImplementedError(f"Aggregation {aggregate} not supported")
 
     return bin_data, y_title, tickformat
+
+
+def get_segmnet_ids(data: pd.DataFrame, segments: None | list[int]) -> list[int]:
+    if segments is None:
+        return sorted(data.segment.unique())
+    else:
+        if not all([s in data.segment.unique() for s in segments]):
+            raise VisualizationSetupError(
+                f"Not all passed segments are available in data. Passed {segments} "
+                f"with {data.segment.unique()} in data."
+            )
+        return segments
 
 
 def plot_track_zones(
@@ -123,19 +136,9 @@ def plot_segment_zones(
         )
     data_for_plot = _preprocess_data(data, metric, strict_data_selection)
 
-    if segments is None:
-        plot_segments = sorted(data_for_plot.segment.unique())
-    else:
-        if not all([s in data_for_plot.segment.unique() for s in segments]):
-            raise VisualizationSetupError(
-                f"Not all passed segments are available in data. Passed {segments} "
-                f"with {data_for_plot.segment.unique()} in data."
-            )
-        plot_segments = segments
-
     fig = go.Figure()
 
-    for segment in plot_segments:
+    for segment in get_segmnet_ids(data_for_plot, segments):
         _data_for_plot = data_for_plot[data_for_plot.segment == segment]
         bin_data, y_title, tickformat = _aggregate_zone_data(
             _data_for_plot, metric, aggregate
@@ -162,6 +165,82 @@ def plot_segment_zones(
     fig.update_layout(
         title=f"{aggregate.capitalize()} in {metric.capitalize()} zones",
         yaxis=dict(tickformat=tickformat, title=y_title),
+    )
+
+    if height is not None:
+        fig.update_layout(height=height)
+    if width is not None:
+        fig.update_layout(width=width)
+
+    return fig
+
+
+def plot_segment_summary(
+    data: pd.DataFrame,
+    aggregate: Literal["total_time", "total_distance", "avg_speed", "max_speed"],
+    *,
+    colors: None | tuple[str, str] = None,
+    segments: None | list[int] = None,
+    height: None | int = 600,
+    width: None | int = 1200,
+    strict_data_selection: bool = False,
+) -> Figure:
+    if "segment" not in data.columns:
+        raise VisualizationSetupError(
+            "Data has no **segment** in columns. Required for plot"
+        )
+
+    if colors is None:
+        colors = DEFAULT_BAR_COLORS
+    col_a, col_b = colors
+    mask = data.moving
+    if strict_data_selection:
+        mask = mask & data.in_speed_percentile
+
+    data_for_plot = data[mask]
+
+    fig = go.Figure()
+
+    _data_for_plot = data_for_plot[
+        data_for_plot.segment.isin(get_segmnet_ids(data_for_plot, segments))
+    ]
+
+    if aggregate == "avg_speed":
+        bin_data = _data_for_plot.groupby("segment").speed.agg("mean") * 3.6
+        y_title = "Average speed [km/h]"
+        tickformat = ""
+        hover_map_func = lambda v: str(f"{v:.2f} km/h")
+    elif aggregate == "max_speed":
+        bin_data = _data_for_plot.groupby("segment").speed.agg("max") * 3.6
+        y_title = "Maximum speed [km/h]"
+        tickformat = ""
+        hover_map_func = lambda v: str(f"{v:.2f} km/h")
+    elif aggregate == "total_distance":
+        bin_data = _data_for_plot.groupby("segment").distance.agg("sum") / 1000
+        y_title = "Distance [km]"
+        tickformat = ""
+        hover_map_func = lambda v: str(f"{v:.2f} km")
+    elif aggregate == "total_time":
+        bin_data = pd.to_datetime(
+            _data_for_plot.groupby("segment").time.agg("sum"), unit="s"
+        )
+        y_title = "Duration"
+        tickformat = "%H:%M:%S"
+        hover_map_func = lambda dt: str(dt.time())
+
+    fig.add_trace(
+        go.Bar(
+            x=[f"Segment {idx}" for idx in bin_data.index.to_list()],
+            y=bin_data.to_list(),
+            marker_color=[col_a if i % 2 == 0 else col_b for i in range(len(bin_data))],
+            hovertext=list(map(hover_map_func, bin_data.to_list())),
+            hovertemplate="%{hovertext}<extra></extra>",
+        ),
+    )
+
+    fig.update_layout(
+        yaxis=dict(tickformat=tickformat, title=y_title),
+        bargap=0.0,
     )
 
     if height is not None:
