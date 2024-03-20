@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 from plotly.graph_objs import Figure
 
 from geo_track_analyzer.exceptions import VisualizationSetupError
-from geo_track_analyzer.visualize.constants import DEFAULT_BAR_COLORS
+from geo_track_analyzer.visualize.constants import DEFAULT_BAR_COLORS, ENRICH_UNITS
 
 
 def _preprocess_data(
@@ -193,6 +193,7 @@ def plot_segment_summary(
     if colors is None:
         colors = DEFAULT_BAR_COLORS
     col_a, col_b = colors
+
     mask = data.moving
     if strict_data_selection:
         mask = mask & data.in_speed_percentile
@@ -207,12 +208,12 @@ def plot_segment_summary(
 
     if aggregate == "avg_speed":
         bin_data = _data_for_plot.groupby("segment").speed.agg("mean") * 3.6
-        y_title = "Average speed [km/h]"
+        y_title = "Average velocity [km/h]"
         tickformat = ""
         hover_map_func = lambda v: str(f"{v:.2f} km/h")
     elif aggregate == "max_speed":
         bin_data = _data_for_plot.groupby("segment").speed.agg("max") * 3.6
-        y_title = "Maximum speed [km/h]"
+        y_title = "Maximum velocity [km/h]"
         tickformat = ""
         hover_map_func = lambda v: str(f"{v:.2f} km/h")
     elif aggregate == "total_distance":
@@ -247,5 +248,65 @@ def plot_segment_summary(
         fig.update_layout(height=height)
     if width is not None:
         fig.update_layout(width=width)
+
+    return fig
+
+
+def plot_segment_box_summary(
+    data: pd.DataFrame,
+    metric: Literal["heartrate", "power", "cadence", "speed"],
+    *,
+    colors: None | tuple[str, str] = None,
+    segments: None | list[int] = None,
+    height: None | int = 600,
+    width: None | int = 1200,
+    strict_data_selection: bool = False,
+) -> Figure:
+    if "segment" not in data.columns:
+        raise VisualizationSetupError(
+            "Data has no **segment** in columns. Required for plot"
+        )
+
+    if metric not in data.columns:
+        raise VisualizationSetupError("Metric %s not part of the passed data" % metric)
+
+    if colors is None:
+        colors = DEFAULT_BAR_COLORS
+    col_a, col_b = colors
+
+    mask = data.moving
+    if strict_data_selection:
+        mask = mask & data.in_speed_percentile
+
+    data_for_plot = data[mask]
+
+    fig = go.Figure()
+
+    for i, segment in enumerate(get_segmnet_ids(data_for_plot, segments)):
+        _data_for_plot = data_for_plot[data_for_plot.segment == segment]
+
+        if metric == "speed":
+            box_data = _data_for_plot["speed"] * 3.6
+        else:
+            box_data = _data_for_plot[metric]
+
+        fig.add_trace(
+            go.Box(
+                y=box_data,
+                name=f"Segment {segment}",
+                boxpoints=False,
+                line_color=col_a if i % 2 == 0 else col_b,
+                marker_color=col_a if i % 2 == 0 else col_b,
+            )
+        )
+    if height is not None:
+        fig.update_layout(height=height)
+    if width is not None:
+        fig.update_layout(width=width)
+
+    fig.update_layout(
+        yaxis=dict(title=f"{metric.capitalize()} {ENRICH_UNITS[metric]}"),
+        showlegend=False,
+    )
 
     return fig
