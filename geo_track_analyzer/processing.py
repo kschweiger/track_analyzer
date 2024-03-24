@@ -402,7 +402,10 @@ def split_data(
 def add_zones_to_dataframe(
     data: pd.DataFrame, metric: Literal["heartrate", "power", "cadence"], zones: Zones
 ) -> pd.DataFrame:
-    zone_bins, names = format_zones_for_digitize(zones)
+    zone_bins, names, zone_colors = format_zones_for_digitize(zones)
+
+    # if zone_colors is None:
+    #     ...
 
     metric_data = data[metric][~data[metric].isna()]
     binned_metric = pd.Series(

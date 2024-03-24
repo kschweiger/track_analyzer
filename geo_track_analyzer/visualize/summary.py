@@ -70,6 +70,7 @@ def plot_track_zones(
     metric: Literal["heartrate", "power", "cadence"],
     aggregate: Literal["time", "distance"],
     *,
+    colors: None | dict[str, str] = None,
     height: None | int = 600,
     width: None | int = 1200,
     strict_data_selection: bool = False,
@@ -80,8 +81,25 @@ def plot_track_zones(
         data_for_plot, metric, aggregate
     )
 
+    available_zones = bin_data[f"{metric}_zones"].unique()
+    if colors is None:
+        col_a, col_b = DEFAULT_BAR_COLORS
+        colors = {}
+        for i, zone in enumerate(available_zones):
+            colors[zone] = col_a if i % 2 == 0 else col_b
+    else:
+        if not all(z in colors for z in available_zones):
+            raise VisualizationSetupError(
+                "Colors for all zones must be defined if custom colors are provided"
+            )
+
     fig = go.Figure(
-        go.Bar(x=bin_data[f"{metric}_zones"], y=bin_data[aggregate], hoverinfo="skip"),
+        go.Bar(
+            x=bin_data[f"{metric}_zones"],
+            y=bin_data[aggregate],
+            marker_color=[colors[x] for x in bin_data[f"{metric}_zones"]],
+            hoverinfo="skip",
+        ),
     )
 
     for i, rcrd in enumerate(bin_data.to_dict("records")):
