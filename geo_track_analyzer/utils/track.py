@@ -50,9 +50,9 @@ def extract_track_data_for_plot(
     if heartrate_zones is not None:
         data = add_zones_to_dataframe(data, "heartrate", heartrate_zones)
     if power_zones is not None:
-        data = add_zones_to_dataframe(data, "heartrate", power_zones)
+        data = add_zones_to_dataframe(data, "power", power_zones)
     if cadence_zones is not None:
-        data = add_zones_to_dataframe(data, "heartrate", cadence_zones)
+        data = add_zones_to_dataframe(data, "cadence", cadence_zones)
 
     return data
 

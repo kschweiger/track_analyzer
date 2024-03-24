@@ -179,7 +179,9 @@ class ZoneInterval(Model):
     start: None | PositiveInt
     end: None | PositiveInt
     name: None | str = None
+    color: None | str = None
 
+    # TODO: Add color validation
     @model_validator(mode="after")  # type: ignore
     def check_zone_is_valid(self) -> "ZoneInterval":
         if self.start is None and self.end is None:
@@ -197,10 +199,19 @@ class Zones(Model):
         if len(v) < 2:
             raise ValueError("At least two intervals are required")
 
-        none_names = [interval for interval in v if interval.name is None]
+        n_none_names = 0
+        n_none_colors = 0
+        for interval in v:
+            if interval.name is None:
+                n_none_names += 1
+            if interval.color is None:
+                n_none_colors += 1
 
-        if len(none_names) > 0 and len(none_names) != len(v):
+        if n_none_names > 0 and n_none_names != len(v):
             raise ValueError("Set either no names of intervals or all names")
+
+        if n_none_colors > 0 and n_none_colors != len(v):
+            raise ValueError("Set either no color of intervals or all colors")
 
         return v
 

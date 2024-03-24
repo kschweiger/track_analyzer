@@ -645,6 +645,9 @@ class Track(ABC):
                 require_elevation=require_elevation,
                 intervals=reduce_pp_intervals,
                 connect_segments="full" if kind in connect_segment_full else "forward",
+                heartrate_zones=self.heartrate_zones,
+                cadence_zones=self.cadence_zones,
+                power_zones=self.power_zones,
             )
         elif isinstance(segment, int):
             from geo_track_analyzer.utils.track import extract_segment_data_for_plot
@@ -655,6 +658,9 @@ class Track(ABC):
                 kind=kind,
                 require_elevation=require_elevation,
                 intervals=reduce_pp_intervals,
+                heartrate_zones=self.heartrate_zones,
+                cadence_zones=self.cadence_zones,
+                power_zones=self.power_zones,
             )
         else:
             from geo_track_analyzer.utils.track import (
@@ -667,6 +673,9 @@ class Track(ABC):
                 kind=kind,
                 require_elevation=require_elevation,
                 intervals=reduce_pp_intervals,
+                heartrate_zones=self.heartrate_zones,
+                cadence_zones=self.cadence_zones,
+                power_zones=self.power_zones,
             )
 
         fig: Figure
