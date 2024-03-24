@@ -38,7 +38,8 @@ def _aggregate_zone_data(
     metric: Literal["heartrate", "power", "cadence"],
     aggregate: Literal["time", "distance"],
 ) -> tuple[pd.DataFrame, str, str]:
-    bin_data = data.groupby(f"{metric}_zones")[aggregate].agg("sum").reset_index()
+    group = data.groupby(f"{metric}_zones")
+    bin_data = group[aggregate].agg("sum").reset_index()
     if aggregate == "time":
         bin_data["time"] = pd.to_datetime(bin_data["time"].astype(int), unit="s")
         y_title = "Duration"
@@ -49,6 +50,8 @@ def _aggregate_zone_data(
         tickformat = ""
     else:
         raise NotImplementedError(f"Aggregation {aggregate} not supported")
+
+    bin_data["colors"] = group[f"{metric}_zone_colors"].first().to_numpy()
 
     return bin_data, y_title, tickformat
 
@@ -70,7 +73,7 @@ def plot_track_zones(
     metric: Literal["heartrate", "power", "cadence"],
     aggregate: Literal["time", "distance"],
     *,
-    colors: None | dict[str, str] = None,
+    use_zone_colors: bool = False,
     height: None | int = 600,
     width: None | int = 1200,
     strict_data_selection: bool = False,
@@ -81,23 +84,19 @@ def plot_track_zones(
         data_for_plot, metric, aggregate
     )
 
-    available_zones = bin_data[f"{metric}_zones"].unique()
-    if colors is None:
-        col_a, col_b = DEFAULT_BAR_COLORS
-        colors = {}
-        for i, zone in enumerate(available_zones):
-            colors[zone] = col_a if i % 2 == 0 else col_b
+    if use_zone_colors:
+        colors = bin_data.colors
     else:
-        if not all(z in colors for z in available_zones):
-            raise VisualizationSetupError(
-                "Colors for all zones must be defined if custom colors are provided"
-            )
+        col_a, col_b = DEFAULT_BAR_COLORS
+        colors = []
+        for i in range(len(bin_data)):
+            colors.append(col_a if i % 2 == 0 else col_b)
 
     fig = go.Figure(
         go.Bar(
             x=bin_data[f"{metric}_zones"],
             y=bin_data[aggregate],
-            marker_color=[colors[x] for x in bin_data[f"{metric}_zones"]],
+            marker_color=colors,
             hoverinfo="skip",
         ),
     )
