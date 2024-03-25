@@ -36,20 +36,30 @@ def _preprocess_data(
 def _aggregate_zone_data(
     data: pd.DataFrame,
     metric: Literal["heartrate", "power", "cadence"],
-    aggregate: Literal["time", "distance"],
+    aggregate: Literal["time", "distance", "speed"],
+    aggregation_method: Literal["sum", "mean"],
 ) -> tuple[pd.DataFrame, str, str]:
     group = data.groupby(f"{metric}_zones")
-    bin_data = group[aggregate].agg("sum").reset_index()
+    bin_data = group[aggregate].agg(aggregation_method).reset_index()
     if aggregate == "time":
         bin_data["time"] = pd.to_datetime(bin_data["time"].astype(int), unit="s")
-        y_title = "Duration"
+        y_title = "duration"
         tickformat = "%H:%M:%S"
     elif aggregate == "distance":
         bin_data["distance"] = bin_data["distance"] / 1000
-        y_title = "Distance [km]"
+        y_title = "distance [km]"
+        tickformat = ""
+    elif aggregate == "speed":
+        bin_data["speed"] = bin_data["speed"] * 3.6
+        y_title = "velocity [km/h]"
         tickformat = ""
     else:
         raise NotImplementedError(f"Aggregation {aggregate} not supported")
+
+    if aggregation_method == "sum":
+        y_title = f"Total {y_title}"
+    elif aggregation_method == "mean":
+        y_title = f"Average {y_title}"
 
     bin_data["colors"] = group[f"{metric}_zone_colors"].first().to_numpy()
 
@@ -57,6 +67,14 @@ def _aggregate_zone_data(
 
 
 def get_segmnet_ids(data: pd.DataFrame, segments: None | list[int]) -> list[int]:
+    """Get segments id's from DataFrame and select are subset.
+
+    :param data: Dataframe containing the data
+    :param segments: Optionally constrain the the list of id's to a subset
+    :raises VisualizationSetupError: Raised if the passed segment id's are not
+        all in the DataFrame
+    :return: List of segment id's that are validated against the data
+    """
     if segments is None:
         return sorted(data.segment.unique())
     else:
@@ -71,17 +89,37 @@ def get_segmnet_ids(data: pd.DataFrame, segments: None | list[int]) -> list[int]
 def plot_track_zones(
     data: pd.DataFrame,
     metric: Literal["heartrate", "power", "cadence"],
-    aggregate: Literal["time", "distance"],
+    aggregate: Literal["time", "distance", "speed"],
     *,
     use_zone_colors: bool = False,
     height: None | int = 600,
     width: None | int = 1200,
     strict_data_selection: bool = False,
 ) -> Figure:
+    """Aggregate a value per zone defined for heartrate, power, or cadence.
+
+    :param data: DataFrame containing track and zone data
+    :param metric: One of "heartrate", "cadence", or "power"
+    :param aggregate: Value to aggregate. Supported values are (total) "time",
+        "distance",  and (average) speed in a certain zone
+    :param use_zone_colors: If True, use distinct colors per zone (either set by the
+        zone object or a default defined by the package). Otherwise alternating colors
+        will be used, defaults to False.
+    :param height: Height of the plot, defaults to 600
+    :param width: Width of the plot, defaults to 1200
+    :param strict_data_selection: If True only included that passing the minimum speed
+        requirements of the Track, defaults to False
+    :raises VisualizationSetupError: Is raised if metric is not avaialable in the data
+
+    :return: Plotly Figure object
+    """
     data_for_plot = _preprocess_data(data, metric, strict_data_selection)
 
     bin_data, y_title, tickformat = _aggregate_zone_data(
-        data_for_plot, metric, aggregate
+        data_for_plot,
+        metric,
+        aggregate,
+        aggregation_method="mean" if aggregate == "speed" else "sum",
     )
 
     if use_zone_colors:
@@ -121,6 +159,13 @@ def plot_track_zones(
                     text=f"{rcrd['distance']:.2f} km",
                 )
             )
+        elif aggregate == "speed":
+            kwargs.update(
+                dict(
+                    y=rcrd["speed"],
+                    text=f"{rcrd['speed']:.2f} km/h",
+                )
+            )
         fig.add_annotation(**kwargs)
 
     fig.update_layout(
@@ -140,13 +185,31 @@ def plot_track_zones(
 def plot_segment_zones(
     data: pd.DataFrame,
     metric: Literal["heartrate", "power", "cadence"],
-    aggregate: Literal["time", "distance"],
+    aggregate: Literal["time", "distance", "speed"],
     *,
     segments: None | list[int] = None,
     height: None | int = 600,
     width: None | int = 1200,
     strict_data_selection: bool = False,
 ) -> Figure:
+    """Aggregate a value per zone defined for heartrate, power, or cadence, split into
+    segments available in data.
+
+    :param data: DataFrame containing track and zone data
+    :param metric: One of heartrate, cadence, or power
+    :param aggregate: Value to aggregate. Supported values are (total) "time",
+        "distance",  and (average) speed in a certain zone
+    :param segments: Select a subset of segments for the plot, defaults to None
+    :param height: Height of the plot, defaults to 600
+    :param width: Width of the plot, defaults to 1200
+    :param strict_data_selection: If True only included that passing the minimum speed
+        requirements of the Track, defaults to False
+    :raises VisualizationSetupError: Is raised if metric is not avaialable in the data
+    :raises VisualizationSetupError: Is raised if no segment information is available in
+        the data
+
+    :return: Plotly Figure object
+    """
     if "segment" not in data.columns:
         raise VisualizationSetupError(
             "Data has no **segment** in columns. Required for plot"
@@ -158,7 +221,10 @@ def plot_segment_zones(
     for segment in get_segmnet_ids(data_for_plot, segments):
         _data_for_plot = data_for_plot[data_for_plot.segment == segment]
         bin_data, y_title, tickformat = _aggregate_zone_data(
-            _data_for_plot, metric, aggregate
+            _data_for_plot,
+            metric,
+            aggregate,
+            aggregation_method="mean" if aggregate == "speed" else "sum",
         )
 
         hovertext = []
@@ -168,6 +234,9 @@ def plot_segment_zones(
 
             elif aggregate == "distance":
                 hovertext.append(f"{rcrd['distance']:.2f} km")
+
+            elif aggregate == "speed":
+                hovertext.append(f"{rcrd['speed']:.2f} km/h")
 
         fig.add_trace(
             go.Bar(
@@ -202,6 +271,22 @@ def plot_segment_summary(
     width: None | int = 1200,
     strict_data_selection: bool = False,
 ) -> Figure:
+    """_summary_
+
+    :param data: DataFrame containing track and zone data
+    :param aggregate: Value to aggregate. Supported values are "total_time",
+        "total_distance", "avg_speed", and "max_speed"
+    :param colors: Overwrite the default alternating colors, defaults to None
+    :param segments: Select a subset of segments for the plot, defaults to None
+    :param height: Height of the plot, defaults to 600
+    :param width: Width of the plot, defaults to 1200
+    :param strict_data_selection: If True only included that passing the minimum speed
+        requirements of the Track, defaults to False
+    :raises VisualizationSetupError: Is raised if no segment information is available in
+        the data
+
+    :return: Plotly Figure object
+    """
     if "segment" not in data.columns:
         raise VisualizationSetupError(
             "Data has no **segment** in columns. Required for plot"
@@ -279,6 +364,22 @@ def plot_segment_box_summary(
     width: None | int = 1200,
     strict_data_selection: bool = False,
 ) -> Figure:
+    """Show the metric as boxplot for each segment in the data.
+
+    :param data: DataFrame containing track and zone data
+    :param metric: One of "heartrate", "cadence", "power", or "speed"
+    :param colors: Overwrite the default alternating colors, defaults to None
+    :param segments: Select a subset of segments for the plot, defaults to None
+    :param height: Height of the plot, defaults to 600
+    :param width: Width of the plot, defaults to 1200
+    :param strict_data_selection: If True only included that passing the minimum speed
+        requirements of the Track, defaults to False
+    :raises VisualizationSetupError: Is raised if metric is not avaialable in the data
+    :raises VisualizationSetupError: Is raised if no segment information is available in
+        the data
+
+    :return: Plotly Figure object
+    """
     if "segment" not in data.columns:
         raise VisualizationSetupError(
             "Data has no **segment** in columns. Required for plot"
