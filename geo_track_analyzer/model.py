@@ -176,10 +176,23 @@ class PointDistance(Model):
 
 
 class ZoneInterval(Model):
+    """Represents a zone interval. Start or end can be None implying and interval that
+    include all value smaller or larger than the provided value, respectively
+
+    :raises ValueError: If start and end are None
+    """
+
     start: None | PositiveInt
+    """Lower bound of the interval"""
+
     end: None | PositiveInt
+    """Upper bound of the interval"""
+
     name: None | str = None
+    """Optional name of the interval"""
+
     color: None | str = None
+    """Optional color of the interval"""
 
     # TODO: Add color validation
     @model_validator(mode="after")  # type: ignore
@@ -190,8 +203,23 @@ class ZoneInterval(Model):
 
 
 class Zones(Model):
+    """Represents a collection of zones. The list of intervals is required to contain
+    open ZoneIntervals in the fist and last position. Furthermore the intervals can not
+    have gaps.
+
+    :raises ValueError: If not at least two intervals are provided in the object
+    :raises ValueError: If some intervals have a name attached but not all (or none)
+    :raises ValueError: If some intervals have a color attached but not all (or none)
+    :raises ValueError: If first interval has a start value not equal to None
+    :raises ValueError: If last interval has a end value not equal to None
+    :raises ValueError: If consecutive intervals to not end/start with the same value
+    """
+
     intervals: list[ZoneInterval]
+    """A list of intervals comprising the collection of zones"""
+
     meta_info: None | str = None
+    """Optional meta information about the zones"""
 
     @field_validator("intervals")
     @classmethod
