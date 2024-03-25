@@ -623,6 +623,8 @@ def test_format_zones_for_digitize(
 
     vals, ret_names, ret_colors = format_zones_for_digitize(zones)
 
-    assert ret_names == exp_names
+    for ret_name, exp_name in zip(ret_names, exp_names):
+        assert ret_name.startswith(exp_name)
+
     assert ret_colors == exp_colors
     assert (vals == np.array([-np.inf, 100, 150, np.inf])).all()

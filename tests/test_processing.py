@@ -260,13 +260,13 @@ def test_add_zones_to_dataframe() -> None:
     assert data["heartrate_zones"].equals(
         pd.Series(
             [
-                "Zone 1",
-                "Zone 1",
-                "Zone 2",
+                "Zone 1 [0, 110]",
+                "Zone 1 [0, 110]",
+                "Zone 2 [110, 130]",
                 np.nan,
-                "Zone 1",
-                "Zone 3",
-                "Zone 4",
+                "Zone 1 [0, 110]",
+                "Zone 3 [130, 150]",
+                "Zone 4 [150, \u221e]",
                 np.nan,
                 np.nan,
             ]

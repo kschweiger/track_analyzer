@@ -356,7 +356,7 @@ def plot_segment_summary(
 
 def plot_segment_box_summary(
     data: pd.DataFrame,
-    metric: Literal["heartrate", "power", "cadence", "speed"],
+    metric: Literal["heartrate", "power", "cadence", "speed", "elevation"],
     *,
     colors: None | tuple[str, str] = None,
     segments: None | list[int] = None,
