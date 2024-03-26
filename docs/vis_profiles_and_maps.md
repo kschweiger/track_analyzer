@@ -1,4 +1,4 @@
-# Track visualization
+# Track visualization - Profiles and Maps
 
 All visualizations are implemented using the [Plotly Graphing Library](https://plotly.com/python/). All methods and functions return a [Figure](https://plotly.com/python-api-reference/generated/plotly.graph_objects.Figure.html#id0>) objects to enable additonal customization of the plot outside of the package e.g. using the `update_layout` method.
 

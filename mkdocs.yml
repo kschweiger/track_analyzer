@@ -8,7 +8,9 @@ nav:
   - About: index.md
   - Usage:
       - Getting Started: usage.md
-      - Visualization: visualizations.md
+      - Visualization:
+          - Track profiles and maps: vis_profiles_and_maps.md
+          - Summaries: vis_summaries.md
       - Comparison: comparison.md
       - Enhancer: enhancer.md
       - CLI: cli.md
@@ -71,7 +73,7 @@ markdown_extensions:
       user: kschweiger
       repo: track_analyzer
   - toc:
-      toc_depth: 3
+      toc_depth: 4
 
 plugins:
   - search
@@ -79,6 +81,8 @@ plugins:
       handlers:
         python:
           options:
+            heading_level: 3
+            show_symbol_type_toc: true
             docstring_style: sphinx
             inherited_members: true
             show_root_heading: true

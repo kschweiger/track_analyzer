@@ -14,3 +14,10 @@
 ## Other track visualizations
 
 ::: geo_track_analyzer.visualize.plot_track_3d
+
+## Summary visualizations
+
+::: geo_track_analyzer.visualize.plot_track_zones
+::: geo_track_analyzer.visualize.plot_segment_zones
+::: geo_track_analyzer.visualize.plot_segment_summary
+::: geo_track_analyzer.visualize.plot_segment_box_summary
