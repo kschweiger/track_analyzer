@@ -32,6 +32,30 @@ Furhtermore the Track can be initialized programmatically from python objects in
     )
 ```
 
+#### Zones
+
+When intiliazing a track, zones for `heartrate`, `power`, and `cadence` can be set and are used for further analysis of a track. For this defined the zones via the [`Zones`][geo_track_analyzer.model.Zones] object:
+
+```python
+Zones(
+    intervals=[
+        ZoneInterval(start=None, end=135),
+        ZoneInterval(start=135, end=146),
+        ZoneIntervayl(start=146, end=155),
+        ZoneInterval(start=155, end=165),
+        ZoneInterval(start=165, end=169),
+        ZoneInterval(start=169, end=174),
+        ZoneInterval(start=174, end=None),
+    ]
+)
+```
+
+Each [`ZoneInterval`][geo_track_analyzer.model.ZoneInterval] can also be defined with a `name` and a `color` attribute for further customization. For the interval definition, it is enforced
+
+- that the first (last) interval starts (ends) with a `None` value and
+- that consecutive intervals end/start with the same value.
+
+
 ### Extracting track data
 
 The data of the track can be extracted into a pandas DataFrame object with the columns:
@@ -69,4 +93,4 @@ Furthermore an summary of the segments and tracks can be generated in the form o
 
 Visualizations of a track can be generated via the [`Track.plot`][geo_track_analyzer.GPXFileTrack.plot] method via the `kind` parameter. Additionally the
 track data can be extracted with the [`Track.get_track_data`][geo_track_analyzer.GPXFileTrack.get_track_data] or [`Track.get_segment_data`][geo_track_analyzer.GPXFileTrack.get_segment_data]
-methods and using the functions in the [Visualizations](visualizations.md).
+methods and using the functions described in the [Profiles and Maps](vis_profiles_and_maps.md) and [Summaries](vis_summaries.md).
