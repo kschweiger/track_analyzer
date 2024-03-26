@@ -432,7 +432,7 @@ class Track(ABC):
 
         :param spacing: Minimum distance between points added by the interpolation
         :param n_segment: segment in the track to use, defaults to 0
-        :param copy_extension: How should the extenstion (if present) be defined in the
+        :param copy_extensions: How should the extenstion (if present) be defined in the
             interpolated points.
         """
         self.track.segments[n_segment] = interpolate_segment(
@@ -611,24 +611,31 @@ class Track(ABC):
 
             - profile: Elevation profile of the track. May be enhanced with additional
               information like Velocity, Heartrate, Cadence, and Power. Pass keyword
-              args for :func:`~geo_track_analyzer.visualize.plot_track_2d`
+              args for [`plot_track_2d`][geo_track_analyzer.visualize.plot_track_2d]
             - profile-slope: Elevation profile with slopes between points. Use the
               reduce_pp_intervals argument to reduce the number of slope intervals.
               Pass keyword args for
-              :func:`~geo_track_analyzer.visualize.plot_track_with_slope`
+              [`plot_track_with_slope`][geo_track_analyzer.visualize.plot_track_with_slope]
             - map-line: Visualize coordinates on the map. Pass keyword args for
-              :func:`~geo_track_analyzer.visualize.plot_track_line_on_map`
+              [`plot_track_line_on_map`][geo_track_analyzer.visualize.plot_track_line_on_map]
             - map-line-enhanced: Visualize coordinates on the map. Enhance with
               additional information like Elevation, Velocity, Heartrate, Cadence, and
-              Power. Pass keyword args for
-              :func:`~geo_track_analyzer.visualize.plot_track_enriched_on_map`
+              Power. Pass keyword args for [`plot_track_enriched_on_map`][geo_track_analyzer.visualize.plot_track_enriched_on_map]
             - map-segments: Visualize coordinates on the map split into segments.
               Pass keyword args for
-              :func:`~geo_track_analyzer.visualize.plot_segments_on_map`
-            - zone_summary :
-            - segment_zone_summary :
-            - segment_box :
-            - segment_summary :
+              [`plot_segments_on_map`][geo_track_analyzer.visualize.plot_segments_on_map]
+            - zone_summary : Visualize an aggregate (time, distance, speed) value for a
+                metric (heartrate, power, cadence) with defined zones. Pass keyword args
+                for [`plot_track_zones`][geo_track_analyzer.visualize.plot_track_zones],
+                `aggregate` and `metric` are required.
+            - segment_zone_summary : Same as "zone_summary" but split aggregate per
+                segment [`plot_segment_zones`][geo_track_analyzer.visualize.plot_segment_zones]
+            - segment_box : Box plot of a metric (heartrate, power, cadence, speed,
+                elevation) per segment. Pass keyword args for [`plot_segments_on_map`][geo_track_analyzer.visualize.plot_segments_on_map]
+                `metric` is required.
+            - segment_summary : Visualize a aggregate (total_time, total_distance,
+                avg_speed, max_speed) per segment. Pass keyword args for [`plot_segment_summary`][geo_track_analyzer.visualize.plot_segment_summary]
+                `aggregate` is required.
         :param segment: Select a specific segment, multiple segments or all segmenets,
             defaults to None
         :param reduce_pp_intervals: Optionally pass a distance in m which is used to
@@ -798,6 +805,9 @@ class GPXFileTrack(Track):
             as moving, defaults to 1
         :param max_speed_percentile: Points with speed outside of the percentile are not
             counted when analyzing the track, defaults to 95
+        :param heartrate_zones: Optional heartrate Zones, defaults to None
+        :param power_zones: Optional power Zones, defaults to None
+        :param cadence_zones: Optional cadence Zones, defaults to None
         """
 
         super().__init__(
@@ -846,6 +856,9 @@ class ByteTrack(Track):
             as moving, defaults to 1
         :param max_speed_percentile: Points with speed outside of the percentile are not
             counted when analyzing the track, defaults to 95
+        :param heartrate_zones: Optional heartrate Zones, defaults to None
+        :param power_zones: Optional power Zones, defaults to None
+        :param cadence_zones: Optional cadence Zones, defaults to None
         """
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
@@ -894,6 +907,9 @@ class PyTrack(Track):
             as moving, defaults to 1
         :param max_speed_percentile: Points with speed outside of the percentile are not
             counted when analyzing the track, defaults to 95
+        :param heartrate_zones: Optional heartrate Zones, defaults to None
+        :param power_zones: Optional power Zones, defaults to None
+        :param cadence_zones: Optional cadence Zones, defaults to None
         :raises TrackInitializationError: Raised if number of elevation, time, heatrate,
             or cadence values do not match passed points
         """
@@ -1047,6 +1063,9 @@ class SegmentTrack(Track):
             as moving, defaults to 1
         :param max_speed_percentile: Points with speed outside of the percentile are not
             counted when analyzing the track, defaults to 95
+        :param heartrate_zones: Optional heartrate Zones, defaults to None
+        :param power_zones: Optional power Zones, defaults to None
+        :param cadence_zones: Optional cadence Zones, defaults to None
         """
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
@@ -1093,6 +1112,9 @@ class FITTrack(Track):
             counted when analyzing the track, defaults to 95
         :param strict_elevation_loading: If set, only points are added to the track that
             have a valid elevation,defaults to False
+        :param heartrate_zones: Optional heartrate Zones, defaults to None
+        :param power_zones: Optional power Zones, defaults to None
+        :param cadence_zones: Optional cadence Zones, defaults to None
         """
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
