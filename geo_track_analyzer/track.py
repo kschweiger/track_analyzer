@@ -32,11 +32,15 @@ from geo_track_analyzer.utils.base import (
 )
 from geo_track_analyzer.utils.internal import get_extended_track_point
 from geo_track_analyzer.visualize import (
+    plot_segment_box_summary,
+    plot_segment_summary,
+    plot_segment_zones,
     plot_segments_on_map,
     plot_track_2d,
     plot_track_enriched_on_map,
     plot_track_line_on_map,
     plot_track_with_slope,
+    plot_track_zones,
 )
 
 logger = logging.getLogger(__name__)
@@ -585,7 +589,15 @@ class Track(ABC):
     def plot(
         self,
         kind: Literal[
-            "profile", "profile-slope", "map-line", "map-line-enhanced", "map-segments"
+            "profile",
+            "profile-slope",
+            "map-line",
+            "map-line-enhanced",
+            "map-segments",
+            "zone_summary",
+            "segment_zone_summary",
+            "segment_box",
+            "segment_summary",
         ],
         *,
         segment: None | int | list[int] = None,
@@ -613,6 +625,10 @@ class Track(ABC):
             - map-segments: Visualize coordinates on the map split into segments.
               Pass keyword args for
               :func:`~geo_track_analyzer.visualize.plot_segments_on_map`
+            - zone_summary :
+            - segment_zone_summary :
+            - segment_box :
+            - segment_summary :
         :param segment: Select a specific segment, multiple segments or all segmenets,
             defaults to None
         :param reduce_pp_intervals: Optionally pass a distance in m which is used to
@@ -627,6 +643,10 @@ class Track(ABC):
             "map-line",
             "map-line-enhanced",
             "map-segments",
+            "zone_summary",
+            "segment_zone_summary",
+            "segment_box",
+            "segment_summary",
         ]
 
         require_elevation = ["profile", "profile-slope"]
@@ -634,6 +654,25 @@ class Track(ABC):
         if kind not in valid_kinds:
             raise VisualizationSetupError(
                 f"Kind {kind} is not valid. Pass on of {','.join(valid_kinds)}"
+            )
+
+        if kind in ["zone_summary", "segment_zone_summary"] and not all(
+            key in kwargs.keys() for key in ["metric", "aggregate"]
+        ):
+            raise VisualizationSetupError(
+                f"If {kind} is passed, **metric** and **aggregate** need to be passed"
+            )
+        if kind in ["segment_box"] and not not all(
+            key in kwargs.keys() for key in ["metric"]
+        ):
+            raise VisualizationSetupError(
+                f"If {kind} is passed, **metric** needs to be passed"
+            )
+        if kind in ["segment_summary"] and not not all(
+            key in kwargs.keys() for key in ["aggregate"]
+        ):
+            raise VisualizationSetupError(
+                f"If {kind} is passed, **metric** needs to be passed"
             )
 
         if segment is None:
@@ -687,8 +726,16 @@ class Track(ABC):
             fig = plot_track_line_on_map(data=data, **kwargs)
         elif kind == "map-line-enhanced":
             fig = plot_track_enriched_on_map(data=data, **kwargs)
-        else:
+        elif kind == "map-segments":
             fig = plot_segments_on_map(data=data, **kwargs)
+        elif kind == "zone_summary":
+            fig = plot_track_zones(data=data, **kwargs)
+        elif kind == "segment_zone_summary":
+            fig = plot_segment_zones(data=data, **kwargs)
+        elif kind == "segment_summary":
+            fig = plot_segment_summary(data=data, **kwargs)
+        elif kind == "segment_box":
+            fig = plot_segment_box_summary(data=data, **kwargs)
 
         return fig
 
