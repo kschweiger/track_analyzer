@@ -340,7 +340,6 @@ def plot_segment_box_summary(
     :param data: DataFrame containing track and zone data
     :param metric: One of "heartrate", "cadence", "power", or "speed"
     :param colors: Overwrite the default alternating colors, defaults to None
-    :param segments: Select a subset of segments for the plot, defaults to None
     :param height: Height of the plot, defaults to 600
     :param width: Width of the plot, defaults to 1200
     :param strict_data_selection: If True only included that passing the minimum speed
