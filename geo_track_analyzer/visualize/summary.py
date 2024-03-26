@@ -66,26 +66,6 @@ def _aggregate_zone_data(
     return bin_data, y_title, tickformat
 
 
-def get_segmnet_ids(data: pd.DataFrame, segments: None | list[int]) -> list[int]:
-    """Get segments id's from DataFrame and select are subset.
-
-    :param data: Dataframe containing the data
-    :param segments: Optionally constrain the the list of id's to a subset
-    :raises VisualizationSetupError: Raised if the passed segment id's are not
-        all in the DataFrame
-    :return: List of segment id's that are validated against the data
-    """
-    if segments is None:
-        return sorted(data.segment.unique())
-    else:
-        if not all([s in data.segment.unique() for s in segments]):
-            raise VisualizationSetupError(
-                f"Not all passed segments are available in data. Passed {segments} "
-                f"with {data.segment.unique()} in data."
-            )
-        return segments
-
-
 def plot_track_zones(
     data: pd.DataFrame,
     metric: Literal["heartrate", "power", "cadence"],
@@ -187,7 +167,6 @@ def plot_segment_zones(
     metric: Literal["heartrate", "power", "cadence"],
     aggregate: Literal["time", "distance", "speed"],
     *,
-    segments: None | list[int] = None,
     height: None | int = 600,
     width: None | int = 1200,
     strict_data_selection: bool = False,
@@ -199,7 +178,6 @@ def plot_segment_zones(
     :param metric: One of heartrate, cadence, or power
     :param aggregate: Value to aggregate. Supported values are (total) "time",
         "distance",  and (average) speed in a certain zone
-    :param segments: Select a subset of segments for the plot, defaults to None
     :param height: Height of the plot, defaults to 600
     :param width: Width of the plot, defaults to 1200
     :param strict_data_selection: If True only included that passing the minimum speed
@@ -218,7 +196,7 @@ def plot_segment_zones(
 
     fig = go.Figure()
 
-    for segment in get_segmnet_ids(data_for_plot, segments):
+    for segment in data_for_plot.segment.unique():
         _data_for_plot = data_for_plot[data_for_plot.segment == segment]
         bin_data, y_title, tickformat = _aggregate_zone_data(
             _data_for_plot,
@@ -266,7 +244,6 @@ def plot_segment_summary(
     aggregate: Literal["total_time", "total_distance", "avg_speed", "max_speed"],
     *,
     colors: None | tuple[str, str] = None,
-    segments: None | list[int] = None,
     height: None | int = 600,
     width: None | int = 1200,
     strict_data_selection: bool = False,
@@ -277,7 +254,6 @@ def plot_segment_summary(
     :param aggregate: Value to aggregate. Supported values are "total_time",
         "total_distance", "avg_speed", and "max_speed"
     :param colors: Overwrite the default alternating colors, defaults to None
-    :param segments: Select a subset of segments for the plot, defaults to None
     :param height: Height of the plot, defaults to 600
     :param width: Width of the plot, defaults to 1200
     :param strict_data_selection: If True only included that passing the minimum speed
@@ -300,13 +276,9 @@ def plot_segment_summary(
     if strict_data_selection:
         mask = mask & data.in_speed_percentile
 
-    data_for_plot = data[mask]
+    _data_for_plot = data[mask]
 
     fig = go.Figure()
-
-    _data_for_plot = data_for_plot[
-        data_for_plot.segment.isin(get_segmnet_ids(data_for_plot, segments))
-    ]
 
     if aggregate == "avg_speed":
         bin_data = _data_for_plot.groupby("segment").speed.agg("mean") * 3.6
@@ -359,7 +331,6 @@ def plot_segment_box_summary(
     metric: Literal["heartrate", "power", "cadence", "speed", "elevation"],
     *,
     colors: None | tuple[str, str] = None,
-    segments: None | list[int] = None,
     height: None | int = 600,
     width: None | int = 1200,
     strict_data_selection: bool = False,
@@ -400,7 +371,7 @@ def plot_segment_box_summary(
 
     fig = go.Figure()
 
-    for i, segment in enumerate(get_segmnet_ids(data_for_plot, segments)):
+    for i, segment in enumerate(data_for_plot.segment.unique()):
         _data_for_plot = data_for_plot[data_for_plot.segment == segment]
 
         if metric == "speed":

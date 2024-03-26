@@ -354,7 +354,7 @@ def split_data(
 ) -> pd.DataFrame:
     split_idx_finder: Callable[[pd.Series, float], int]
     if method == "closest":
-        split_idx_finder = lambda s, v: np.abs(s.to_numpy() - v).argmin()
+        split_idx_finder = lambda s, v: np.abs(s.to_numpy() - v).argmin()  # type: ignore
     # TODO: Implement method in which the plotting point is interpolat to the ecxat val
     elif method == "interploation":
         raise NotImplementedError("Interploation splitting method not implemented")
