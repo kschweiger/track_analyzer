@@ -180,7 +180,7 @@ def plot_segment_zones(
     :param metric: One of heartrate, cadence, or power
     :param aggregate: Value to aggregate. Supported values are (total) "time",
         "distance",  and (average) speed in a certain zone
-    :param color_scale_span: Overwrite the default colors for the bar. If a tuple of two
+    :param bar_colors: Overwrite the default colors for the bar. If a tuple of two
         colors is passed, a colorscale will be generated based on these values and
         colors for segments will be picked from this scale. Furthermore, a list of
         colors can be passed that must at least be as long as the number of segments in
