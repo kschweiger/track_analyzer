@@ -2,7 +2,14 @@ from typing import Annotated
 
 import numpy as np
 from gpxpy.gpx import GPXTrackPoint
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    PositiveInt,
+    field_validator,
+    model_validator,
+)
 from pydantic_numpy import np_array_pydantic_annotated_typing
 
 from geo_track_analyzer.utils.internal import GPXTrackPointAfterValidator
@@ -90,7 +97,7 @@ class SegmentOverview(Model):
     avg_velocity_kmh: None | float = Field(default=None)
     """avg_speed converted the km/h"""
 
-    @model_validator(mode="after")
+    @model_validator(mode="after")  # type: ignore
     def set_km_attr(self) -> "SegmentOverview":
         self.moving_distance_km = self.moving_distance / 1000
         self.total_distance_km = self.total_distance / 1000
@@ -112,7 +119,7 @@ class SegmentOverlap(Model):
     inverse: bool
     """Match direction of the segment relative to the base"""
 
-    plate: np_array_pydantic_annotated_typing(data_type=np.float32, dimensions=2)
+    plate: np_array_pydantic_annotated_typing(data_type=np.float32, dimensions=2)  # type: ignore
     """2D representation of the segment overlap"""
 
     start_point: Annotated[GPXTrackPoint, GPXTrackPointAfterValidator]
@@ -166,3 +173,87 @@ class PointDistance(Model):
             f"segment_idx={self.segment_idx}, "
             f"segment_point_idx={self.segment_point_idx})"
         )
+
+
+class ZoneInterval(Model):
+    """Represents a zone interval. Start or end can be None implying and interval that
+    include all value smaller or larger than the provided value, respectively
+
+    :raises ValueError: If start and end are None
+    """
+
+    start: None | PositiveInt
+    """Lower bound of the interval"""
+
+    end: None | PositiveInt
+    """Upper bound of the interval"""
+
+    name: None | str = None
+    """Optional name of the interval"""
+
+    color: None | str = None
+    """Optional color of the interval"""
+
+    # TODO: Add color validation
+    @model_validator(mode="after")  # type: ignore
+    def check_zone_is_valid(self) -> "ZoneInterval":
+        if self.start is None and self.end is None:
+            raise ValueError("start and end can not both be None")
+        return self
+
+
+class Zones(Model):
+    """Represents a collection of zones. The list of intervals is required to contain
+    open ZoneIntervals in the fist and last position. Furthermore the intervals can not
+    have gaps.
+
+    :raises ValueError: If not at least two intervals are provided in the object
+    :raises ValueError: If some intervals have a name attached but not all (or none)
+    :raises ValueError: If some intervals have a color attached but not all (or none)
+    :raises ValueError: If first interval has a start value not equal to None
+    :raises ValueError: If last interval has a end value not equal to None
+    :raises ValueError: If consecutive intervals to not end/start with the same value
+    """
+
+    intervals: list[ZoneInterval]
+    """A list of intervals comprising the collection of zones"""
+
+    meta_info: None | str = None
+    """Optional meta information about the zones"""
+
+    @field_validator("intervals")
+    @classmethod
+    def at_least_two_intervals(cls, v: list[ZoneInterval]) -> list:
+        if len(v) < 2:
+            raise ValueError("At least two intervals are required")
+
+        n_none_names = 0
+        n_none_colors = 0
+        for interval in v:
+            if interval.name is None:
+                n_none_names += 1
+            if interval.color is None:
+                n_none_colors += 1
+
+        if n_none_names > 0 and n_none_names != len(v):
+            raise ValueError("Set either no names of intervals or all names")
+
+        if n_none_colors > 0 and n_none_colors != len(v):
+            raise ValueError("Set either no color of intervals or all colors")
+
+        return v
+
+    @model_validator(mode="after")  # type: ignore
+    def check_intervals(self) -> "Zones":
+        if self.intervals[0].start is not None:
+            raise ValueError("First interval must start with None")
+        if self.intervals[-1].end is not None:
+            raise ValueError("Last interval must end with None")
+        prev_interval = self.intervals[0]
+        for interval in self.intervals[1:]:
+            if interval.start != prev_interval.end:
+                raise ValueError(
+                    "Consecutive intervals mit start/end with the same value"
+                )
+            prev_interval = interval
+        return self
