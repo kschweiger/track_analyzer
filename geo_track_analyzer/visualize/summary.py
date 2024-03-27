@@ -2,6 +2,7 @@ from typing import Literal
 
 import pandas as pd
 import plotly.graph_objects as go
+from plotly.colors import make_colorscale, sample_colorscale
 from plotly.graph_objs import Figure
 
 from geo_track_analyzer.exceptions import VisualizationSetupError
@@ -167,6 +168,7 @@ def plot_segment_zones(
     metric: Literal["heartrate", "power", "cadence"],
     aggregate: Literal["time", "distance", "speed"],
     *,
+    bar_colors: None | tuple[str, str] | list[str] = None,
     height: None | int = 600,
     width: None | int = 1200,
     strict_data_selection: bool = False,
@@ -178,6 +180,11 @@ def plot_segment_zones(
     :param metric: One of heartrate, cadence, or power
     :param aggregate: Value to aggregate. Supported values are (total) "time",
         "distance",  and (average) speed in a certain zone
+    :param color_scale_span: Overwrite the default colors for the bar. If a tuple of two
+        colors is passed, a colorscale will be generated based on these values and
+        colors for segments will be picked from this scale. Furthermore, a list of
+        colors can be passed that must at least be as long as the number of segments in
+        the data
     :param height: Height of the plot, defaults to 600
     :param width: Width of the plot, defaults to 1200
     :param strict_data_selection: If True only included that passing the minimum speed
@@ -196,7 +203,22 @@ def plot_segment_zones(
 
     fig = go.Figure()
 
-    for segment in data_for_plot.segment.unique():
+    plot_segments = data_for_plot.segment.unique()
+
+    if isinstance(bar_colors, list):
+        if len(plot_segments) > len(bar_colors):
+            raise VisualizationSetupError(
+                "If a list of colors is passed, it must be at least same lenght as the "
+                "segments in the data"
+            )
+        colors = bar_colors[0 : len(plot_segments)]
+    else:
+        colors = sample_colorscale(
+            make_colorscale(DEFAULT_BAR_COLORS if bar_colors is None else bar_colors),
+            len(plot_segments),
+        )
+
+    for color, segment in zip(colors, plot_segments):
         _data_for_plot = data_for_plot[data_for_plot.segment == segment]
         bin_data, y_title, tickformat = _aggregate_zone_data(
             _data_for_plot,
@@ -221,6 +243,7 @@ def plot_segment_zones(
                 x=bin_data[f"{metric}_zones"],
                 y=bin_data[aggregate],
                 name=f"Segment {segment}",
+                marker_color=color,
                 hovertext=hovertext,
                 hovertemplate="%{hovertext}<extra></extra>",
             ),

@@ -42,12 +42,19 @@ def test_plot_track_zones(
     assert isinstance(fig, go.Figure)
 
 
+@pytest.mark.parametrize(
+    "colors",
+    [None, ("#FF0000", "#00FF00"), ["#FF0000", "#00FF00", "#0000FF", "#FF00FF"]],
+)
 @pytest.mark.parametrize("aggregate", ["time", "distance", "speed"])
 def test_plot_segment_zones(
     summary_data: pd.DataFrame,
     aggregate: Literal["time", "distance", "speed"],
+    colors: None | tuple[str, str] | list[str],
 ) -> None:
-    fig = plot_segment_zones(data=summary_data, metric="heartrate", aggregate=aggregate)
+    fig = plot_segment_zones(
+        data=summary_data, metric="heartrate", aggregate=aggregate, bar_colors=colors
+    )
 
     # fig.show()
 
