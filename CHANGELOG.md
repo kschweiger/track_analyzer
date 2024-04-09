@@ -1,4 +1,12 @@
 <!-- insertion marker -->
+<a name="1.3.2"></a>
+
+## [1.3.2](https://github.com/kschweiger/track_analyzer/compare/1.3.1...1.3.2) (2024-04-09)
+
+### Bug Fixes
+
+- **profiles:** Segment border crashed with partial data (#24) ([5cf727f](https://github.com/kschweiger/track_analyzer/commit/5cf727f29968dc7b4ed65c5106d3259165e96ffd))
+
 <a name="1.3.1"></a>
 
 ## [1.3.1](https://github.com/kschweiger/track_analyzer/compare/1.3.0...1.3.1) (2024-03-02)
