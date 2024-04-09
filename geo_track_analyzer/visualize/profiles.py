@@ -35,7 +35,7 @@ def _add_segment_borders(data: pd.DataFrame, fig: Figure, color: None | str) -> 
             line_width=3 if idx > 0 else 0,
             line_dash="dash",
             line_color="darkslategray" if color is None else color,
-            annotation_text=f"Segment {data.iloc[segment_border_idx].segment}",
+            annotation_text=f"Segment {data.loc[segment_border_idx].segment}",
             annotation_borderpad=5,
         )
 
