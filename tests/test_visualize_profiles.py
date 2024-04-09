@@ -97,11 +97,13 @@ def test_2d_plot_w_extensions_plot_no_data_error(flag: dict[str, bool]) -> None:
 
 @pytest.mark.parametrize("func", [plot_track_2d, plot_track_with_slope])
 @pytest.mark.parametrize("color", [None, "#f0f0f0"])
+@pytest.mark.parametrize("drop_first_segment", [True, False])
 def test_profile_w_segment_borders(
     mocker: MockerFixture,
     track_for_test_3_segments: Track,
     func: Callable,
     color: None | str,
+    drop_first_segment: bool,
 ) -> None:
     from geo_track_analyzer.visualize import profiles
 
@@ -109,6 +111,9 @@ def test_profile_w_segment_borders(
     spy_add = mocker.spy(profiles, "_add_segment_borders")
 
     data = track_for_test_3_segments.get_track_data()
+    if drop_first_segment:
+        data = data[data.segment != 0]
+
     fig = func(data, show_segment_borders=True, color_segment_border=color)
 
     assert spy_check.call_count == 1
