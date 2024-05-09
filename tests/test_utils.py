@@ -4,6 +4,7 @@ from time import perf_counter
 from typing import Literal, Type
 
 import numpy as np
+import pandas as pd
 import pytest
 from gpxpy.gpx import GPXTrack, GPXTrackPoint, GPXTrackSegment
 from pytest_mock import MockerFixture
@@ -39,6 +40,7 @@ from geo_track_analyzer.utils.internal import (
     get_extension_value,
 )
 from geo_track_analyzer.utils.model import format_zones_for_digitize
+from geo_track_analyzer.utils.track import generate_distance_segments
 
 
 def test_distance_far() -> None:
@@ -628,3 +630,46 @@ def test_format_zones_for_digitize(
 
     assert ret_colors == exp_colors
     assert (vals == np.array([-np.inf, 100, 150, np.inf])).all()
+
+
+@pytest.mark.parametrize(
+    ("data", "distance", "exp_segments"),
+    [
+        (
+            pd.DataFrame(
+                {
+                    "cum_distance_moving": [0, 100, 200, 300, 400, 500, 600, 700],
+                    "segment": [0, 0, 0, 0, 0, 1, 1, 1],
+                }
+            ),
+            2000,
+            pd.Series([0, 0, 0, 0, 0, 0, 0, 0]),
+        ),
+        (
+            pd.DataFrame(
+                {
+                    "cum_distance_moving": [0, 100, 200, 300, 400, 500, 600, 700],
+                    "segment": [0, 0, 0, 0, 0, 0, 0, 0],
+                }
+            ),
+            200,
+            pd.Series([0, 0, 1, 1, 2, 2, 3, 3]),
+        ),
+        (
+            pd.DataFrame(
+                {
+                    "cum_distance_moving": [0, 100, 200, 300, 400, 500, 600],
+                    "segment": [0, 0, 0, 0, 0, 0, 0],
+                }
+            ),
+            200,
+            pd.Series([0, 0, 1, 1, 2, 2, 3]),
+        ),
+    ],
+)
+def test_generate_distance_segments(
+    data: pd.DataFrame, distance: int, exp_segments: pd.Series
+) -> None:
+    split_data = generate_distance_segments(data, distance)
+
+    assert split_data["segment"].compare(exp_segments).empty

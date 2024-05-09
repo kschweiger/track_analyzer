@@ -602,6 +602,7 @@ class Track(ABC):
         *,
         segment: None | int | list[int] = None,
         reduce_pp_intervals: None | int = None,
+        use_distance_segments: None | float = None,
         **kwargs,
     ) -> Figure:
         """
@@ -640,10 +641,21 @@ class Track(ABC):
             defaults to None
         :param reduce_pp_intervals: Optionally pass a distance in m which is used to
             reduce the points in a track, defaults to None
+        :param use_distance_segments: Ignore all segments in data and split full track
+            into segments with passed cummulated distance in meters. If passed, segment
+            arg must be None. Defaults to None.
         :raises VisualizationSetupError: If the plot prequisites are not met
 
         :return: Figure (plotly)
         """
+        from geo_track_analyzer.utils.track import generate_distance_segments
+
+        if use_distance_segments is not None and segment is not None:
+            raise VisualizationSetupError(
+                f"use_distance_segments {use_distance_segments} cannot be passed with "
+                f"segment {segment}."
+            )
+
         valid_kinds = [
             "profile",
             "profile-slope",
@@ -669,13 +681,13 @@ class Track(ABC):
             raise VisualizationSetupError(
                 f"If {kind} is passed, **metric** and **aggregate** need to be passed"
             )
-        if kind in ["segment_box"] and not not all(
+        if kind in ["segment_box"] and not all(
             key in kwargs.keys() for key in ["metric"]
         ):
             raise VisualizationSetupError(
                 f"If {kind} is passed, **metric** needs to be passed"
             )
-        if kind in ["segment_summary"] and not not all(
+        if kind in ["segment_summary"] and not all(
             key in kwargs.keys() for key in ["aggregate"]
         ):
             raise VisualizationSetupError(
@@ -723,6 +735,9 @@ class Track(ABC):
                 cadence_zones=self.cadence_zones,
                 power_zones=self.power_zones,
             )
+
+        if use_distance_segments is not None:
+            data = generate_distance_segments(data, use_distance_segments)
 
         fig: Figure
         if kind == "profile":

@@ -11,8 +11,9 @@ from pytest_mock import MockerFixture
 from geo_track_analyzer.exceptions import (
     TrackInitializationError,
     TrackTransformationError,
+    VisualizationSetupError,
 )
-from geo_track_analyzer.model import SegmentOverview
+from geo_track_analyzer.model import SegmentOverview, ZoneInterval, Zones
 from geo_track_analyzer.track import ByteTrack, GPXFileTrack, PyTrack, Track
 from geo_track_analyzer.utils.internal import get_extension_value
 from tests import resources
@@ -574,4 +575,82 @@ def test_plot_multi_segment_plot(kind: str) -> None:
 
     fig = track.plot(kind, segment=[1, 2])  # type: ignore
 
+    assert isinstance(fig, Figure)
+
+
+@pytest.mark.parametrize(
+    ("kind", "kwargs"),
+    [
+        ("segment_summary", {"aggregate": "total_distance"}),
+        ("segment_box", {"metric": "elevation"}),
+        ("zone_summary", {"metric": "heartrate", "aggregate": "distance"}),
+        ("segment_zone_summary", {"metric": "heartrate", "aggregate": "distance"}),
+    ],
+)
+def test_plot_segment_summaries(kind: str, kwargs: dict) -> None:
+    resource_files = importlib.resources.files(resources)
+
+    hr_zones = Zones(
+        intervals=[
+            ZoneInterval(start=None, end=130),
+            ZoneInterval(start=130, end=160),
+            ZoneInterval(start=160, end=None),
+        ]
+    )
+
+    track = ByteTrack(
+        (resource_files / "Freiburger_Münster_nach_Schau_Ins_Land.gpx").read_bytes(),
+        heartrate_zones=hr_zones,
+    )
+    track.split((47.9805, 7.84799))
+    fig = track.plot(kind, **kwargs)  # type: ignore
+    assert isinstance(fig, Figure)
+
+
+@pytest.mark.parametrize(
+    ("kind", "kwargs"),
+    [
+        ("segment_summary", {}),
+        ("segment_box", {}),
+        ("zone_summary", {"aggregate": "distance"}),
+        ("zone_summary", {"metric": "heartrate"}),
+        ("segment_zone_summary", {"aggregate": "distance"}),
+        ("segment_zone_summary", {"metric": "heartrate"}),
+    ],
+)
+def test_plot_segment_summaries_kwarg_errors(kind: str, kwargs: dict) -> None:
+    resource_files = importlib.resources.files(resources)
+
+    hr_zones = Zones(
+        intervals=[
+            ZoneInterval(start=None, end=130),
+            ZoneInterval(start=130, end=160),
+            ZoneInterval(start=160, end=None),
+        ]
+    )
+
+    track = ByteTrack(
+        (resource_files / "Freiburger_Münster_nach_Schau_Ins_Land.gpx").read_bytes(),
+        heartrate_zones=hr_zones,
+    )
+    track.split((47.9805, 7.84799))
+    with pytest.raises(VisualizationSetupError):
+        track.plot(kind, **kwargs)  # type: ignore
+
+
+def test_plot_use_distance_segments(
+    mocker: MockerFixture,
+) -> None:
+    import geo_track_analyzer.utils.track as track_utils_mod
+
+    resource_files = importlib.resources.files(resources)
+
+    spy_generate = mocker.spy(track_utils_mod, "generate_distance_segments")
+
+    track = ByteTrack(
+        (resource_files / "Freiburger_Münster_nach_Schau_Ins_Land.gpx").read_bytes(),
+    )
+
+    fig = track.plot("map-segments", use_distance_segments=1000)
+    assert spy_generate.call_count == 1
     assert isinstance(fig, Figure)

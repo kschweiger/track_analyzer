@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Literal
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -121,7 +121,7 @@ def plot_track_zones(
     )
 
     for i, rcrd in enumerate(bin_data.to_dict("records")):
-        kwargs = dict(
+        kwargs: dict[str, Any] = dict(
             x=i,
             showarrow=False,
             yshift=10,
@@ -147,6 +147,9 @@ def plot_track_zones(
                     text=f"{rcrd['speed']:.2f} km/h",
                 )
             )
+        else:
+            raise NotImplementedError(f"Aggregate {aggregate} is not implemented")
+
         fig.add_annotation(**kwargs)
 
     fig.update_layout(
@@ -325,6 +328,8 @@ def plot_segment_summary(
         y_title = "Duration"
         tickformat = "%H:%M:%S"
         hover_map_func = lambda dt: str(dt.time())
+    else:
+        raise NotImplementedError(f"Aggregate {aggregate} is not implemented")
 
     fig.add_trace(
         go.Bar(
