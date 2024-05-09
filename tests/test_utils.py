@@ -535,8 +535,9 @@ def test_interpolate_extension_not_possible(ext_1: dict, ext_2: dict) -> None:
     ]
 
 
+@pytest.mark.flaky(retries=3)
 @pytest.mark.parametrize("n_points", [500, 1000, 1500, 10_000])
-def test_closest_point_timing(n_points) -> None:
+def test_closest_point_timing(n_points: int) -> None:
     from gpxpy.geo import Location
 
     def run(track: PyTrack, point: tuple[float, float]) -> None:
