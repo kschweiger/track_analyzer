@@ -1,4 +1,5 @@
 import logging
+from typing import Callable, Literal
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -6,7 +7,7 @@ from plotly.graph_objs import Figure
 from plotly.subplots import make_subplots
 
 from geo_track_analyzer.exceptions import VisualizationSetupError
-from geo_track_analyzer.visualize.utils import get_slope_colors
+from geo_track_analyzer.visualize.utils import get_slope_colors, group_dataframe
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +41,141 @@ def _add_segment_borders(data: pd.DataFrame, fig: Figure, color: None | str) -> 
         )
 
 
+def _add_secondary(
+    fig: Figure,
+    data: pd.DataFrame,
+    secondary: Literal["velocity", "heartrate", "cadence", "power"],
+    split_by_zone: bool,
+    min_zone_size: float,
+) -> None:
+    mode = "lines"
+    fill: None | str = "tozeroy"
+    y_range_max_factor = 1.2
+    y_converter: Callable[[pd.Series], pd.Series] = lambda s: s.fillna(0).astype(int)
+    if secondary == "velocity":
+        title = "Velocity [km/h]"
+        y_range_max_factor = 2.1
+        y_converter = lambda s: s * 3.6
+    elif secondary == "heartrate":
+        title = "Heart Rate [bpm]"
+    elif secondary == "power":
+        title = "Power [W]"
+    elif secondary == "cadence":
+        title = "Cadence [rpm]"
+        fill = None
+        mode = "markers"
+
+    else:
+        raise RuntimeError
+
+    if pd.isna(data[secondary]).all():
+        raise VisualizationSetupError(
+            "Requested to plot heart rate but no heart rate information available "
+            "in data"
+        )
+
+    if split_by_zone:
+        _add_secondary_disonct(
+            fig=fig,
+            data=data,
+            secondary=secondary,
+            y_converter=y_converter,
+            y_range_max_factor=y_range_max_factor,
+            title=title,
+            mode=mode,
+            fill=fill,
+            min_zone_size=min_zone_size,
+        )
+    else:
+        _add_secondary_cont(
+            fig=fig,
+            data=data,
+            secondary=secondary,
+            y_converter=y_converter,
+            y_range_max_factor=y_range_max_factor,
+            title=title,
+            mode=mode,
+            fill=fill,
+        )
+
+
+def _add_secondary_cont(
+    fig: Figure,
+    data: pd.DataFrame,
+    secondary: str,
+    y_converter: Callable[[pd.Series], pd.Series],
+    y_range_max_factor: float,
+    title: str,
+    mode: str,
+    fill: None | str,
+    color: None | str = None,
+    legend_group: None | str = None,
+    show_legend: bool = False,
+    y_title: None | str = None,
+) -> None:
+    y_data = y_converter(data[secondary])
+    y_range = [0, y_data.max() * y_range_max_factor]
+
+    scatter_kwargs = dict(
+        x=data.cum_distance_moving,
+        y=y_data,
+        mode=mode,
+        name=title,
+        legendgroup=legend_group,
+        fill=fill,
+        showlegend=show_legend,
+    )
+    if color is not None:
+        scatter_kwargs["line_color"] = color
+    fig.add_trace(
+        go.Scatter(**scatter_kwargs),
+        secondary_y=True,
+    )
+    fig.update_yaxes(
+        title_text=title if y_title is None else y_title,
+        secondary_y=True,
+        range=y_range,
+    )
+
+
+def _add_secondary_disonct(
+    fig: Figure,
+    data: pd.DataFrame,
+    secondary: str,
+    y_converter: Callable[[pd.Series], pd.Series],
+    y_range_max_factor: float,
+    title: str,
+    mode: str,
+    fill: None | str,
+    min_zone_size: float,
+) -> None:
+    if f"{secondary}_zones" not in data.columns:
+        raise VisualizationSetupError("Zone data is not provided in passed dataframe")
+
+    zone_data = group_dataframe(
+        data, f"{secondary}_zones", int(len(data) * min_zone_size)
+    )
+    seen_group_names = []
+    for data_ in zone_data:
+        group_name = data_[f"{secondary}_zones"].iloc[-1]
+        _add_secondary_cont(
+            fig=fig,
+            data=data_,
+            secondary=secondary,
+            y_converter=y_converter,
+            y_range_max_factor=y_range_max_factor,
+            title=group_name,
+            mode=mode,
+            fill=fill,
+            color=data_[f"{secondary}_zone_colors"].iloc[-1],
+            legend_group=group_name,
+            show_legend=group_name not in seen_group_names,
+            y_title=title,
+        )
+        if group_name not in seen_group_names:
+            seen_group_names.append(group_name)
+
+
 def plot_track_2d(
     data: pd.DataFrame,
     *,
@@ -57,6 +193,8 @@ def plot_track_2d(
     color_poi: None | str = None,
     color_segment_border: None | str = None,
     slider: bool = False,
+    split_by_zone: bool = False,
+    min_zone_size: float = 0.0025,
     **kwargs,
 ) -> Figure:
     """Elevation profile of the track. May be enhanced with additional information like
@@ -84,11 +222,17 @@ def plot_track_2d(
         by plotly, defaults to None
     :param slider: Should a slide be included in the plot to zoom into the x-axis,
         defaults to False
+    :param split_by_zone: If True, and one for included_* flags is passed and Zones are
+        set for the corresponding extension are set, the Zones will be colored
+        according to the zone colors.
+    :param min_zone_size: Minimum fraction of points required for a distinct zone, if
+        split_by_Zone is passed.
     :raises VisualizationSetupError: If more than one of include_velocity,
         include_heartrate, include_cadence, or include_power was set the True
     :raises VisualizationSetupError: If elevation data is missing in the data
     :raises VisualizationSetupError: If the data requried for the additional data is
        missing
+    :raises VisualizationSetupError: If split_by_zone is passed but Zones are not set
 
     :return: Plotly Figure object.
     """
@@ -111,7 +255,7 @@ def plot_track_2d(
     if strict_data_selection:
         mask = mask & data.in_speed_percentile
 
-    data_for_plot = data[mask]
+    data_for_plot: pd.DataFrame = data[mask]  # type: ignore
 
     if show_segment_borders:
         show_segment_borders = _check_segment_availability(data_for_plot)
@@ -135,6 +279,7 @@ def plot_track_2d(
             ],
             hovertemplate="<b>Distance</b>: %{x:.1f} km <br><b>Elevation</b>: "
             + "%{y:.1f} m <br>%{text}<extra></extra>",
+            showlegend=False,
         ),
         secondary_y=False,
     )
@@ -148,58 +293,23 @@ def plot_track_2d(
     )
     fig.update_xaxes(title_text="Distance [m]")
 
-    y_data = None
-    y_range = None
-    title = None
-    mode = "lines"
-    fill: None | str = "tozeroy"
+    secondary = None
     if include_velocity:
-        y_data = data_for_plot.apply(lambda c: c.speed * 3.6, axis=1)
-        title = "Velocity [km/h]"
-        y_range = [0, y_data.max() * 2.1]
+        secondary = "velocity"
     if include_heartrate:
-        if pd.isna(data_for_plot.heartrate).all():
-            raise VisualizationSetupError(
-                "Requested to plot heart rate but no heart rate information available "
-                "in data"
-            )
-        y_data = data_for_plot.heartrate.fillna(0).astype(int)
-        title = "Heart Rate [bpm]"
-        y_range = [0, y_data.max() * 1.2]
+        secondary = "heartrate"
     if include_cadence:
-        if pd.isna(data_for_plot.cadence).all():
-            raise VisualizationSetupError(
-                "Requested to plot cadence but no cadence information available in data"
-            )
-        y_data = data_for_plot.cadence.fillna(0).astype(int)
-        title = "Cadence [rpm]"
-        mode = "markers"
-        fill = None
-        y_range = [0, y_data.max() * 1.2]
+        secondary = "cadence"
     if include_power:
-        if pd.isna(data_for_plot.power).all():
-            raise VisualizationSetupError(
-                "Requested to plot power but no power information available in data"
-            )
-        y_data = data_for_plot.power.fillna(0).astype(int)
-        title = "Power [W]"
-        y_range = [0, y_data.max() * 1.2]
+        secondary = "power"
 
-    if y_data is not None:
-        fig.add_trace(
-            go.Scatter(
-                x=data_for_plot.cum_distance_moving,
-                y=y_data,
-                mode=mode,
-                name=title,
-                fill=fill,
-            ),
-            secondary_y=True,
-        )
-        fig.update_yaxes(
-            title_text=title,
-            secondary_y=True,
-            range=y_range,
+    if secondary is not None:
+        _add_secondary(
+            fig=fig,
+            data=data_for_plot,
+            secondary=secondary,
+            split_by_zone=split_by_zone,
+            min_zone_size=min_zone_size,
         )
 
     if pois is not None:
@@ -226,13 +336,16 @@ def plot_track_2d(
                     standoff=10,
                     angle=180,
                 ),
+                showlegend=False,
             )
 
     if show_segment_borders:
         _add_segment_borders(data_for_plot, fig, color_segment_border)
 
     fig.update_layout(
-        showlegend=False, autosize=False, margin={"r": 0, "t": 0, "l": 0, "b": 0}
+        showlegend=split_by_zone,
+        autosize=False,
+        margin={"r": 0, "t": 0, "l": 0, "b": 0},
     )
     if height is not None:
         fig.update_layout(height=height)
@@ -301,7 +414,7 @@ def plot_track_with_slope(
         *slope_gradient_color, max_slope=max_slope, min_slope=min_slope
     )
 
-    data = data[data.moving].copy()
+    data = data[data.moving].copy()  # type: ignore
 
     if data.elevation.isna().all():
         raise VisualizationSetupError("Can not plot profile w/o elevation information")

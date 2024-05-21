@@ -84,23 +84,35 @@ def group_dataframe(
     """
     frames: list[pd.DataFrame] = []
     data["group"] = (data[group_by] != data[group_by].shift()).cumsum()
-
+    group_by_color = f"{group_by}_colors".replace("zones", "zone")
     for _, group in data.groupby("group"):
         # First is always just added to the list
         if len(frames) == 0:
             frames.append(group)
             continue
 
+        color = None
+
         if len(group) > min_in_group:
             group_name = group[group_by].unique()[0]
+            if group_by_color in group:
+                color = group[group_by_color].unique()[0]
+
             tral_prev_group = frames[len(frames) - 1].tail(1).copy()
             group = pd.concat([tral_prev_group, group])
             # Make sure the last entry from previous group hast same name
             group[group_by] = group_name
+            if color is not None:
+                group[group_by_color] = color
         else:
             group_name = frames[len(frames) - 1][group_by].unique()[0]
+            if group_by_color in group:
+                color = frames[len(frames) - 1][group_by_color].unique()[0]
+
             frames[len(frames) - 1] = pd.concat([frames[len(frames) - 1], group])
             frames[len(frames) - 1][group_by] = group_name
+            if color is not None:
+                frames[len(frames) - 1][group_by_color] = color
             continue
 
         name = group[group_by].unique()[0]

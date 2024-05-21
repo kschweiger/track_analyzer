@@ -33,6 +33,7 @@ def extract_track_data_for_plot(
 
     :return: DataFrame
     """
+    # TODO: Why do the Zones have to be passed??
     if kind in require_elevation and not track.track.has_elevations():
         raise VisualizationSetupError(f"Track has so elevation so {kind} is not valid")
     _track = track.track
