@@ -414,5 +414,6 @@ def add_zones_to_dataframe(
     )
     data[f"{metric}_zones"] = binned_metric.apply(lambda v: names[v - 1])
     data[f"{metric}_zone_colors"] = binned_metric.apply(lambda v: zone_colors[v - 1])
-
+    data.loc[data[data[metric].isna()].index, f"{metric}_zones"] = names[0]
+    data.loc[data[data[metric].isna()].index, f"{metric}_zone_colors"] = zone_colors[0]
     return data

@@ -255,7 +255,7 @@ def plot_track_2d(
     if strict_data_selection:
         mask = mask & data.in_speed_percentile
 
-    data_for_plot: pd.DataFrame = data[mask]  # type: ignore
+    data_for_plot: pd.DataFrame = data[mask].copy()  # type: ignore
 
     if show_segment_borders:
         show_segment_borders = _check_segment_availability(data_for_plot)
