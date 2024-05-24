@@ -4,9 +4,7 @@ from typing import Literal
 import pandas as pd
 
 from geo_track_analyzer.exceptions import VisualizationSetupError
-from geo_track_analyzer.model import Zones
 from geo_track_analyzer.processing import (
-    add_zones_to_dataframe,
     get_processed_segment_data,
     get_processed_track_data,
 )
@@ -19,9 +17,6 @@ def extract_track_data_for_plot(
     require_elevation: list[str],
     intervals: None | int = None,
     connect_segments: Literal["full", "forward"] = "forward",
-    heartrate_zones: None | Zones = None,
-    power_zones: None | Zones = None,
-    cadence_zones: None | Zones = None,
 ) -> pd.DataFrame:
     """Extract the data from a Track as DataFrame for plotting.
 
@@ -33,7 +28,6 @@ def extract_track_data_for_plot(
 
     :return: DataFrame
     """
-    # TODO: Why do the Zones have to be passed??
     if kind in require_elevation and not track.track.has_elevations():
         raise VisualizationSetupError(f"Track has so elevation so {kind} is not valid")
     _track = track.track
@@ -46,15 +40,12 @@ def extract_track_data_for_plot(
             _track.reduce_points(intervals)
 
     _, _, _, _, data = get_processed_track_data(
-        _track, connect_segments=connect_segments
+        _track,
+        connect_segments=connect_segments,
+        heartrate_zones=track.heartrate_zones,
+        power_zones=track.power_zones,
+        cadence_zones=track.cadence_zones,
     )
-
-    if heartrate_zones is not None:
-        data = add_zones_to_dataframe(data, "heartrate", heartrate_zones)
-    if power_zones is not None:
-        data = add_zones_to_dataframe(data, "power", power_zones)
-    if cadence_zones is not None:
-        data = add_zones_to_dataframe(data, "cadence", cadence_zones)
 
     return data
 
@@ -66,9 +57,6 @@ def extract_multiple_segment_data_for_plot(
     require_elevation: list[str],
     intervals: None | int = None,
     connect_segments: Literal["full", "forward"] = "forward",
-    heartrate_zones: None | Zones = None,
-    power_zones: None | Zones = None,
-    cadence_zones: None | Zones = None,
 ) -> pd.DataFrame:
     """Extract the data for a two or more segments from a Track as DataFrame for
     plotting.
@@ -95,9 +83,6 @@ def extract_multiple_segment_data_for_plot(
         require_elevation=require_elevation,
         intervals=intervals,
         connect_segments=connect_segments,
-        heartrate_zones=heartrate_zones,
-        power_zones=power_zones,
-        cadence_zones=cadence_zones,
     )
 
     return data[data.segment.isin(segments)]
@@ -109,9 +94,6 @@ def extract_segment_data_for_plot(
     kind: str,
     require_elevation: list[str],
     intervals: None | int = None,
-    heartrate_zones: None | Zones = None,
-    power_zones: None | Zones = None,
-    cadence_zones: None | Zones = None,
 ) -> pd.DataFrame:
     """Extract the data for a segment from a Track as DataFrame for plotting.
 
@@ -140,14 +122,12 @@ def extract_segment_data_for_plot(
             segement = track.track.segments[segment].clone()
             segement.reduce_points(intervals)
 
-    _, _, _, _, data = get_processed_segment_data(segement)
-
-    if heartrate_zones is not None:
-        data = add_zones_to_dataframe(data, "heartrate", heartrate_zones)
-    if power_zones is not None:
-        data = add_zones_to_dataframe(data, "power", power_zones)
-    if cadence_zones is not None:
-        data = add_zones_to_dataframe(data, "cadence", cadence_zones)
+    _, _, _, _, data = get_processed_segment_data(
+        segement,
+        heartrate_zones=track.heartrate_zones,
+        power_zones=track.power_zones,
+        cadence_zones=track.cadence_zones,
+    )
 
     return data
 

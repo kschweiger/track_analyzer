@@ -323,7 +323,11 @@ class Track(ABC):
                 stopped_distance,
                 data,
             ) = get_processed_segment_data(
-                self.track.segments[n_segment], self.stopped_speed_threshold
+                self.track.segments[n_segment],
+                self.stopped_speed_threshold,
+                heartrate_zones=self.heartrate_zones,
+                power_zones=self.power_zones,
+                cadence_zones=self.cadence_zones,
             )
 
             if data.time.notna().any():
@@ -354,7 +358,12 @@ class Track(ABC):
             stopped_distance,
             processed_data,
         ) = get_processed_track_data(
-            self.track, self.stopped_speed_threshold, connect_segments=connect_segments
+            self.track,
+            self.stopped_speed_threshold,
+            connect_segments=connect_segments,
+            heartrate_zones=self.heartrate_zones,
+            power_zones=self.power_zones,
+            cadence_zones=self.cadence_zones,
         )
 
         if processed_data.time.notna().any():
@@ -703,9 +712,6 @@ class Track(ABC):
                 require_elevation=require_elevation,
                 intervals=reduce_pp_intervals,
                 connect_segments="full" if kind in connect_segment_full else "forward",
-                heartrate_zones=self.heartrate_zones,
-                cadence_zones=self.cadence_zones,
-                power_zones=self.power_zones,
             )
         elif isinstance(segment, int):
             from geo_track_analyzer.utils.track import extract_segment_data_for_plot
@@ -716,9 +722,6 @@ class Track(ABC):
                 kind=kind,
                 require_elevation=require_elevation,
                 intervals=reduce_pp_intervals,
-                heartrate_zones=self.heartrate_zones,
-                cadence_zones=self.cadence_zones,
-                power_zones=self.power_zones,
             )
         else:
             from geo_track_analyzer.utils.track import (
@@ -731,9 +734,6 @@ class Track(ABC):
                 kind=kind,
                 require_elevation=require_elevation,
                 intervals=reduce_pp_intervals,
-                heartrate_zones=self.heartrate_zones,
-                cadence_zones=self.cadence_zones,
-                power_zones=self.power_zones,
             )
 
         if use_distance_segments is not None:

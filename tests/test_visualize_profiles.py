@@ -200,9 +200,6 @@ def test_2d_plot_w_extensions_zones(flag: dict[str, bool]) -> None:
         track=track,
         kind="a",
         require_elevation=["b"],
-        heartrate_zones=track.heartrate_zones,
-        power_zones=track.power_zones,
-        cadence_zones=track.cadence_zones,
     )
     fig = plot_track_2d(data, **flag)
     # fig.show()

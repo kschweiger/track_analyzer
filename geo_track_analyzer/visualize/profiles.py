@@ -87,12 +87,14 @@ def _add_secondary(
             min_zone_size=min_zone_size,
         )
     else:
+        y_data = y_converter(data[secondary])
+        y_range = (0, y_data.max() * y_range_max_factor)
+
         _add_secondary_cont(
             fig=fig,
-            data=data,
-            secondary=secondary,
-            y_converter=y_converter,
-            y_range_max_factor=y_range_max_factor,
+            x=data.cum_distance_moving,
+            y=y_data,
+            y_range=y_range,
             title=title,
             mode=mode,
             fill=fill,
@@ -101,10 +103,10 @@ def _add_secondary(
 
 def _add_secondary_cont(
     fig: Figure,
-    data: pd.DataFrame,
-    secondary: str,
-    y_converter: Callable[[pd.Series], pd.Series],
-    y_range_max_factor: float,
+    # data: pd.DataFrame,
+    x: pd.Series,
+    y: pd.Series,
+    y_range: None | tuple[float, float],
     title: str,
     mode: str,
     fill: None | str,
@@ -113,12 +115,9 @@ def _add_secondary_cont(
     show_legend: bool = False,
     y_title: None | str = None,
 ) -> None:
-    y_data = y_converter(data[secondary])
-    y_range = [0, y_data.max() * y_range_max_factor]
-
     scatter_kwargs = dict(
-        x=data.cum_distance_moving,
-        y=y_data,
+        x=x,
+        y=y,
         mode=mode,
         name=title,
         legendgroup=legend_group,
@@ -156,14 +155,18 @@ def _add_secondary_disonct(
         data, f"{secondary}_zones", int(len(data) * min_zone_size)
     )
     seen_group_names = []
-    for data_ in zone_data:
+    y_max = -99
+    for data_ in zone_data[::-1]:
         group_name = data_[f"{secondary}_zones"].iloc[-1]
+
+        y_data = y_converter(data_[secondary])
+        y_max = max(y_max, y_data.max() * y_range_max_factor)
+
         _add_secondary_cont(
             fig=fig,
-            data=data_,
-            secondary=secondary,
-            y_converter=y_converter,
-            y_range_max_factor=y_range_max_factor,
+            x=data_.cum_distance_moving,
+            y=y_data,
+            y_range=None,
             title=group_name,
             mode=mode,
             fill=fill,
@@ -174,6 +177,11 @@ def _add_secondary_disonct(
         )
         if group_name not in seen_group_names:
             seen_group_names.append(group_name)
+
+    fig.update_yaxes(
+        range=(0, y_max),
+        secondary_y=True,
+    )
 
 
 def plot_track_2d(
@@ -236,6 +244,8 @@ def plot_track_2d(
 
     :return: Plotly Figure object.
     """
+    if split_by_zone:
+        color_additional_trace = None
     if (
         sum(
             [
