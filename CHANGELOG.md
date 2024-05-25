@@ -1,4 +1,12 @@
 <!-- insertion marker -->
+<a name="1.4.0"></a>
+
+## [1.4.0](https://github.com/kschweiger/track_analyzer/compare/1.3.2...1.4.0) (2024-05-25)
+
+### Features
+
+- Zones and summary plots (#23) ([7be77d0](https://github.com/kschweiger/track_analyzer/commit/7be77d0181ba7027a0ba1dfd4b58d357637f52de))
+
 <a name="1.3.2"></a>
 
 ## [1.3.2](https://github.com/kschweiger/track_analyzer/compare/1.3.1...1.3.2) (2024-04-09)
