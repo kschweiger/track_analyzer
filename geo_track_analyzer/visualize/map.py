@@ -78,6 +78,7 @@ def plot_track_enriched_on_map(
     enrich_with_column: Literal[
         "elevation", "speed", "heartrate", "cadence", "power"
     ] = "elevation",
+    color_by_zone: bool = False,
     zoom: int = 13,
     height: None | int = None,
     width: None | int = None,
@@ -92,6 +93,8 @@ def plot_track_enriched_on_map(
 
     :param data: DataFrame containing track data.
     :param enrich_with_column: Column to enrich the track with, defaults to "elevation"
+    :param color_by_zone: If True, track will be covered by Zones. Only available for
+        enrich_with_column heartrate, cadence and power.
     :param zoom: Zoom level for the map, defaults to 13
     :param height: Height of the plot, defaults to None
     :param width: Width of the plot, defaults to None
@@ -104,9 +107,16 @@ def plot_track_enriched_on_map(
         open-street-map
     :param kwargs: Additional keyword arguments.
     :raises VisualizationSetupError: If no data is in passed enrich_with_column column
-
+    :raises VisualizationSetupError: If color_by_zone is passed and enricht_with_column
+        is unsupported or Zones are not set for the supported values
     :return: Plotly Figure object.
     """
+    if color_by_zone and (
+        (enrich_with_column not in ["heartrate", "cadence", "power"])
+        or (f"{enrich_with_column}_zones" not in data.columns)
+    ):
+        raise VisualizationSetupError("Zone data is not provided in passed dataframe")
+
     mask = data.moving
 
     plot_data = data[mask]
@@ -125,7 +135,7 @@ def plot_track_enriched_on_map(
         int if enrich_with_column in ["heartrate", "cadence", "power"] else float
     )
 
-    # ~~~~~~~~~~~ Generator colors for passed column ~~~~~~~~~~~~~~~~~
+    # ~~~~~~~~~~~ Colors ~~~~~~~~~~~~~~~~~
     color_column_values = plot_data[enrich_with_column]
 
     if color_column_values.isna().all():
@@ -147,61 +157,69 @@ def plot_track_enriched_on_map(
     diff_abs = color_column_values.max() - color_column_values.min()
     assert diff_abs > 0
 
-    if overwrite_color_gradient:
-        color_min, color_max = overwrite_color_gradient
+    colorbar_trace = None
+    # ~~~~~~~~~~~~~~~~ Color by Zone ~~~~~~~~~~~~~~~~~~~~~~~
+    if color_by_zone:
+        color_col = f"{enrich_with_column}_zone_colors"
+        colors = plot_data[color_col]
+        marker = go.scattermapbox.Marker(color=colors)
+    # ~~~~~~~~~~~~~~~~ Generate color gradient from value ~~~~~~~~~~~~~~~
     else:
-        if enrich_with_column in COLOR_GRADIENTS.keys():
-            color_min, color_max = COLOR_GRADIENTS[enrich_with_column]
+        if overwrite_color_gradient:
+            color_min, color_max = overwrite_color_gradient
         else:
-            color_min, color_max = DEFAULT_COLOR_GRADIENT
-    color_map = pd.Series(
-        data=get_color_gradient(color_min, color_max, round(diff_abs) + 1),
-        index=range(
-            round(color_column_values.min()), round(color_column_values.max()) + 1
-        ),
-    )
-
-    def color_mapper(value: float) -> str:
-        if value < color_map.index.start:
-            return color_map.iloc[0]
-        elif value > color_map.index.stop:
-            return color_map.iloc[-1]
-        else:
-            return color_map.loc[int(value)]
-
-    colors = color_column_values.apply(color_mapper).to_list()
-    marker = go.scattermapbox.Marker(color=colors)
-
-    # ~~~~~~~~~~~~~~~ Colorbar for the passed column ~~~~~~~~~~~~~~~~~~~~
-    splits = 1 / (cbar_ticks - 1)
-    factor = 0.0
-    tick_vals = []
-    tick_cols = []
-    while factor <= 1:
-        idx = int(diff_abs * factor)
-        tick_vals.append(color_map.index[idx])
-        tick_cols.append(color_map.iloc[idx])
-        factor += splits
-
-    colorbar_trace = go.Scatter(
-        x=[None],
-        y=[None],
-        mode="markers",
-        marker=dict(
-            colorscale=color_map.to_list(),
-            showscale=True,
-            cmin=color_column_values.min(),
-            cmax=color_column_values.max(),
-            colorbar=dict(
-                title=enrich_with_column.capitalize(),
-                thickness=10,
-                tickvals=tick_vals,
-                ticktext=tick_vals,
-                outlinewidth=0,
+            if enrich_with_column in COLOR_GRADIENTS.keys():
+                color_min, color_max = COLOR_GRADIENTS[enrich_with_column]
+            else:
+                color_min, color_max = DEFAULT_COLOR_GRADIENT
+        color_map = pd.Series(
+            data=get_color_gradient(color_min, color_max, round(diff_abs) + 1),
+            index=range(
+                round(color_column_values.min()), round(color_column_values.max()) + 1
             ),
-        ),
-        hoverinfo="none",
-    )
+        )
+
+        def color_mapper(value: float) -> str:
+            if value < color_map.index.start:
+                return color_map.iloc[0]
+            elif value > color_map.index.stop:
+                return color_map.iloc[-1]
+            else:
+                return color_map.loc[int(value)]
+
+        colors = color_column_values.apply(color_mapper).to_list()
+        marker = go.scattermapbox.Marker(color=colors)
+
+        # ~~~~~~~~~~~~~~~ Colorbar for the passed column ~~~~~~~~~~~~~~~~~~~~
+        splits = 1 / (cbar_ticks - 1)
+        factor = 0.0
+        tick_vals = []
+        tick_cols = []
+        while factor <= 1:
+            idx = int(diff_abs * factor)
+            tick_vals.append(color_map.index[idx])
+            tick_cols.append(color_map.iloc[idx])
+            factor += splits
+
+        colorbar_trace = go.Scatter(
+            x=[None],
+            y=[None],
+            mode="markers",
+            marker=dict(
+                colorscale=color_map.to_list(),
+                showscale=True,
+                cmin=color_column_values.min(),
+                cmax=color_column_values.max(),
+                colorbar=dict(
+                    title=enrich_with_column.capitalize(),
+                    thickness=10,
+                    tickvals=tick_vals,
+                    ticktext=tick_vals,
+                    outlinewidth=0,
+                ),
+            ),
+            hoverinfo="none",
+        )
 
     # ~~~~~~~~~~~~~~~ Build figure ~~~~~~~~~~~~~~~~~~~
     fig = go.Figure(
@@ -220,7 +238,8 @@ def plot_track_enriched_on_map(
         )
     )
 
-    fig.add_trace(colorbar_trace)
+    if colorbar_trace is not None:
+        fig.add_trace(colorbar_trace)
 
     fig.update_layout(mapbox_style=map_style)
     fig.update_layout(

@@ -1,3 +1,5 @@
+from typing import Literal
+
 import plotly.graph_objects as go
 import pytest
 
@@ -28,7 +30,8 @@ def test_plot_track_enriched_on_map(
     data = track_for_test.get_track_data()
 
     figure = plot_track_enriched_on_map(
-        data, enrich_with_column=enrich_with_column  # type: ignore
+        data,
+        enrich_with_column=enrich_with_column,  # type: ignore
     )
     assert isinstance(figure, go.Figure)
 
@@ -67,6 +70,41 @@ def test_plot_track_enriched_on_map_with_nans(
     figure = plot_track_enriched_on_map(data, enrich_with_column="heartrate")
 
     assert isinstance(figure, go.Figure)
+
+
+def test_plot_track_enriched_on_map_zones(
+    track_for_test: Track,
+) -> None:
+    data = track_for_test.get_track_data()
+
+    figure = plot_track_enriched_on_map(
+        data, enrich_with_column="heartrate", color_by_zone=True
+    )
+
+    assert isinstance(figure, go.Figure)
+
+
+def test_plot_track_enriched_on_map_zones_no_zone_set(
+    track_for_test: Track,
+) -> None:
+    data = track_for_test.get_track_data()
+
+    with pytest.raises(VisualizationSetupError):
+        plot_track_enriched_on_map(
+            data, enrich_with_column="cadence", color_by_zone=True
+        )
+
+
+@pytest.mark.parametrize("enrich_with", ["elevation", "speed"])
+def test_plot_track_enriched_on_map_zones_no_zone_possible(
+    track_for_test: Track, enrich_with: Literal["elevation", "speed"]
+) -> None:
+    data = track_for_test.get_track_data()
+
+    with pytest.raises(VisualizationSetupError):
+        plot_track_enriched_on_map(
+            data, enrich_with_column=enrich_with, color_by_zone=True
+        )
 
 
 @pytest.mark.parametrize("average_only", [True, False])

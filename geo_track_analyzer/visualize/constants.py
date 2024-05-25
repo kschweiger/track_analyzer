@@ -12,3 +12,5 @@ DEFAULT_COLOR_GRADIENT: tuple[str, str] = ("#0508b8", "#fec3fe")
 COLOR_GRADIENTS: dict[str, tuple[str, str]] = {
     "heartrate": ("#636EFA", "#EF553B"),
 }
+
+DEFAULT_BAR_COLORS: tuple[str, str] = ("#7570b3", "#8da0cb")

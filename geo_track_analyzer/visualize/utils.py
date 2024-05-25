@@ -2,6 +2,7 @@ import logging
 from typing import Dict
 
 import numpy as np
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -61,3 +62,70 @@ def get_slope_colors(
     colors.update({point: color for point, color in zip(neg_points, neg_colors)})
     colors.update({point: color for point, color in zip(pos_points, pos_colors)})
     return colors
+
+
+def group_dataframe(
+    data: pd.DataFrame, group_by: str, min_in_group: int
+) -> list[pd.DataFrame]:
+    """
+    Group the DataFrame by a specified column, ensuring that each group contains at
+    least a minimum number of rows. Except the first group, the last value from the
+    previous group is prepended to the group to get consitent lines in a plot. Small
+    groups (defined by min_in_group) will be merged in previous group. If this leads
+    to multiple groups with same name, these will also be merged.
+
+    :param data: The DataFrame to be grouped.
+    :param group_by: The name of the column to group by.
+    :param min_in_group: The minimum number of rows required in each group. Will be
+        merged with previous group if number is not reached
+
+    :return: A list of DataFrames, each containing a group of rows
+        from the original DataFrame.
+    """
+    frames: list[pd.DataFrame] = []
+    data["group"] = (data[group_by] != data[group_by].shift()).cumsum()
+    group_by_color = f"{group_by}_colors".replace("zones", "zone")
+    for _, group in data.groupby("group"):
+        # First is always just added to the list
+        if len(frames) == 0:
+            frames.append(group)
+            continue
+
+        color = None
+
+        if len(group) > min_in_group:
+            group_name = group[group_by].unique()[0]
+            if group_by_color in group:
+                color = group[group_by_color].unique()[0]
+
+            tral_prev_group = frames[len(frames) - 1].tail(1).copy()
+            group = pd.concat([tral_prev_group, group])
+            # Make sure the last entry from previous group hast same name
+            group[group_by] = group_name
+            if color is not None:
+                group[group_by_color] = color
+        else:
+            group_name = frames[len(frames) - 1][group_by].unique()[0]
+            if group_by_color in group:
+                color = frames[len(frames) - 1][group_by_color].unique()[0]
+
+            frames[len(frames) - 1] = pd.concat([frames[len(frames) - 1], group])
+            frames[len(frames) - 1][group_by] = group_name
+            if color is not None:
+                frames[len(frames) - 1][group_by_color] = color
+            continue
+
+        name = group[group_by].unique()[0]
+        prev_name = frames[len(frames) - 1][group_by].unique()[0]
+        if name != prev_name:
+            frames.append(group)
+        else:
+            # THis only happends with merged groups in between so groups with same name
+            # so we need to drop the duplicates
+            frames[len(frames) - 1] = pd.concat(
+                [frames[len(frames) - 1], group]
+            ).drop_duplicates()
+
+    # Cleanup
+    data.drop("group", axis=1, inplace=True)  # noqa: PD002
+    return frames

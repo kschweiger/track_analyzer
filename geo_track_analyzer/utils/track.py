@@ -1,3 +1,4 @@
+from itertools import pairwise
 from typing import Literal
 
 import pandas as pd
@@ -39,7 +40,11 @@ def extract_track_data_for_plot(
             _track.reduce_points(intervals)
 
     _, _, _, _, data = get_processed_track_data(
-        _track, connect_segments=connect_segments
+        _track,
+        connect_segments=connect_segments,
+        heartrate_zones=track.heartrate_zones,
+        power_zones=track.power_zones,
+        cadence_zones=track.cadence_zones,
     )
 
     return data
@@ -117,5 +122,46 @@ def extract_segment_data_for_plot(
             segement = track.track.segments[segment].clone()
             segement.reduce_points(intervals)
 
-    _, _, _, _, data = get_processed_segment_data(segement)
+    _, _, _, _, data = get_processed_segment_data(
+        segement,
+        heartrate_zones=track.heartrate_zones,
+        power_zones=track.power_zones,
+        cadence_zones=track.cadence_zones,
+    )
+
+    return data
+
+
+def generate_distance_segments(data: pd.DataFrame, distance: float) -> pd.DataFrame:
+    """Generate segments with the distance specified with the passed parameter. Segments
+    present in the passed data will be replaced. Splitting is done based on the
+    distance_moving value in the data. Segements are split closest to the passed
+    distance. So extact cummulated distance in a segment depends on the pp-distance in
+    the track. The last segmeent may be shorter than the passed distance.
+
+    :param data: Dataframe create with extract_track_data_for_plot,
+        extract_segment_data_for_plot, or extract_multiple_segment_data_for_plot
+        methods.
+    :param distance: Intended segmeent distance
+
+    :return: Dataframe with updated segments
+    """
+    key = "cum_distance_moving"
+    max_distance = data.iloc[-1][key]
+
+    if max_distance < distance:
+        data["segment"] = 0
+        return data
+
+    distances, segments_ids = [0.0], [0]
+    while distances[-1] < max_distance:
+        distances.append(distances[-1] + distance)
+        segments_ids.append(segments_ids[-1] + 1)
+
+    new_segments = data.segment.copy()
+    new_segments.loc[:] = max(segments_ids)
+    for (start, end), idx in zip(pairwise(distances), segments_ids):
+        new_segments.iloc[data[(data[key] >= start) & (data[key] < end)].index] = idx
+
+    data["segment"] = new_segments
     return data

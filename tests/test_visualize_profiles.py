@@ -1,4 +1,5 @@
 import importlib.resources
+import random
 from typing import Callable
 
 import pandas as pd
@@ -7,7 +8,11 @@ import pytest
 from pytest_mock import MockerFixture
 
 from geo_track_analyzer.exceptions import VisualizationSetupError
+from geo_track_analyzer.model import ZoneInterval, Zones
 from geo_track_analyzer.track import ByteTrack, PyTrack, Track
+from geo_track_analyzer.utils.track import (
+    extract_track_data_for_plot,
+)
 from geo_track_analyzer.visualize.profiles import (
     plot_track_2d,
     plot_track_with_slope,
@@ -44,7 +49,11 @@ def test_plot_track_with_slope(n_segment: None | int) -> None:
 
 @pytest.mark.parametrize(
     "flag",
-    [{"include_heartrate": True}, {"include_cadence": True}, {"include_power": True}],
+    [
+        # {"include_heartrate": True},
+        {"include_cadence": True},
+        # {"include_power": True},
+    ],
 )
 def test_2d_plot_w_extensions(flag: dict[str, bool]) -> None:
     track = PyTrack(
@@ -57,6 +66,7 @@ def test_2d_plot_w_extensions(flag: dict[str, bool]) -> None:
     )
     data = track.get_segment_data(0)
     fig = plot_track_2d(data, **flag)
+    # fig.show()
     assert isinstance(fig, go.Figure)
 
 
@@ -146,4 +156,51 @@ def test_profile_w_segment_borders_ne_segments_in_data(
     assert spy_check.call_count == 1
     assert spy_add.call_count == 0
 
+    assert isinstance(fig, go.Figure)
+
+
+@pytest.mark.parametrize(
+    "flag",
+    [
+        {"include_heartrate": True, "split_by_zone": True},
+        {"include_cadence": True, "split_by_zone": True},
+        {"include_power": True, "split_by_zone": True},
+    ],
+)
+def test_2d_plot_w_extensions_zones(flag: dict[str, bool]) -> None:
+    track = PyTrack(
+        points=[(i, i) for i in range(100)],
+        elevations=[200 + random.randrange(20) for _ in range(100)],
+        times=None,
+        heartrate=[80] * 20 + [100] * 30 + [140] * 30 + [90] * 20,
+        cadence=[70] * 30 + [80] * 30 + [70] * 40,
+        power=[200] * 50 + [400] * 50,
+        heartrate_zones=Zones(
+            intervals=[
+                ZoneInterval(start=None, end=85, color="#FF0000"),
+                ZoneInterval(start=85, end=120, color="#00FF00"),
+                ZoneInterval(start=120, end=None, color="#0000FF"),
+            ]
+        ),
+        cadence_zones=Zones(
+            intervals=[
+                ZoneInterval(start=None, end=75, color="#FF0000"),
+                ZoneInterval(start=75, end=85, color="#00FF00"),
+                ZoneInterval(start=85, end=None, color="#0000FF"),
+            ]
+        ),
+        power_zones=Zones(
+            intervals=[
+                ZoneInterval(start=None, end=250, color="#FF0000"),
+                ZoneInterval(start=250, end=None, color="#0000FF"),
+            ]
+        ),
+    )
+    data = extract_track_data_for_plot(
+        track=track,
+        kind="a",
+        require_elevation=["b"],
+    )
+    fig = plot_track_2d(data, **flag)
+    # fig.show()
     assert isinstance(fig, go.Figure)

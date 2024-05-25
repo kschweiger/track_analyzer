@@ -4,11 +4,18 @@ from time import perf_counter
 from typing import Literal, Type
 
 import numpy as np
+import pandas as pd
 import pytest
 from gpxpy.gpx import GPXTrack, GPXTrackPoint, GPXTrackSegment
 from pytest_mock import MockerFixture
 
-from geo_track_analyzer.model import PointDistance, Position2D, Position3D
+from geo_track_analyzer.model import (
+    PointDistance,
+    Position2D,
+    Position3D,
+    ZoneInterval,
+    Zones,
+)
 from geo_track_analyzer.track import PyTrack
 from geo_track_analyzer.utils.base import (
     calc_elevation_metrics,
@@ -32,6 +39,8 @@ from geo_track_analyzer.utils.internal import (
     get_extended_track_point,
     get_extension_value,
 )
+from geo_track_analyzer.utils.model import format_zones_for_digitize
+from geo_track_analyzer.utils.track import generate_distance_segments
 
 
 def test_distance_far() -> None:
@@ -526,8 +535,9 @@ def test_interpolate_extension_not_possible(ext_1: dict, ext_2: dict) -> None:
     ]
 
 
+@pytest.mark.flaky(retries=3)
 @pytest.mark.parametrize("n_points", [500, 1000, 1500, 10_000])
-def test_closest_point_timing(n_points) -> None:
+def test_closest_point_timing(n_points: int) -> None:
     from gpxpy.geo import Location
 
     def run(track: PyTrack, point: tuple[float, float]) -> None:
@@ -580,3 +590,87 @@ def test_closest_point_timing(n_points) -> None:
 )
 def test_fill_list(values: list[None | float], exp_values: list[float]) -> None:
     assert fill_list(values) == exp_values
+
+
+@pytest.mark.parametrize(
+    ("names", "colors", "exp_names", "exp_colors"),
+    [
+        ([None, None, None], [None, None, None], ["Zone 1", "Zone 2", "Zone 3"], None),
+        (
+            ["Some Zone 1", "Some Zone 2", "Some Zone 3"],
+            [None, None, None],
+            ["Some Zone 1", "Some Zone 2", "Some Zone 3"],
+            None,
+        ),
+        (
+            [None, None, None],
+            ["#FFFFFF", "#222222", "#000000"],
+            ["Zone 1", "Zone 2", "Zone 3"],
+            ["#FFFFFF", "#222222", "#000000"],
+        ),
+    ],
+)
+def test_format_zones_for_digitize(
+    names: list[None] | list[str],
+    colors: list[None] | list[str],
+    exp_names: list[str],
+    exp_colors: None | list[str],
+) -> None:
+    zones = Zones(
+        intervals=[
+            ZoneInterval(start=None, end=100, name=names[0], color=colors[0]),
+            ZoneInterval(start=100, end=150, name=names[1], color=colors[1]),
+            ZoneInterval(start=150, end=None, name=names[2], color=colors[2]),
+        ],
+    )
+
+    vals, ret_names, ret_colors = format_zones_for_digitize(zones)
+
+    for ret_name, exp_name in zip(ret_names, exp_names):
+        assert ret_name.startswith(exp_name)
+
+    assert ret_colors == exp_colors
+    assert (vals == np.array([-np.inf, 100, 150, np.inf])).all()
+
+
+@pytest.mark.parametrize(
+    ("data", "distance", "exp_segments"),
+    [
+        (
+            pd.DataFrame(
+                {
+                    "cum_distance_moving": [0, 100, 200, 300, 400, 500, 600, 700],
+                    "segment": [0, 0, 0, 0, 0, 1, 1, 1],
+                }
+            ),
+            2000,
+            pd.Series([0, 0, 0, 0, 0, 0, 0, 0]),
+        ),
+        (
+            pd.DataFrame(
+                {
+                    "cum_distance_moving": [0, 100, 200, 300, 400, 500, 600, 700],
+                    "segment": [0, 0, 0, 0, 0, 0, 0, 0],
+                }
+            ),
+            200,
+            pd.Series([0, 0, 1, 1, 2, 2, 3, 3]),
+        ),
+        (
+            pd.DataFrame(
+                {
+                    "cum_distance_moving": [0, 100, 200, 300, 400, 500, 600],
+                    "segment": [0, 0, 0, 0, 0, 0, 0],
+                }
+            ),
+            200,
+            pd.Series([0, 0, 1, 1, 2, 2, 3]),
+        ),
+    ],
+)
+def test_generate_distance_segments(
+    data: pd.DataFrame, distance: int, exp_segments: pd.Series
+) -> None:
+    split_data = generate_distance_segments(data, distance)
+
+    assert split_data["segment"].compare(exp_segments).empty

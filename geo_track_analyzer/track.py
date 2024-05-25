@@ -19,7 +19,7 @@ from geo_track_analyzer.exceptions import (
     TrackTransformationError,
     VisualizationSetupError,
 )
-from geo_track_analyzer.model import PointDistance, Position3D, SegmentOverview
+from geo_track_analyzer.model import PointDistance, Position3D, SegmentOverview, Zones
 from geo_track_analyzer.processing import (
     get_processed_segment_data,
     get_processed_track_data,
@@ -32,11 +32,15 @@ from geo_track_analyzer.utils.base import (
 )
 from geo_track_analyzer.utils.internal import get_extended_track_point
 from geo_track_analyzer.visualize import (
+    plot_segment_box_summary,
+    plot_segment_summary,
+    plot_segment_zones,
     plot_segments_on_map,
     plot_track_2d,
     plot_track_enriched_on_map,
     plot_track_line_on_map,
     plot_track_with_slope,
+    plot_track_zones,
 )
 
 logger = logging.getLogger(__name__)
@@ -51,7 +55,12 @@ class Track(ABC):
     """
 
     def __init__(
-        self, stopped_speed_threshold: float, max_speed_percentile: int
+        self,
+        stopped_speed_threshold: float,
+        max_speed_percentile: int,
+        heartrate_zones: None | Zones = None,
+        power_zones: None | Zones = None,
+        cadence_zones: None | Zones = None,
     ) -> None:
         logger.debug(
             "Using threshold for stopped speed: %s km/h", stopped_speed_threshold
@@ -66,10 +75,13 @@ class Track(ABC):
 
         self.session_data: Dict[str, str | int | float] = {}
 
+        self.heartrate_zones = heartrate_zones
+        self.power_zones = power_zones
+        self.cadence_zones = cadence_zones
+
     @property
     @abstractmethod
-    def track(self) -> GPXTrack:
-        ...
+    def track(self) -> GPXTrack: ...
 
     @property
     def n_segments(self) -> int:
@@ -311,7 +323,11 @@ class Track(ABC):
                 stopped_distance,
                 data,
             ) = get_processed_segment_data(
-                self.track.segments[n_segment], self.stopped_speed_threshold
+                self.track.segments[n_segment],
+                self.stopped_speed_threshold,
+                heartrate_zones=self.heartrate_zones,
+                power_zones=self.power_zones,
+                cadence_zones=self.cadence_zones,
             )
 
             if data.time.notna().any():
@@ -342,7 +358,12 @@ class Track(ABC):
             stopped_distance,
             processed_data,
         ) = get_processed_track_data(
-            self.track, self.stopped_speed_threshold, connect_segments=connect_segments
+            self.track,
+            self.stopped_speed_threshold,
+            connect_segments=connect_segments,
+            heartrate_zones=self.heartrate_zones,
+            power_zones=self.power_zones,
+            cadence_zones=self.cadence_zones,
         )
 
         if processed_data.time.notna().any():
@@ -420,7 +441,7 @@ class Track(ABC):
 
         :param spacing: Minimum distance between points added by the interpolation
         :param n_segment: segment in the track to use, defaults to 0
-        :param copy_extension: How should the extenstion (if present) be defined in the
+        :param copy_extensions: How should the extenstion (if present) be defined in the
             interpolated points.
         """
         self.track.segments[n_segment] = interpolate_segment(
@@ -577,11 +598,20 @@ class Track(ABC):
     def plot(
         self,
         kind: Literal[
-            "profile", "profile-slope", "map-line", "map-line-enhanced", "map-segments"
+            "profile",
+            "profile-slope",
+            "map-line",
+            "map-line-enhanced",
+            "map-segments",
+            "zone_summary",
+            "segment_zone_summary",
+            "segment_box",
+            "segment_summary",
         ],
         *,
         segment: None | int | list[int] = None,
         reduce_pp_intervals: None | int = None,
+        use_distance_segments: None | float = None,
         **kwargs,
     ) -> Figure:
         """
@@ -591,34 +621,60 @@ class Track(ABC):
 
             - profile: Elevation profile of the track. May be enhanced with additional
               information like Velocity, Heartrate, Cadence, and Power. Pass keyword
-              args for :func:`~geo_track_analyzer.visualize.plot_track_2d`
+              args for [`plot_track_2d`][geo_track_analyzer.visualize.plot_track_2d]
             - profile-slope: Elevation profile with slopes between points. Use the
               reduce_pp_intervals argument to reduce the number of slope intervals.
               Pass keyword args for
-              :func:`~geo_track_analyzer.visualize.plot_track_with_slope`
+              [`plot_track_with_slope`][geo_track_analyzer.visualize.plot_track_with_slope]
             - map-line: Visualize coordinates on the map. Pass keyword args for
-              :func:`~geo_track_analyzer.visualize.plot_track_line_on_map`
+              [`plot_track_line_on_map`][geo_track_analyzer.visualize.plot_track_line_on_map]
             - map-line-enhanced: Visualize coordinates on the map. Enhance with
               additional information like Elevation, Velocity, Heartrate, Cadence, and
-              Power. Pass keyword args for
-              :func:`~geo_track_analyzer.visualize.plot_track_enriched_on_map`
+              Power. Pass keyword args for [`plot_track_enriched_on_map`][geo_track_analyzer.visualize.plot_track_enriched_on_map]
             - map-segments: Visualize coordinates on the map split into segments.
               Pass keyword args for
-              :func:`~geo_track_analyzer.visualize.plot_segments_on_map`
+              [`plot_segments_on_map`][geo_track_analyzer.visualize.plot_segments_on_map]
+            - zone_summary : Visualize an aggregate (time, distance, speed) value for a
+                metric (heartrate, power, cadence) with defined zones. Pass keyword args
+                for [`plot_track_zones`][geo_track_analyzer.visualize.plot_track_zones],
+                `aggregate` and `metric` are required.
+            - segment_zone_summary : Same as "zone_summary" but split aggregate per
+                segment [`plot_segment_zones`][geo_track_analyzer.visualize.plot_segment_zones]
+            - segment_box : Box plot of a metric (heartrate, power, cadence, speed,
+                elevation) per segment. Pass keyword args for [`plot_segments_on_map`][geo_track_analyzer.visualize.plot_segments_on_map]
+                `metric` is required.
+            - segment_summary : Visualize a aggregate (total_time, total_distance,
+                avg_speed, max_speed) per segment. Pass keyword args for [`plot_segment_summary`][geo_track_analyzer.visualize.plot_segment_summary]
+                `aggregate` is required.
         :param segment: Select a specific segment, multiple segments or all segmenets,
             defaults to None
         :param reduce_pp_intervals: Optionally pass a distance in m which is used to
             reduce the points in a track, defaults to None
+        :param use_distance_segments: Ignore all segments in data and split full track
+            into segments with passed cummulated distance in meters. If passed, segment
+            arg must be None. Defaults to None.
         :raises VisualizationSetupError: If the plot prequisites are not met
 
         :return: Figure (plotly)
         """
+        from geo_track_analyzer.utils.track import generate_distance_segments
+
+        if use_distance_segments is not None and segment is not None:
+            raise VisualizationSetupError(
+                f"use_distance_segments {use_distance_segments} cannot be passed with "
+                f"segment {segment}."
+            )
+
         valid_kinds = [
             "profile",
             "profile-slope",
             "map-line",
             "map-line-enhanced",
             "map-segments",
+            "zone_summary",
+            "segment_zone_summary",
+            "segment_box",
+            "segment_summary",
         ]
 
         require_elevation = ["profile", "profile-slope"]
@@ -626,6 +682,25 @@ class Track(ABC):
         if kind not in valid_kinds:
             raise VisualizationSetupError(
                 f"Kind {kind} is not valid. Pass on of {','.join(valid_kinds)}"
+            )
+
+        if kind in ["zone_summary", "segment_zone_summary"] and not all(
+            key in kwargs.keys() for key in ["metric", "aggregate"]
+        ):
+            raise VisualizationSetupError(
+                f"If {kind} is passed, **metric** and **aggregate** need to be passed"
+            )
+        if kind in ["segment_box"] and not all(
+            key in kwargs.keys() for key in ["metric"]
+        ):
+            raise VisualizationSetupError(
+                f"If {kind} is passed, **metric** needs to be passed"
+            )
+        if kind in ["segment_summary"] and not all(
+            key in kwargs.keys() for key in ["aggregate"]
+        ):
+            raise VisualizationSetupError(
+                f"If {kind} is passed, **metric** needs to be passed"
             )
 
         if segment is None:
@@ -661,6 +736,9 @@ class Track(ABC):
                 intervals=reduce_pp_intervals,
             )
 
+        if use_distance_segments is not None:
+            data = generate_distance_segments(data, use_distance_segments)
+
         fig: Figure
         if kind == "profile":
             fig = plot_track_2d(data=data, **kwargs)
@@ -670,8 +748,16 @@ class Track(ABC):
             fig = plot_track_line_on_map(data=data, **kwargs)
         elif kind == "map-line-enhanced":
             fig = plot_track_enriched_on_map(data=data, **kwargs)
-        else:
+        elif kind == "map-segments":
             fig = plot_segments_on_map(data=data, **kwargs)
+        elif kind == "zone_summary":
+            fig = plot_track_zones(data=data, **kwargs)
+        elif kind == "segment_zone_summary":
+            fig = plot_segment_zones(data=data, **kwargs)
+        elif kind == "segment_summary":
+            fig = plot_segment_summary(data=data, **kwargs)
+        elif kind == "segment_box":
+            fig = plot_segment_box_summary(data=data, **kwargs)
 
         return fig
 
@@ -722,6 +808,9 @@ class GPXFileTrack(Track):
         n_track: int = 0,
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
+        heartrate_zones: None | Zones = None,
+        power_zones: None | Zones = None,
+        cadence_zones: None | Zones = None,
     ) -> None:
         """Initialize a Track object from a gpx file
 
@@ -731,11 +820,17 @@ class GPXFileTrack(Track):
             as moving, defaults to 1
         :param max_speed_percentile: Points with speed outside of the percentile are not
             counted when analyzing the track, defaults to 95
+        :param heartrate_zones: Optional heartrate Zones, defaults to None
+        :param power_zones: Optional power Zones, defaults to None
+        :param cadence_zones: Optional cadence Zones, defaults to None
         """
 
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
             max_speed_percentile=max_speed_percentile,
+            heartrate_zones=heartrate_zones,
+            power_zones=power_zones,
+            cadence_zones=cadence_zones,
         )
 
         logger.info("Loading gpx track from file %s", gpx_file)
@@ -764,6 +859,9 @@ class ByteTrack(Track):
         n_track: int = 0,
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
+        heartrate_zones: None | Zones = None,
+        power_zones: None | Zones = None,
+        cadence_zones: None | Zones = None,
     ) -> None:
         """Initialize a Track object from a gpx file
 
@@ -773,10 +871,16 @@ class ByteTrack(Track):
             as moving, defaults to 1
         :param max_speed_percentile: Points with speed outside of the percentile are not
             counted when analyzing the track, defaults to 95
+        :param heartrate_zones: Optional heartrate Zones, defaults to None
+        :param power_zones: Optional power Zones, defaults to None
+        :param cadence_zones: Optional cadence Zones, defaults to None
         """
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
             max_speed_percentile=max_speed_percentile,
+            heartrate_zones=heartrate_zones,
+            power_zones=power_zones,
+            cadence_zones=cadence_zones,
         )
 
         gpx = gpxpy.parse(bytefile)
@@ -802,6 +906,9 @@ class PyTrack(Track):
         power: None | list[int] = None,
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
+        heartrate_zones: None | Zones = None,
+        power_zones: None | Zones = None,
+        cadence_zones: None | Zones = None,
     ) -> None:
         """A geospacial data track initialized from python objects
 
@@ -815,12 +922,18 @@ class PyTrack(Track):
             as moving, defaults to 1
         :param max_speed_percentile: Points with speed outside of the percentile are not
             counted when analyzing the track, defaults to 95
+        :param heartrate_zones: Optional heartrate Zones, defaults to None
+        :param power_zones: Optional power Zones, defaults to None
+        :param cadence_zones: Optional cadence Zones, defaults to None
         :raises TrackInitializationError: Raised if number of elevation, time, heatrate,
             or cadence values do not match passed points
         """
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
             max_speed_percentile=max_speed_percentile,
+            heartrate_zones=heartrate_zones,
+            power_zones=power_zones,
+            cadence_zones=cadence_zones,
         )
 
         gpx = GPX()
@@ -954,6 +1067,9 @@ class SegmentTrack(Track):
         segment: GPXTrackSegment,
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
+        heartrate_zones: None | Zones = None,
+        power_zones: None | Zones = None,
+        cadence_zones: None | Zones = None,
     ) -> None:
         """Wrap a GPXTrackSegment into a Track object
 
@@ -962,10 +1078,16 @@ class SegmentTrack(Track):
             as moving, defaults to 1
         :param max_speed_percentile: Points with speed outside of the percentile are not
             counted when analyzing the track, defaults to 95
+        :param heartrate_zones: Optional heartrate Zones, defaults to None
+        :param power_zones: Optional power Zones, defaults to None
+        :param cadence_zones: Optional cadence Zones, defaults to None
         """
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
             max_speed_percentile=max_speed_percentile,
+            heartrate_zones=heartrate_zones,
+            power_zones=power_zones,
+            cadence_zones=cadence_zones,
         )
         gpx = GPX()
 
@@ -991,6 +1113,9 @@ class FITTrack(Track):
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
         strict_elevation_loading: bool = False,
+        heartrate_zones: None | Zones = None,
+        power_zones: None | Zones = None,
+        cadence_zones: None | Zones = None,
     ) -> None:
         """Load a .fit file and extract the data into a Track object.
         NOTE: Tested with Wahoo devices only
@@ -1002,10 +1127,16 @@ class FITTrack(Track):
             counted when analyzing the track, defaults to 95
         :param strict_elevation_loading: If set, only points are added to the track that
             have a valid elevation,defaults to False
+        :param heartrate_zones: Optional heartrate Zones, defaults to None
+        :param power_zones: Optional power Zones, defaults to None
+        :param cadence_zones: Optional cadence Zones, defaults to None
         """
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
             max_speed_percentile=max_speed_percentile,
+            heartrate_zones=heartrate_zones,
+            power_zones=power_zones,
+            cadence_zones=cadence_zones,
         )
 
         if isinstance(source, str):

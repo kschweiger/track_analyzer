@@ -4,10 +4,13 @@ from typing import Any, Callable, Dict, Literal, Union
 
 import numpy as np
 import pandas as pd
+import plotly
 from gpxpy.gpx import GPXTrack, GPXTrackPoint, GPXTrackSegment
 
 from geo_track_analyzer.exceptions import GPXPointExtensionError
+from geo_track_analyzer.model import Zones
 from geo_track_analyzer.utils.internal import get_extension_value
+from geo_track_analyzer.utils.model import format_zones_for_digitize
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +58,9 @@ def get_processed_track_data(
     track: GPXTrack,
     stopped_speed_threshold: float = 1,
     connect_segments: Literal["full", "forward"] = "forward",
+    heartrate_zones: None | Zones = None,
+    power_zones: None | Zones = None,
+    cadence_zones: None | Zones = None,
 ) -> tuple[float, float, float, float, pd.DataFrame]:
     """
     Process GPX track data and return a tuple of calculated values. The connect_segmen
@@ -134,6 +140,13 @@ def get_processed_track_data(
     # Recalculate all cumulated columns over the segments
     track_data = _recalc_cumulated_columns(track_data)
 
+    if heartrate_zones is not None:
+        track_data = add_zones_to_dataframe(track_data, "heartrate", heartrate_zones)
+    if power_zones is not None:
+        track_data = add_zones_to_dataframe(track_data, "power", power_zones)
+    if cadence_zones is not None:
+        track_data = add_zones_to_dataframe(track_data, "cadence", cadence_zones)
+
     return (
         track_time,
         track_distance,
@@ -148,6 +161,9 @@ def get_processed_segment_data(
     stopped_speed_threshold: float = 1,
     extend_segment_start: None | list[GPXTrackPoint] = None,
     extend_segment_end: None | list[GPXTrackPoint] = None,
+    heartrate_zones: None | Zones = None,
+    power_zones: None | Zones = None,
+    cadence_zones: None | Zones = None,
 ) -> tuple[float, float, float, float, pd.DataFrame]:
     """
     Calculate the speed and distance from point to point for a segment. This follows
@@ -205,6 +221,13 @@ def get_processed_segment_data(
         time, stopped_distance, stopped_time = 0, 0, 0
 
     data_df = pd.DataFrame(data)
+
+    if heartrate_zones is not None:
+        data_df = add_zones_to_dataframe(data_df, "heartrate", heartrate_zones)
+    if power_zones is not None:
+        data_df = add_zones_to_dataframe(data_df, "power", power_zones)
+    if cadence_zones is not None:
+        data_df = add_zones_to_dataframe(data_df, "cadence", cadence_zones)
 
     return (time, distance, stopped_time, stopped_distance, data_df)
 
@@ -351,7 +374,7 @@ def split_data(
 ) -> pd.DataFrame:
     split_idx_finder: Callable[[pd.Series, float], int]
     if method == "closest":
-        split_idx_finder = lambda s, v: np.abs(s.to_numpy() - v).argmin()
+        split_idx_finder = lambda s, v: np.abs(s.to_numpy() - v).argmin()  # type: ignore
     # TODO: Implement method in which the plotting point is interpolat to the ecxat val
     elif method == "interploation":
         raise NotImplementedError("Interploation splitting method not implemented")
@@ -393,5 +416,24 @@ def split_data(
 
     if last_split != data.index.max() + 1:
         data.loc[last_split : data.index.max() + 1, "segment"] = i_segement
+
+    return data
+
+
+def add_zones_to_dataframe(
+    data: pd.DataFrame, metric: Literal["heartrate", "power", "cadence"], zones: Zones
+) -> pd.DataFrame:
+    zone_bins, names, zone_colors = format_zones_for_digitize(zones)
+    if zone_colors is None:
+        zone_colors = plotly.colors.sample_colorscale("viridis", len(names))
+
+    metric_data = data[metric][~data[metric].isna()]
+    binned_metric = pd.Series(
+        np.digitize(metric_data, zone_bins), index=metric_data.index
+    )
+    data[f"{metric}_zones"] = binned_metric.apply(lambda v: names[v - 1])
+    data[f"{metric}_zone_colors"] = binned_metric.apply(lambda v: zone_colors[v - 1])
+    data.loc[data[data[metric].isna()].index, f"{metric}_zones"] = names[0]
+    data.loc[data[data[metric].isna()].index, f"{metric}_zone_colors"] = zone_colors[0]
 
     return data
