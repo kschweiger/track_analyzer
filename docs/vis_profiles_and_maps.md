@@ -79,3 +79,5 @@ But gaps may appear for sparse tracks as show below.
 Use the inerpolate feature [`Track.interpolate_points_in_segment`][geo_track_analyzer.GPXFileTrack.interpolate_points_in_segment] to increase the density with a following result:
 
 --8<-- "docs/snippets//examples/visualization/map_line_enhanced_interpolated.html"
+
+The line can also be colored based on the [`Zones`][geo_track_analyzer.model.Zones] set in the track for Heart Rate, Cadence, and Power by passing `color_by_zone=True` in the argument of [`Track.plot`][geo_track_analyzer.track.GPXFileTrack.plot] or [`plot_track_enriched_on_map`][geo_track_analyzer.visualize.plot_track_enriched_on_map].

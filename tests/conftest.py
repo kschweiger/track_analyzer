@@ -4,6 +4,7 @@ from typing import Type, final
 import pytest
 
 from geo_track_analyzer.enhancer import ElevationEnhancer
+from geo_track_analyzer.model import ZoneInterval, Zones
 from geo_track_analyzer.track import PyTrack, Track
 
 
@@ -30,6 +31,13 @@ def track_for_test() -> Track:
         heartrate=[100, 120, 125, 121, 125, 130],
         cadence=[80, 81, 79, 70, 60, 65],
         power=[150, 200, 200, 210, 240, 250],
+        heartrate_zones=Zones(
+            intervals=[
+                ZoneInterval(start=None, end=130),
+                ZoneInterval(start=130, end=150),
+                ZoneInterval(start=150, end=None),
+            ]
+        ),
     )
 
     track.add_segmeent(
