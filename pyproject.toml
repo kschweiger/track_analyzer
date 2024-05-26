@@ -20,7 +20,6 @@ requires-python = ">=3.10"
 dependencies = [
   "numpy>=1,<2",
   "gpxpy~=1.6",
-  "coloredlogs>=15,<16",
   "requests>=2,<3",
   "plotly>=5,<6",
   "pandas>=2,<3",
@@ -39,6 +38,9 @@ enhance-elevation = 'geo_track_analyzer:update_elevation'
 
 [project.optional-dependencies]
 cli = ["click>=8,<9", "rich"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/"]
 
 [tool.ruff]
 target-version = "py310"

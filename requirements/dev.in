@@ -3,6 +3,7 @@
 -c doc.txt
 
 types-requests
+coloredlogs
 
 # Build tools
 flit
