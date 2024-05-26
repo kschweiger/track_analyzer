@@ -6,16 +6,12 @@ charset-normalizer==3.3.2
     # via requests
 click==8.1.7
     # via geo-track-analyzer (pyproject.toml)
-coloredlogs==15.0.1
-    # via geo-track-analyzer (pyproject.toml)
 compress-pickle==2.1.0
     # via pydantic-numpy
 fitparse==1.2.0
     # via geo-track-analyzer (pyproject.toml)
 gpxpy==1.6.2
     # via geo-track-analyzer (pyproject.toml)
-humanfriendly==10.0
-    # via coloredlogs
 idna==3.7
     # via requests
 lz4==4.3.3

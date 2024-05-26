@@ -3,7 +3,6 @@ from datetime import timedelta
 from math import acos, asin, atan2, cos, degrees, pi, sin, sqrt
 from typing import Callable, Literal, Type, TypeVar, Union
 
-import coloredlogs
 import numpy as np
 import numpy.typing as npt
 from gpxpy.gpx import GPXBounds, GPXTrack, GPXTrackPoint, GPXTrackSegment
@@ -23,6 +22,12 @@ from geo_track_analyzer.utils.internal import (
     get_extended_track_point,
     get_extension_value,
 )
+
+try:
+    import coloredlogs  # type: ignore
+except ModuleNotFoundError:
+    coloredlogs = None
+
 
 logger = logging.getLogger(__name__)
 
@@ -134,7 +139,10 @@ def init_logging(this_level: Union[int, str]) -> bool:
     """Helper function for setting up python logging"""
     log_format = "[%(asctime)s] %(name)-30s %(levelname)-8s %(message)s"
     level, _ = parse_level(this_level)
-    coloredlogs.install(level=level, fmt=log_format)
+    if coloredlogs is None:
+        logging.basicConfig(level=level, format=log_format)
+    else:
+        coloredlogs.install(level=level, fmt=log_format)
     return True
 
 

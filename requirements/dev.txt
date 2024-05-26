@@ -16,6 +16,8 @@ charset-normalizer==3.3.2
     #   -c requirements/doc.txt
     #   -c requirements/prod.txt
     #   requests
+coloredlogs==15.0.1
+    # via -r requirements/dev.in
 curtsies==0.4.2
     # via bpython
 cwcwidth==0.1.9
@@ -38,6 +40,8 @@ git-changelog==2.5.2
     # via -r requirements/dev.in
 greenlet==3.0.3
     # via bpython
+humanfriendly==10.0
+    # via coloredlogs
 identify==2.5.36
     # via pre-commit
 idna==3.7
