@@ -13,3 +13,9 @@ poetry-install-extras:
 doc-preprocess:
 	python docs/dump_github_releases.py
 	python docs/generate_visualization_examples.py
+
+uv-compile:
+	uv pip compile pyproject.toml -o requirements/prod.txt --all-extras --no-header
+	uv pip compile requirements/dev.in -o requirements/dev.txt --no-header
+	uv pip compile requirements/test.in -o requirements/test.txt --no-header
+	uv pip compile requirements/doc.in -o requirements/doc.txt --no-header
