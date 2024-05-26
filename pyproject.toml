@@ -1,90 +1,44 @@
-[tool.poetry]
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
 name = "geo-track-analyzer"
-version = "1.4.1"
-description = "Analyze geospacial data tracks"
-authors = ["Korbinian Schweiger <korbinian.schweiger@gmail.com>"]
-license = "MIT"
+authors = [
+  { name = "Korbinian Schweiger", email = "korbinian.schweiger@gmail.com" },
+]
+readme = "README.md"
+license = { file = "LICENSE" }
+dynamic = ["version", "description"]
 classifiers = [
-    "Topic :: Scientific/Engineering :: GIS",
-    "Topic :: Scientific/Engineering :: Visualization",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Scientific/Engineering :: GIS",
+  "Topic :: Scientific/Engineering :: Visualization",
 ]
 keywords = ["fit", "gpx", "visualization", "analysis"]
-readme = "README.md"
-packages = [{ include = "geo_track_analyzer" }]
-documentation = "https://kschweiger.github.io/track_analyzer/"
-repository = "https://github.com/kschweiger/track_analyzer"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1,<2",
+  "gpxpy~=1.6",
+  "coloredlogs>=15,<16",
+  "requests>=2,<3",
+  "plotly>=5,<6",
+  "pandas>=2,<3",
+  "fitparse~=1.2",
+  "pydantic>=2,<3",
+  "pydantic-numpy>=5,<6",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.10,<3.13"
-numpy = "^1"
-gpxpy = "^1.6"
-coloredlogs = "^15"
-requests = "^2"
-plotly = "^5"
-pandas = "^2"
-fitparse = "^1.2"
-pydantic = "^2"
-pydantic-numpy = "^5"
-click = { version = "^8", optional = true }
-rich = { version = "^13", optional = true }
+[project.urls]
+Home = "https://github.com/kschweiger/track_analyzer"
+Documentation = "https://kschweiger.github.io/track_analyzer/"
 
-[tool.poetry.extras]
-cli = ["click", "rich"]
-
-
-[tool.poetry.group.dev]
-optional = true
-
-[tool.poetry.group.dev.dependencies]
-pre-commit = "^3.7.0"
-flake8 = "^7.0.0"
-mypy = "^1.10.0"
-types-requests = "^2.31.0.20240406"
-ruff = "~0.4.3"
-bpython = "^0.24"
-git-changelog = "^2.5.2"
-debugpy = "^1.8.1"
-
-[tool.poetry.group.test]
-optional = true
-
-[tool.poetry.group.test.dependencies]
-pytest = "^8.2.0"
-pytest-cov = "^5.0.0"
-pytest-mock = "^3.14.0"
-pytest-dependency = "^0.6.0"
-pytest-sugar = "^1.0.0"
-pytest-retry = "^1.6.2"
-
-[tool.poetry.group.doc]
-optional = true
-
-[tool.poetry.group.doc.dependencies]
-mkdocs = "^1.5.3"
-mkdocs-material = "^9.5.11"
-mkdocstrings = { extras = ["python"], version = "^0.24.0" }
-mkdocs-click = "^0.8.1"
-
-[tool.poetry.scripts]
+[project.scripts]
 extract-fit-track = 'geo_track_analyzer:extract_track'
 enhance-elevation = 'geo_track_analyzer:update_elevation'
 
-[[tool.poetry.source]]
-name = "PyPI"
-priority = "primary"
-
-
-[[tool.poetry.source]]
-name = "testpypi"
-url = "https://test.pypi.org/simple/"
-priority = "primary"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.pytest.ini_options]
-testpaths = ["tests/"]
+[project.optional-dependencies]
+cli = ["click>=8,<9", "rich"]
 
 [tool.ruff]
 target-version = "py310"
@@ -94,14 +48,14 @@ line-length = 88
 select = ["E", "F", "I", "PD", "PT", "NPY", "N", "W", "RET", "ANN", "RUF"]
 unfixable = ["F841", "RUF005", "RUF015"]
 ignore = [
-    "ANN101",
-    "RUF009",
-    "E731",
-    "RET505",
-    "ANN002",
-    "ANN003",
-    "RUF005",
-    "ANN102",
+  "ANN101",
+  "RUF009",
+  "E731",
+  "RET505",
+  "ANN002",
+  "ANN003",
+  "RUF005",
+  "ANN102",
 ]
 ignore-init-module-imports = true
 

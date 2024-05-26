@@ -1,0 +1,19 @@
+-c prod.txt
+-c test.txt
+-c doc.txt
+
+types-requests
+
+# Build tools
+flit
+uv
+
+# Lint and format
+mypy
+ruff
+
+# Development tools
+pre-commit
+bpython
+git-changelog
+debugpy

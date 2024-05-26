@@ -1,0 +1,13 @@
+-c prod.txt
+-c dev.txt
+-c doc.txt
+
+
+pytest
+pytest-cov
+pytest-mock
+pytest-dependency
+pytest-sugar
+pytest-retry
+
+

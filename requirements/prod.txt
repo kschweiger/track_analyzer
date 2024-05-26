@@ -1,37 +1,73 @@
---extra-index-url https://test.pypi.org/simple
-
-annotated-types==0.6.0 ; python_version >= "3.10" and python_version < "3.13"
-certifi==2024.2.2 ; python_version >= "3.10" and python_version < "3.13"
-charset-normalizer==3.3.2 ; python_version >= "3.10" and python_version < "3.13"
-click==8.1.7 ; python_version >= "3.10" and python_version < "3.13"
-colorama==0.4.6 ; python_version >= "3.10" and python_version < "3.13" and platform_system == "Windows"
-coloredlogs==15.0.1 ; python_version >= "3.10" and python_version < "3.13"
-compress-pickle[lz4]==2.1.0 ; python_version >= "3.10" and python_version < "3.13"
-fitparse==1.2.0 ; python_version >= "3.10" and python_version < "3.13"
-gpxpy==1.6.2 ; python_version >= "3.10" and python_version < "3.13"
-humanfriendly==10.0 ; python_version >= "3.10" and python_version < "3.13"
-idna==3.7 ; python_version >= "3.10" and python_version < "3.13"
-lz4==4.3.3 ; python_version >= "3.10" and python_version < "3.13"
-markdown-it-py==3.0.0 ; python_version >= "3.10" and python_version < "3.13"
-mdurl==0.1.2 ; python_version >= "3.10" and python_version < "3.13"
-numpy==1.26.4 ; python_version >= "3.10" and python_version < "3.13"
-packaging==24.0 ; python_version >= "3.10" and python_version < "3.13"
-pandas==2.2.2 ; python_version >= "3.10" and python_version < "3.13"
-plotly==5.22.0 ; python_version >= "3.10" and python_version < "3.13"
-pydantic-core==2.18.2 ; python_version >= "3.10" and python_version < "3.13"
-pydantic-numpy==5.0.1 ; python_version >= "3.10" and python_version < "3.13"
-pydantic==2.7.1 ; python_version >= "3.10" and python_version < "3.13"
-pygments==2.18.0 ; python_version >= "3.10" and python_version < "3.13"
-pyreadline3==3.4.1 ; sys_platform == "win32" and python_version >= "3.10" and python_version < "3.13"
-python-dateutil==3.9.0 ; python_version >= "3.10" and python_version < "3.13"
-pytz==2024.1 ; python_version >= "3.10" and python_version < "3.13"
-requests==2.31.0 ; python_version >= "3.10" and python_version < "3.13"
-rich==13.7.1 ; python_version >= "3.10" and python_version < "3.13"
-ruamel-yaml-clib==0.2.8 ; platform_python_implementation == "CPython" and python_version < "3.13" and python_version >= "3.10"
-ruamel-yaml==0.18.6 ; python_version >= "3.10" and python_version < "3.13"
-semver==3.0.2 ; python_version >= "3.10" and python_version < "3.13"
-six==1.16.0 ; python_version >= "3.10" and python_version < "3.13"
-tenacity==8.3.0 ; python_version >= "3.10" and python_version < "3.13"
-typing-extensions==4.11.0 ; python_version >= "3.10" and python_version < "3.13"
-tzdata==2024.1 ; python_version >= "3.10" and python_version < "3.13"
-urllib3==2.2.1 ; python_version >= "3.10" and python_version < "3.13"
+annotated-types==0.6.0
+    # via pydantic
+certifi==2024.2.2
+    # via requests
+charset-normalizer==3.3.2
+    # via requests
+click==8.1.7
+    # via geo-track-analyzer (pyproject.toml)
+coloredlogs==15.0.1
+    # via geo-track-analyzer (pyproject.toml)
+compress-pickle==2.1.0
+    # via pydantic-numpy
+fitparse==1.2.0
+    # via geo-track-analyzer (pyproject.toml)
+gpxpy==1.6.2
+    # via geo-track-analyzer (pyproject.toml)
+humanfriendly==10.0
+    # via coloredlogs
+idna==3.7
+    # via requests
+lz4==4.3.3
+    # via compress-pickle
+markdown-it-py==3.0.0
+    # via rich
+mdurl==0.1.2
+    # via markdown-it-py
+numpy==1.26.4
+    # via
+    #   geo-track-analyzer (pyproject.toml)
+    #   pandas
+    #   pydantic-numpy
+packaging==24.0
+    # via plotly
+pandas==2.2.2
+    # via geo-track-analyzer (pyproject.toml)
+plotly==5.22.0
+    # via geo-track-analyzer (pyproject.toml)
+pydantic==2.7.1
+    # via
+    #   geo-track-analyzer (pyproject.toml)
+    #   pydantic-numpy
+pydantic-core==2.18.2
+    # via pydantic
+pydantic-numpy==5.0.1
+    # via geo-track-analyzer (pyproject.toml)
+pygments==2.18.0
+    # via rich
+python-dateutil==2.9.0.post0
+    # via pandas
+pytz==2024.1
+    # via pandas
+requests==2.31.0
+    # via geo-track-analyzer (pyproject.toml)
+rich==13.7.1
+    # via geo-track-analyzer (pyproject.toml)
+ruamel-yaml==0.18.6
+    # via pydantic-numpy
+ruamel-yaml-clib==0.2.8
+    # via ruamel-yaml
+semver==3.0.2
+    # via pydantic-numpy
+six==1.16.0
+    # via python-dateutil
+tenacity==8.3.0
+    # via plotly
+typing-extensions==4.11.0
+    # via
+    #   pydantic
+    #   pydantic-core
+tzdata==2024.1
+    # via pandas
+urllib3==2.2.1
+    # via requests
