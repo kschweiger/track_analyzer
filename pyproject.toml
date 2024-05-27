@@ -31,6 +31,7 @@ dependencies = [
 [project.urls]
 Home = "https://github.com/kschweiger/track_analyzer"
 Documentation = "https://kschweiger.github.io/track_analyzer/"
+Source = "https://github.com/kschweiger/track_analyzer"
 
 [project.scripts]
 extract-fit-track = 'geo_track_analyzer:extract_track'
