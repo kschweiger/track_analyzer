@@ -44,7 +44,7 @@ def _add_segment_borders(data: pd.DataFrame, fig: Figure, color: None | str) -> 
 def _add_secondary(
     fig: Figure,
     data: pd.DataFrame,
-    secondary: Literal["velocity", "heartrate", "cadence", "power"],
+    secondary: Literal["velocity", "heartrate", "cadence", "power", "speed"],
     split_by_zone: bool,
     min_zone_size: float,
 ) -> None:
@@ -52,10 +52,11 @@ def _add_secondary(
     fill: None | str = "tozeroy"
     y_range_max_factor = 1.2
     y_converter: Callable[[pd.Series], pd.Series] = lambda s: s.fillna(0).astype(int)
-    if secondary == "velocity":
+    if secondary == "velocity" or secondary == "speed":
         title = "Velocity [km/h]"
         y_range_max_factor = 2.1
         y_converter = lambda s: s * 3.6
+        secondary = "speed"
     elif secondary == "heartrate":
         title = "Heart Rate [bpm]"
     elif secondary == "power":
@@ -64,14 +65,14 @@ def _add_secondary(
         title = "Cadence [rpm]"
         fill = None
         mode = "markers"
-
     else:
-        raise RuntimeError
+        raise RuntimeError(
+            "%s was passed for secondary. This is not supported" % secondary
+        )
 
     if pd.isna(data[secondary]).all():
         raise VisualizationSetupError(
-            "Requested to plot heart rate but no heart rate information available "
-            "in data"
+            f"Requested to plot{secondary} but data is (partially) missing in data"
         )
 
     if split_by_zone:

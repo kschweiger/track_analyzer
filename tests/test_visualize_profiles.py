@@ -1,5 +1,6 @@
 import importlib.resources
 import random
+from datetime import datetime
 from typing import Callable
 
 import pandas as pd
@@ -50,16 +51,22 @@ def test_plot_track_with_slope(n_segment: None | int) -> None:
 @pytest.mark.parametrize(
     "flag",
     [
-        # {"include_heartrate": True},
+        {"include_velocity": True},
+        {"include_heartrate": True},
         {"include_cadence": True},
-        # {"include_power": True},
+        {"include_power": True},
     ],
 )
 def test_2d_plot_w_extensions(flag: dict[str, bool]) -> None:
     track = PyTrack(
         points=[(1, 1), (2, 2), (3, 3), (4, 4)],
         elevations=[100, 200, 220, 200],
-        times=None,
+        times=[
+            datetime(2024, 1, 1, 12),
+            datetime(2024, 1, 1, 13),
+            datetime(2024, 1, 1, 14),
+            datetime(2024, 1, 1, 15),
+        ],
         heartrate=[100, 80, 90, 70],
         cadence=[80, 70, 70, 60],
         power=[200, 300, 450, 500],
