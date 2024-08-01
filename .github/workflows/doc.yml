@@ -23,7 +23,6 @@ jobs:
           pip install -e .
       - name: Build the documentation
         run: |
-          source .venv/bin/activate
           pip list
           python docs/dump_github_releases.py
           python docs/generate_visualization_examples.py
