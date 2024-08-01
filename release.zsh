@@ -21,8 +21,8 @@ git commit -n -m "chore: Updated CHANGELOG.md :memo:"
 
 git tag ${VERSION}
 
-# echo "Pushing"
-# git push
-#
-# echo "Pushing tag"
-# git push --tag
+echo "Pushing"
+git push
+
+echo "Pushing tag"
+git push --tag
