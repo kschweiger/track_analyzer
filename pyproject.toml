@@ -1,15 +1,16 @@
 [build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "geo-track-analyzer"
+description = "Analyze geospacial data tracks"
 authors = [
   { name = "Korbinian Schweiger", email = "korbinian.schweiger@gmail.com" },
 ]
 readme = "README.md"
 license = { file = "LICENSE" }
-dynamic = ["version", "description"]
+dynamic = ["version"]
 classifiers = [
   "License :: OSI Approved :: MIT License",
   "Topic :: Scientific/Engineering :: GIS",
@@ -83,3 +84,7 @@ ignore_missing_imports = true
 output = "CHANGELOG.md"
 convention = "conventional"
 template = "angular"
+
+[tool.setuptools_scm]
+[tool.setuptools.packages]
+find = {}
