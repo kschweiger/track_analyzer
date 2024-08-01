@@ -1,4 +1,12 @@
 <!-- insertion marker -->
+<a name="1.4.1"></a>
+
+## [1.4.1](https://github.com/kschweiger/track_analyzer/compare/1.4.0...1.4.1) (2024-08-01)
+
+### Bug Fixes
+
+- **profiles:** Velocity could not be plotted as secondary due to column/name conflict ([41132db](https://github.com/kschweiger/track_analyzer/commit/41132db5a8358a7ed0a007eddb72463fc0ed7b32))
+
 <a name="1.4.0"></a>
 
 ## [1.4.0](https://github.com/kschweiger/track_analyzer/compare/1.3.2...1.4.0) (2024-05-25)
