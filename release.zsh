@@ -9,7 +9,7 @@ then
 fi
 VERSION=$(bump-my-version show current_version)
 
-git add pyproject.toml
+git add .bumpversion.toml
 git commit -n -m "build: Bumped version to ${VERSION} :bookmark:"
 
 echo "Updating changelog"
