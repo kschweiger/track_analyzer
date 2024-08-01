@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.21">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.24">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.66ac8b77.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.6543a935.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
@@ -673,7 +673,7 @@
         <li class="md-nav__item">
   <a href="#geo_track_analyzer.compare.check_segment_bound_overlap" class="md-nav__link">
     <span class="md-ellipsis">
-      &nbsp;check_segment_bound_overlap
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;check_segment_bound_overlap
     </span>
   </a>
   
@@ -682,7 +682,7 @@
         <li class="md-nav__item">
   <a href="#geo_track_analyzer.compare.get_segment_overlap" class="md-nav__link">
     <span class="md-ellipsis">
-      &nbsp;get_segment_overlap
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;get_segment_overlap
     </span>
   </a>
   
@@ -691,7 +691,7 @@
         <li class="md-nav__item">
   <a href="#geo_track_analyzer.compare.convert_segment_to_plate" class="md-nav__link">
     <span class="md-ellipsis">
-      &nbsp;convert_segment_to_plate
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;convert_segment_to_plate
     </span>
   </a>
   
@@ -812,7 +812,7 @@
         <li class="md-nav__item">
   <a href="#geo_track_analyzer.compare.check_segment_bound_overlap" class="md-nav__link">
     <span class="md-ellipsis">
-      &nbsp;check_segment_bound_overlap
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;check_segment_bound_overlap
     </span>
   </a>
   
@@ -821,7 +821,7 @@
         <li class="md-nav__item">
   <a href="#geo_track_analyzer.compare.get_segment_overlap" class="md-nav__link">
     <span class="md-ellipsis">
-      &nbsp;get_segment_overlap
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;get_segment_overlap
     </span>
   </a>
   
@@ -830,7 +830,7 @@
         <li class="md-nav__item">
   <a href="#geo_track_analyzer.compare.convert_segment_to_plate" class="md-nav__link">
     <span class="md-ellipsis">
-      &nbsp;convert_segment_to_plate
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;convert_segment_to_plate
     </span>
   </a>
   
@@ -862,92 +862,88 @@
 <h1 id="comparison-reference">Comparison Reference</h1>
 
 
-
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="geo_track_analyzer.compare.check_segment_bound_overlap" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>          <code class="highlight language-python"><span class="n">check_segment_bound_overlap</span><span class="p">(</span><span class="n">reference_segments</span><span class="p">,</span> <span class="n">segments</span><span class="p">)</span></code>
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <code class="highlight language-python"><span class="n">check_segment_bound_overlap</span><span class="p">(</span><span class="n">reference_segments</span><span class="p">,</span> <span class="n">segments</span><span class="p">)</span></code>
 
 </h3>
 
 
-  <div class="doc doc-contents first">
-  
+    <div class="doc doc-contents first">
+
       <p>Check if segments are within the bounds of a reference segment</p>
 
 
-
-  <p><span class="doc-section-title">Parameters:</span></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-          <td><code>reference_segments</code></td>
-          <td>
-                <code><span title="gpxpy.gpx.GPXTrackSegment">GPXTrackSegment</span></code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Segment defining the bounds inside which the other segments should be contained</p>
-            </div>
-          </td>
-          <td>
-              <em>required</em>
-          </td>
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
         </tr>
-        <tr class="doc-section-item">
-          <td><code>segments</code></td>
-          <td>
-                <code>list[<span title="gpxpy.gpx.GPXTrackSegment">GPXTrackSegment</span>]</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Segments to be checked</p>
-            </div>
-          </td>
-          <td>
-              <em>required</em>
-          </td>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>reference_segments</code></td>
+            <td>
+                  <code><span title="gpxpy.gpx.GPXTrackSegment">GPXTrackSegment</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Segment defining the bounds inside which the other segments should be contained</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>segments</code></td>
+            <td>
+                  <code>list[<span title="gpxpy.gpx.GPXTrackSegment">GPXTrackSegment</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Segments to be checked</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
         </tr>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>list[bool]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List of bools specifying if the segments are inside the refence bounds</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
-
-
-  <p><span class="doc-section-title">Returns:</span></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-          <td>
-                <code>list[bool]</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>List of bools specifying if the segments are inside the refence bounds</p>
-            </div>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-          <details class="quote">
-            <summary>Source code in <code>geo_track_analyzer/compare.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">24</span>
+            <details class="quote">
+              <summary>Source code in <code>geo_track_analyzer/compare.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">24</span>
 <span class="normal">25</span>
 <span class="normal">26</span>
 <span class="normal">27</span>
@@ -1007,153 +1003,149 @@
 
     <span class="k">return</span> <span class="n">res</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="geo_track_analyzer.compare.get_segment_overlap" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>          <code class="highlight language-python"><span class="n">get_segment_overlap</span><span class="p">(</span><span class="n">base_segment</span><span class="p">,</span> <span class="n">match_segment</span><span class="p">,</span> <span class="n">grid_width</span><span class="p">,</span> <span class="n">max_queue_normalize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">allow_points_outside_bounds</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">overlap_threshold</span><span class="o">=</span><span class="mf">0.75</span><span class="p">)</span></code>
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <code class="highlight language-python"><span class="n">get_segment_overlap</span><span class="p">(</span><span class="n">base_segment</span><span class="p">,</span> <span class="n">match_segment</span><span class="p">,</span> <span class="n">grid_width</span><span class="p">,</span> <span class="n">max_queue_normalize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">allow_points_outside_bounds</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">overlap_threshold</span><span class="o">=</span><span class="mf">0.75</span><span class="p">)</span></code>
 
 </h3>
 
 
-  <div class="doc doc-contents first">
-  
+    <div class="doc doc-contents first">
+
       <p>Compare the tracks of two segements and caclulate the overlap.</p>
 
 
-
-  <p><span class="doc-section-title">Parameters:</span></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-          <td><code>base_segment</code></td>
-          <td>
-                <code><span title="gpxpy.gpx.GPXTrackSegment">GPXTrackSegment</span></code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Base segement in which the match segment should be found</p>
-            </div>
-          </td>
-          <td>
-              <em>required</em>
-          </td>
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
         </tr>
-        <tr class="doc-section-item">
-          <td><code>match_segment</code></td>
-          <td>
-                <code><span title="gpxpy.gpx.GPXTrackSegment">GPXTrackSegment</span></code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Other segmeent that should be found in the base segement</p>
-            </div>
-          </td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-        <tr class="doc-section-item">
-          <td><code>grid_width</code></td>
-          <td>
-                <code>float</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Width (in meters) of the grid that will be filled to estimate the overalp.</p>
-            </div>
-          </td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-        <tr class="doc-section-item">
-          <td><code>max_queue_normalize</code></td>
-          <td>
-                <code>int</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Minimum number of successive points in the segment between two points falling into same plate bin.</p>
-            </div>
-          </td>
-          <td>
-                <code>5</code>
-          </td>
-        </tr>
-        <tr class="doc-section-item">
-          <td><code>allow_points_outside_bounds</code></td>
-          <td>
-                <code>int</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Number of points between sub segments allowed for merging the segments.</p>
-            </div>
-          </td>
-          <td>
-                <code>5</code>
-          </td>
-        </tr>
-        <tr class="doc-section-item">
-          <td><code>overlap_threshold</code></td>
-          <td>
-                <code>float</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Minimum overlap required to return the overlap data.</p>
-            </div>
-          </td>
-          <td>
-                <code>0.75</code>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>base_segment</code></td>
+            <td>
+                  <code><span title="gpxpy.gpx.GPXTrackSegment">GPXTrackSegment</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Base segement in which the match segment should be found</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>match_segment</code></td>
+            <td>
+                  <code><span title="gpxpy.gpx.GPXTrackSegment">GPXTrackSegment</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Other segmeent that should be found in the base segement</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>grid_width</code></td>
+            <td>
+                  <code>float</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Width (in meters) of the grid that will be filled to estimate the overalp.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>max_queue_normalize</code></td>
+            <td>
+                  <code>int</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Minimum number of successive points in the segment between two points falling into same plate bin.</p>
+              </div>
+            </td>
+            <td>
+                  <code>5</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>allow_points_outside_bounds</code></td>
+            <td>
+                  <code>int</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Number of points between sub segments allowed for merging the segments.</p>
+              </div>
+            </td>
+            <td>
+                  <code>5</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>overlap_threshold</code></td>
+            <td>
+                  <code>float</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Minimum overlap required to return the overlap data.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.75</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
-  <p><span class="doc-section-title">Returns:</span></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-          <td>
-                <code>list[<a class="autorefs autorefs-internal" title="geo_track_analyzer.model.SegmentOverlap" href="../api_model/#geo_track_analyzer.model.SegmentOverlap">SegmentOverlap</a>]</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>list of SegmentOverlap objects.</p>
-            </div>
-          </td>
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
         </tr>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>list[<a class="autorefs autorefs-internal" title="geo_track_analyzer.model.SegmentOverlap" href="../api_model/#geo_track_analyzer.model.SegmentOverlap">SegmentOverlap</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>list of SegmentOverlap objects.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
-          <details class="quote">
-            <summary>Source code in <code>geo_track_analyzer/compare.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">254</span>
+            <details class="quote">
+              <summary>Source code in <code>geo_track_analyzer/compare.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">254</span>
 <span class="normal">255</span>
 <span class="normal">256</span>
 <span class="normal">257</span>
@@ -1393,182 +1385,178 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
-
 
 <div class="doc doc-object doc-function">
 
 
-
 <h3 id="geo_track_analyzer.compare.convert_segment_to_plate" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>          <code class="highlight language-python"><span class="n">convert_segment_to_plate</span><span class="p">(</span><span class="n">segment</span><span class="p">,</span> <span class="n">gird_width</span><span class="p">,</span> <span class="n">bounds_min_latitude</span><span class="p">,</span> <span class="n">bounds_min_longitude</span><span class="p">,</span> <span class="n">bounds_max_latitude</span><span class="p">,</span> <span class="n">bounds_max_longitude</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">max_queue_normalize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span></code>
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <code class="highlight language-python"><span class="n">convert_segment_to_plate</span><span class="p">(</span><span class="n">segment</span><span class="p">,</span> <span class="n">gird_width</span><span class="p">,</span> <span class="n">bounds_min_latitude</span><span class="p">,</span> <span class="n">bounds_min_longitude</span><span class="p">,</span> <span class="n">bounds_max_latitude</span><span class="p">,</span> <span class="n">bounds_max_longitude</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">max_queue_normalize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span></code>
 
 </h3>
 
 
-  <div class="doc doc-contents first">
-  
+    <div class="doc doc-contents first">
+
       <p>Takes a GPXSegement and fills bins of a 2D array (called plate) with the passed
 bin width. Bins will start at the min latitude and longited values.</p>
 
 
-
-  <p><span class="doc-section-title">Parameters:</span></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-          <td><code>segment</code></td>
-          <td>
-                <code><span title="gpxpy.gpx.GPXTrackSegment">GPXTrackSegment</span></code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The GPXPoints of the Segment will be filled into the plate</p>
-            </div>
-          </td>
-          <td>
-              <em>required</em>
-          </td>
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
         </tr>
-        <tr class="doc-section-item">
-          <td><code>gird_width</code></td>
-          <td>
-                <code>float</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Width (in meters) of the grid</p>
-            </div>
-          </td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-        <tr class="doc-section-item">
-          <td><code>bounds_min_latitude</code></td>
-          <td>
-                <code>float</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Minimum latitude of the grid</p>
-            </div>
-          </td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-        <tr class="doc-section-item">
-          <td><code>bounds_min_longitude</code></td>
-          <td>
-                <code>float</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Minimum longitude of the grid</p>
-            </div>
-          </td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-        <tr class="doc-section-item">
-          <td><code>bounds_max_latitude</code></td>
-          <td>
-                <code>float</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Maximum latitude of the gtid. Bins may end with larger values than passed here dependeing on the grid width</p>
-            </div>
-          </td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-        <tr class="doc-section-item">
-          <td><code>bounds_max_longitude</code></td>
-          <td>
-                <code>float</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Maximum longitude of the grid. Bins may end with larger values than passed here dependeing on the grid width</p>
-            </div>
-          </td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-        <tr class="doc-section-item">
-          <td><code>normalize</code></td>
-          <td>
-                <code>bool</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>If True, successive points (defined by the max_queue_normalize) will not change the values in a bin. This means that each bin values should have the value 1 except there is overlap with points later in the track. To decide this the previous max_queue_normalize points will be considered. So this value dependes on the chosen gridwidth.</p>
-            </div>
-          </td>
-          <td>
-                <code>False</code>
-          </td>
-        </tr>
-        <tr class="doc-section-item">
-          <td><code>max_queue_normalize</code></td>
-          <td>
-                <code>int</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Number of previous bins considered when normalize is set to true.</p>
-            </div>
-          </td>
-          <td>
-                <code>5</code>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>segment</code></td>
+            <td>
+                  <code><span title="gpxpy.gpx.GPXTrackSegment">GPXTrackSegment</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The GPXPoints of the Segment will be filled into the plate</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>gird_width</code></td>
+            <td>
+                  <code>float</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Width (in meters) of the grid</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>bounds_min_latitude</code></td>
+            <td>
+                  <code>float</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Minimum latitude of the grid</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>bounds_min_longitude</code></td>
+            <td>
+                  <code>float</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Minimum longitude of the grid</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>bounds_max_latitude</code></td>
+            <td>
+                  <code>float</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Maximum latitude of the gtid. Bins may end with larger values than passed here dependeing on the grid width</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>bounds_max_longitude</code></td>
+            <td>
+                  <code>float</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Maximum longitude of the grid. Bins may end with larger values than passed here dependeing on the grid width</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>normalize</code></td>
+            <td>
+                  <code>bool</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, successive points (defined by the max_queue_normalize) will not change the values in a bin. This means that each bin values should have the value 1 except there is overlap with points later in the track. To decide this the previous max_queue_normalize points will be considered. So this value dependes on the chosen gridwidth.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>max_queue_normalize</code></td>
+            <td>
+                  <code>int</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Number of previous bins considered when normalize is set to true.</p>
+              </div>
+            </td>
+            <td>
+                  <code>5</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
-  <p><span class="doc-section-title">Returns:</span></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-          <td>
-                <code><span title="numpy.ndarray">ndarray</span></code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>2DArray representing the plate.</p>
-            </div>
-          </td>
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
         </tr>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>2DArray representing the plate.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
-          <details class="quote">
-            <summary>Source code in <code>geo_track_analyzer/compare.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">151</span>
+            <details class="quote">
+              <summary>Source code in <code>geo_track_analyzer/compare.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">151</span>
 <span class="normal">152</span>
 <span class="normal">153</span>
 <span class="normal">154</span>
@@ -1702,8 +1690,8 @@ bin width. Bins will start at the min latitude and longited values.</p>
 
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">plate</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
@@ -1836,7 +1824,7 @@ bin width. Bins will start at the min latitude and longited values.</p>
     <script id="__config" type="application/json">{"base": "..", "features": ["content.action.edit", "content.code.copy", "content.tabs.link", "content.tooltips", "navigation.expand", "navigation.footer", "navigation.instant", "navigation.sections"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.a7c05c9e.min.js"></script>
+      <script src="../assets/javascripts/bundle.081f42fc.min.js"></script>
       
     
   </body>
