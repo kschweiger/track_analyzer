@@ -6,6 +6,7 @@ types-requests
 coloredlogs
 
 # Build tools
+bump-my-version
 build>=1,<2
 setuptools>=72,<73
 setuptools-scm>=8,<9
