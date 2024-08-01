@@ -1,16 +1,13 @@
 #!/bin/zsh
 
 echo "Bumping Version"
-bump-my-version bump $1
+bump-my-version bump $1 --commit
 if [[ $? != 0 ]]
 then
   echo "Bumping version failed. Exiting..."
   exit 1
 fi
 VERSION=$(bump-my-version show current_version)
-
-git add .bumpversion.toml
-git commit -n -m "build: Bumped version to ${VERSION} :bookmark:"
 
 echo "Updating changelog"
 git-changelog --bump ${VERSION}
