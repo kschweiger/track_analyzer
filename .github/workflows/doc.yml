@@ -15,19 +15,14 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
-      - name: Install Poetry
-        uses: abatilo/actions-poetry@v2
-      - name: Setup a local virtual environment (if no poetry.toml file)
-        run: |
-          poetry config virtualenvs.create true --local
-          poetry config virtualenvs.in-project true --local
+          python-version: "3.11"
       - name: Install dependencies
         run: |
-          poetry install --all-extras --with doc
+          pip install -r requirements/prod.txt
+          pip install -r requirements/doc.txt
+          pip install -e .
       - name: Build the documentation
         run: |
-          source .venv/bin/activate
           pip list
           python docs/dump_github_releases.py
           python docs/generate_visualization_examples.py
@@ -36,7 +31,6 @@ jobs:
         with:
           name: DocumentationHTML
           path: site/
-
       - name: Commit documentation changes
         run: |
           git clone https://github.com/kschweiger/track_analyzer.git --branch gh-pages --single-branch gh-pages
@@ -55,3 +49,4 @@ jobs:
           branch: gh-pages
           directory: gh-pages
           github_token: ${{ secrets.GITHUB_TOKEN }}
+

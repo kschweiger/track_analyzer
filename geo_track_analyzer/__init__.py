@@ -1,3 +1,5 @@
+"""Analyze geospacial data tracks"""
+
 from .cli import extract_track, update_elevation
 from .enhancer import (
     ElevationEnhancer,
@@ -25,3 +27,5 @@ __all__ = [
     "update_elevation",
     "extract_track",
 ]
+
+__version__ = "1.4.0"

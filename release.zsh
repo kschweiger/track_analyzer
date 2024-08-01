@@ -1,14 +1,13 @@
 #!/bin/zsh
 
 echo "Bumping Version"
-VERSION=$(poetry version --short $1)
+bump-my-version bump $1 --commit
 if [[ $? != 0 ]]
 then
-  echo "poetry version failed. Exiting..."
+  echo "Bumping version failed. Exiting..."
   exit 1
 fi
-git add pyproject.toml
-git commit -n -m "build: Bumped version to ${VERSION} :bookmark:"
+VERSION=$(bump-my-version show current_version)
 
 echo "Updating changelog"
 git-changelog --bump ${VERSION}
