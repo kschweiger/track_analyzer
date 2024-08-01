@@ -24,8 +24,7 @@ jobs:
       - name: Build the package
         run: |
           pip list
-          flit --debug build --format wheel
-          flit --debug build --format sdist --no-use-vcs
+          python -m build
       - name: Store the distribution packages
         uses: actions/upload-artifact@master
         with:
@@ -41,14 +40,11 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
-      - name: Install dependencies
+      - name: Setup twine and repo settings
         run: |
-          pip install $(cat requirements/dev.txt | grep flit==)
-      - name: Set repo settings
-        run: |
-          export FLIT_INDEX_URL="https://test.pypi.org/legacy/"
-          export FLIT_USERNAME="__token__"
-          export FLIT_PASSWORD="${{ secrets.TEST_PYPI_API_KEY }}"
+          pip install --upgrade twine
+          export TWINE_USERNAME="__token__"
+          export TWINE_PASSWORD="${{ secrets.TEST_PYPI_API_KEY }}"
       - name: Download all the dists
         uses: actions/download-artifact@master
         with:
@@ -58,7 +54,7 @@ jobs:
         run: |
           ls -l
           ls -l dist/
-          poetry publish -r testpypi
+          twine upload -r testpypi dist/*
   install-test-package:
     name: Install 📦 from Test-PyPI
     runs-on: ubuntu-latest
@@ -83,12 +79,11 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
-      - name: Install Poetry
-        uses: abatilo/actions-poetry@v2
-      - name: Set repo settings
+      - name: Setup twine and repo settings
         run: |
-          poetry source add pypi
-          poetry config pypi-token.pypi "${{ secrets.PYPI_API_KEY }}"
+          pip install --upgrade twine
+          export TWINE_USERNAME="__token__"
+          export TWINE_PASSWORD="${{ secrets.PYPI_API_KEY }}"
       - name: Download all the dists
         uses: actions/download-artifact@master
         with:
@@ -98,7 +93,7 @@ jobs:
         run: |
           ls -l
           ls -l dist/
-          poetry publish
+          twine upload dist/*
   publish-github:
     name: GitHub release 🦾
     runs-on: ubuntu-latest
@@ -171,4 +166,3 @@ jobs:
           branch: gh-pages
           directory: gh-pages
           github_token: ${{ secrets.GITHUB_TOKEN }}
-
