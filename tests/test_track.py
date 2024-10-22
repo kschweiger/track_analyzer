@@ -654,3 +654,159 @@ def test_plot_use_distance_segments(
     fig = track.plot("map-segments", use_distance_segments=1000)
     assert spy_generate.call_count == 1
     assert isinstance(fig, Figure)
+
+
+@pytest.mark.parametrize(
+    ("n_segment", "merge"),
+    [
+        (0, "before"),
+        (1, "after"),
+        (5, "before"),
+        (5, "after"),
+    ],
+)
+def test_remove_segment_no_succ(n_segment: int, merge: str) -> None:
+    track = PyTrack(
+        [(1.0001, 1.0001), (1.00012, 1.00012), (1.00014, 1.00014)],
+        [100, 100, 100],
+        [
+            datetime(2023, 1, 1, 10),
+            datetime(2023, 1, 1, 10, 0, 10),
+            datetime(2023, 1, 1, 10, 0, 20),
+        ],
+    )
+    track.add_segmeent(
+        [(1.00016, 1.00016), (1.00018, 1.00018), (1.0002, 1.0002)],
+        [100, 100, 100],
+        [
+            datetime(2023, 1, 1, 10, 0, 30),
+            datetime(2023, 1, 1, 10, 0, 40),
+            datetime(2023, 1, 1, 10, 0, 50),
+        ],
+    )
+
+    assert not track.remove_segement(n_segment, merge)  # type: ignore
+
+
+@pytest.mark.parametrize(
+    ("points", "n_segment", "merge", "n_exp_segments", "exp_segment"),
+    [
+        (
+            [
+                [(1, 1, 0), (2, 2, 5), (3, 3, 10)],
+                [(4, 4, 15), (5, 5, 20), (6, 6, 25)],
+            ],
+            0,
+            "after",
+            1,
+            (0, 6),
+        ),
+        (
+            [
+                [(1, 1, 0), (2, 2, 5), (3, 3, 10)],
+                [(3, 3, 10), (5, 5, 15), (6, 6, 20)],
+            ],
+            0,
+            "after",
+            1,
+            (0, 5),
+        ),
+        (
+            [
+                [(1, 1, 0), (2, 2, 5), (3, 3, 10)],
+                [(4, 4, 15), (5, 5, 20), (6, 6, 25)],
+                [(7, 7, 30), (8, 8, 35)],
+            ],
+            0,
+            "after",
+            2,
+            (0, 6),
+        ),
+        (
+            [
+                [(1, 1, 0), (2, 2, 5), (3, 3, 10)],
+                [(4, 4, 12), (5, 5, 15), (6, 6, 20)],
+            ],
+            1,
+            "before",
+            1,
+            (0, 6),
+        ),
+        (
+            [
+                [(1, 1, 0), (2, 2, 5), (3, 3, 10)],
+                [(3, 3, 10), (5, 5, 15), (6, 6, 20)],
+            ],
+            1,
+            "before",
+            1,
+            (0, 5),
+        ),
+        (
+            [
+                [(1, 1, 0), (2, 2, 5), (3, 3, 10)],
+                [(4, 4, 12), (5, 5, 15), (6, 6, 20)],
+                [(7, 7, 30), (8, 8, 35)],
+            ],
+            2,
+            "before",
+            2,
+            (1, 5),
+        ),
+    ],
+)
+def test_remove_segment(
+    points: list[list[tuple[float, float, int]]],
+    n_segment: int,
+    merge: str,
+    n_exp_segments: int,
+    exp_segment: tuple[int, int],
+) -> None:
+    idx_segment, n_points = exp_segment
+    segment_args = []
+    for segment_points in points:
+        dates = []
+        _points: list[tuple[float, float]] = []
+        for lat, long, secs in segment_points:
+            _points.append((lat, long))
+            dates.append(datetime(2024, 1, 1, 10, 0, secs))
+        segment_args.append([_points, [100 for _ in segment_points], dates])
+
+    track = PyTrack(*segment_args[0])
+    for args in segment_args[1:]:
+        track.add_segmeent(*args)
+
+    assert len(track.track.segments) == len(points)
+
+    assert track.remove_segement(n_segment, merge)
+
+    assert len(track.track.segments) == n_exp_segments
+    assert len(track.track.segments[idx_segment].points) == n_points
+
+
+def test_strip_segments() -> None:
+    points = [
+        [(1, 1, 0), (2, 2, 5), (3, 3, 10)],
+        [(4, 4, 12), (5, 5, 15), (6, 6, 20)],
+        [(7, 7, 30), (8, 8, 35)],
+    ]
+    segment_args = []
+    for segment_points in points:
+        dates = []
+        _points: list[tuple[float, float]] = []
+        for lat, long, secs in segment_points:
+            _points.append((lat, long))
+            dates.append(datetime(2024, 1, 1, 10, 0, secs))
+        segment_args.append([_points, [100 for _ in segment_points], dates])
+
+    track = PyTrack(*segment_args[0])
+    for args in segment_args[1:]:
+        track.add_segmeent(*args)
+
+    assert len(track.track.segments) == len(points)
+
+    assert track.strip_segements()
+
+    assert len(track.track.segments) == 1
+    exp_total_points = sum([len(x) for x in points])
+    assert len(track.track.segments[0].points) == exp_total_points

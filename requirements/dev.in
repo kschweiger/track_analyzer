@@ -4,6 +4,7 @@
 
 types-requests
 coloredlogs
+debugpy
 
 # Build tools
 bump-my-version
