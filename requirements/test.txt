@@ -1,8 +1,8 @@
-coverage==7.6.0
+coverage==7.6.4
     # via pytest-cov
 iniconfig==2.0.0
     # via pytest
-packaging==24.0
+packaging==24.1
     # via
     #   -c requirements/dev.txt
     #   -c requirements/doc.txt
@@ -11,7 +11,7 @@ packaging==24.0
     #   pytest-sugar
 pluggy==1.5.0
     # via pytest
-pytest==8.3.2
+pytest==8.3.3
     # via
     #   -r requirements/test.in
     #   pytest-cov
@@ -29,9 +29,9 @@ pytest-retry==1.6.3
     # via -r requirements/test.in
 pytest-sugar==1.0.0
     # via -r requirements/test.in
-setuptools==72.1.0
+setuptools==75.2.0
     # via
     #   -c requirements/dev.txt
     #   pytest-dependency
-termcolor==2.4.0
+termcolor==2.5.0
     # via pytest-sugar

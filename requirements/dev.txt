@@ -1,4 +1,4 @@
-annotated-types==0.6.0
+annotated-types==0.7.0
     # via
     #   -c requirements/prod.txt
     #   pydantic
@@ -8,20 +8,20 @@ blessed==1.20.0
     # via curtsies
 bpython==0.24
     # via -r requirements/dev.in
-bracex==2.4
+bracex==2.5.post1
     # via wcmatch
-build==1.2.1
+build==1.2.2.post1
     # via -r requirements/dev.in
-bump-my-version==0.24.3
+bump-my-version==0.28.0
     # via -r requirements/dev.in
-certifi==2024.2.2
+certifi==2024.8.30
     # via
     #   -c requirements/doc.txt
     #   -c requirements/prod.txt
     #   requests
 cfgv==3.4.0
     # via pre-commit
-charset-normalizer==3.3.2
+charset-normalizer==3.4.0
     # via
     #   -c requirements/doc.txt
     #   -c requirements/prod.txt
@@ -40,21 +40,21 @@ cwcwidth==0.1.9
     # via
     #   bpython
     #   curtsies
-debugpy==1.8.2
+debugpy==1.8.7
     # via -r requirements/dev.in
-distlib==0.3.8
+distlib==0.3.9
     # via virtualenv
-filelock==3.15.4
+filelock==3.16.1
     # via virtualenv
 git-changelog==2.5.2
     # via -r requirements/dev.in
-greenlet==3.0.3
+greenlet==3.1.1
     # via bpython
 humanfriendly==10.0
     # via coloredlogs
-identify==2.6.0
+identify==2.6.1
     # via pre-commit
-idna==3.7
+idna==3.10
     # via
     #   -c requirements/doc.txt
     #   -c requirements/prod.txt
@@ -67,7 +67,7 @@ markdown-it-py==3.0.0
     # via
     #   -c requirements/prod.txt
     #   rich
-markupsafe==2.1.5
+markupsafe==3.0.2
     # via
     #   -c requirements/doc.txt
     #   jinja2
@@ -75,13 +75,13 @@ mdurl==0.1.2
     # via
     #   -c requirements/prod.txt
     #   markdown-it-py
-mypy==1.11.1
+mypy==1.13.0
     # via -r requirements/dev.in
 mypy-extensions==1.0.0
     # via mypy
 nodeenv==1.9.1
     # via pre-commit
-packaging==24.0
+packaging==24.1
     # via
     #   -c requirements/doc.txt
     #   -c requirements/prod.txt
@@ -89,24 +89,24 @@ packaging==24.0
     #   build
     #   git-changelog
     #   setuptools-scm
-platformdirs==4.2.2
+platformdirs==4.3.6
     # via
     #   -c requirements/doc.txt
     #   virtualenv
-pre-commit==3.8.0
+pre-commit==4.0.1
     # via -r requirements/dev.in
 prompt-toolkit==3.0.36
     # via questionary
-pydantic==2.7.1
+pydantic==2.9.2
     # via
     #   -c requirements/prod.txt
     #   bump-my-version
     #   pydantic-settings
-pydantic-core==2.18.2
+pydantic-core==2.23.4
     # via
     #   -c requirements/prod.txt
     #   pydantic
-pydantic-settings==2.4.0
+pydantic-settings==2.6.0
     # via bump-my-version
 pygments==2.18.0
     # via
@@ -114,37 +114,37 @@ pygments==2.18.0
     #   -c requirements/prod.txt
     #   bpython
     #   rich
-pyproject-hooks==1.1.0
+pyproject-hooks==1.2.0
     # via build
 python-dotenv==1.0.1
     # via pydantic-settings
 pyxdg==0.28
     # via bpython
-pyyaml==6.0.1
+pyyaml==6.0.2
     # via
     #   -c requirements/doc.txt
     #   pre-commit
 questionary==2.0.1
     # via bump-my-version
-requests==2.31.0
+requests==2.32.3
     # via
     #   -c requirements/doc.txt
     #   -c requirements/prod.txt
     #   bpython
-rich==13.7.1
+rich==13.9.3
     # via
     #   -c requirements/prod.txt
     #   bump-my-version
     #   rich-click
 rich-click==1.8.3
     # via bump-my-version
-ruff==0.5.5
+ruff==0.7.0
     # via -r requirements/dev.in
 semver==3.0.2
     # via
     #   -c requirements/prod.txt
     #   git-changelog
-setuptools==72.1.0
+setuptools==75.2.0
     # via
     #   -c requirements/test.txt
     #   -r requirements/dev.in
@@ -156,28 +156,28 @@ six==1.16.0
     #   -c requirements/doc.txt
     #   -c requirements/prod.txt
     #   blessed
-tomlkit==0.13.0
+tomlkit==0.13.2
     # via bump-my-version
-types-requests==2.32.0.20240712
+types-requests==2.32.0.20241016
     # via -r requirements/dev.in
-typing-extensions==4.11.0
+typing-extensions==4.12.2
     # via
     #   -c requirements/prod.txt
     #   mypy
     #   pydantic
     #   pydantic-core
     #   rich-click
-urllib3==2.2.1
+urllib3==2.2.3
     # via
     #   -c requirements/doc.txt
     #   -c requirements/prod.txt
     #   requests
     #   types-requests
-uv==0.2.32
+uv==0.4.25
     # via -r requirements/dev.in
-virtualenv==20.26.3
+virtualenv==20.27.0
     # via pre-commit
-wcmatch==8.5.2
+wcmatch==10.0
     # via bump-my-version
 wcwidth==0.2.13
     # via

@@ -50,6 +50,28 @@ def get_extension_value(point: GPXTrackPoint, key: str) -> str:
     raise GPXPointExtensionError("Key %s could not be found" % key)
 
 
+def _points_eq(p1: GPXTrackPoint, p2: GPXTrackPoint) -> bool:
+    base_values = (
+        (p1.latitude == p2.latitude)
+        and (p1.longitude == p2.longitude)
+        and (p1.elevation == p2.elevation)
+        and (p1.time == p2.time)
+    )
+    if not base_values:
+        return False
+
+    if len(p1.extensions) == 0 and len(p1.extensions) == len(p2.extensions):
+        return True
+
+    if len(p1.extensions) != len(p2.extensions):
+        return False
+
+    d1 = {e.tag: e.text for e in p1.extensions if isinstance(e, ExtensionFieldElement)}
+    d2 = {e.tag: e.text for e in p2.extensions if isinstance(e, ExtensionFieldElement)}
+
+    return d1 == d2
+
+
 class GPXTrackPointAfterValidator:
     valid_float_params: ClassVar[list[str]] = [
         "latitude",
@@ -83,7 +105,9 @@ class GPXTrackPointAfterValidator:
 
     @classmethod
     def __get_pydantic_core_schema__(
-        cls, source_type: Any, handler: GetCoreSchemaHandler  # noqa: ANN401
+        cls,
+        source_type: Any,
+        handler: GetCoreSchemaHandler,
     ) -> CoreSchema:
         def validate_from_dict(value: dict[str, Any]) -> GPXTrackPoint:
             conv_dict: dict[str, Any] = {}

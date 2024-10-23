@@ -30,7 +30,7 @@ from geo_track_analyzer.utils.base import (
     get_point_distance,
     interpolate_segment,
 )
-from geo_track_analyzer.utils.internal import get_extended_track_point
+from geo_track_analyzer.utils.internal import _points_eq, get_extended_track_point
 from geo_track_analyzer.visualize import (
     plot_segment_box_summary,
     plot_segment_summary,
@@ -94,6 +94,58 @@ class Track(ABC):
         """
         self.track.segments.append(segment)
         logger.info("Added segment with postition: %s", len(self.track.segments))
+
+    def strip_segements(self) -> bool:
+        while len(self.track.segments) != 1:
+            if not self.remove_segement(len(self.track.segments) - 1, "before"):
+                return False
+
+        return True
+
+    def remove_segement(
+        self, n_segment: int, merge: Literal["before", "after"] = "before"
+    ) -> bool:
+        assert merge in ["before", "after"]
+        if n_segment == 0 and merge != "after":
+            logger.error("First segement can only be merged with the after method")
+            return False
+        if merge == "after" and n_segment == len(self.track.segments) - 1:
+            logger.error("Last segment can only be merged with the before method")
+            return False
+        try:
+            self.track.segments[n_segment]
+        except IndexError:
+            logger.error(
+                "Cannot remove segment %s. No valid key in segments", n_segment
+            )
+            return False
+
+        if merge == "after":
+            idx_end = None
+            if _points_eq(
+                self.track.segments[n_segment].points[-1],
+                self.track.segments[n_segment + 1].points[0],
+            ):
+                idx_end = -1
+            self.track.segments[n_segment + 1].points = (
+                self.track.segments[n_segment].points[0:idx_end]
+                + self.track.segments[n_segment + 1].points
+            )
+            self.track.segments.pop(n_segment)
+            return True
+        else:
+            idx_start = 0
+            if _points_eq(
+                self.track.segments[n_segment].points[0],
+                self.track.segments[n_segment - 1].points[-1],
+            ):
+                idx_start = 1
+            self.track.segments[n_segment - 1].points = (
+                self.track.segments[n_segment - 1].points
+                + self.track.segments[n_segment].points[idx_start:]
+            )
+            self.track.segments.pop(n_segment)
+            return True
 
     def get_xml(self, name: None | str = None, email: None | str = None) -> str:
         """Get track as .gpx file data

@@ -36,6 +36,7 @@ from geo_track_analyzer.utils.base import (
 )
 from geo_track_analyzer.utils.internal import (
     ExtensionFieldElement,
+    _points_eq,
     get_extended_track_point,
     get_extension_value,
 )
@@ -674,3 +675,67 @@ def test_generate_distance_segments(
     split_data = generate_distance_segments(data, distance)
 
     assert split_data["segment"].compare(exp_segments).empty
+
+
+@pytest.mark.parametrize(
+    ("p1", "p2", "res"),
+    [
+        (
+            GPXTrackPoint(1, 1, 100, datetime(2024, 1, 1, 10, 0, 0)),
+            GPXTrackPoint(1, 1, 100, datetime(2024, 1, 1, 10, 0, 0)),
+            True,
+        ),
+        (
+            GPXTrackPoint(1, 1, 100, datetime(2024, 1, 1, 10, 0, 0)),
+            GPXTrackPoint(1, 2, 100, datetime(2024, 1, 1, 10, 0, 0)),
+            False,
+        ),
+        (
+            GPXTrackPoint(1, 1, 100, datetime(2024, 1, 1, 10, 0, 0)),
+            GPXTrackPoint(1, 1, 200, datetime(2024, 1, 1, 10, 0, 0)),
+            False,
+        ),
+        (
+            GPXTrackPoint(1, 1, 100, datetime(2024, 1, 1, 10, 0, 0)),
+            GPXTrackPoint(1, 1, 100, datetime(2024, 1, 1, 20, 0, 0)),
+            False,
+        ),
+        (
+            get_extended_track_point(1, 1, None, None, {}),
+            get_extended_track_point(1, 1, None, None, {}),
+            True,
+        ),
+        (
+            get_extended_track_point(1, 1, None, None, {"a": 1, "b": "1", "c": 1.1}),
+            get_extended_track_point(1, 1, None, None, {"a": 1, "b": "1", "c": 1.1}),
+            True,
+        ),
+        (
+            get_extended_track_point(1, 1, None, None, {}),
+            get_extended_track_point(1, 1, None, None, {"a": 1}),
+            False,
+        ),
+        (
+            get_extended_track_point(1, 1, None, None, {"a": 1, "b": "1", "c": 1.1}),
+            get_extended_track_point(1, 1, None, None, {"a": 1, "b": "1"}),
+            False,
+        ),
+        (
+            get_extended_track_point(1, 1, None, None, {"a": 1}),
+            get_extended_track_point(1, 1, None, None, {"a": 2}),
+            False,
+        ),
+        (
+            get_extended_track_point(1, 1, None, None, {"a": 1.1}),
+            get_extended_track_point(1, 1, None, None, {"a": 2.2}),
+            False,
+        ),
+        (
+            get_extended_track_point(1, 1, None, None, {"a": "1"}),
+            get_extended_track_point(1, 1, None, None, {"a": "2"}),
+            False,
+        ),
+    ],
+)
+def test_points_quadruple_eq(p1: GPXTrackPoint, p2: GPXTrackPoint, res: bool) -> None:
+    assert _points_eq(p1, p2) == res
