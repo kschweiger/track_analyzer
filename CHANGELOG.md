@@ -1,4 +1,12 @@
 <!-- insertion marker -->
+<a name="1.5.0"></a>
+
+## [1.5.0](https://github.com/kschweiger/track_analyzer/compare/1.4.4...1.5.0) (2024-10-23)
+
+### Features
+
+- **track:** Add method for stripping track of all but one segment and removing specific segments (#26) ([cbc1ec5](https://github.com/kschweiger/track_analyzer/commit/cbc1ec5d6c61b13175e885bacdec1f92ef71837c))
+
 <a name="1.4.4"></a>
 
 ## [1.4.4](https://github.com/kschweiger/track_analyzer/compare/1.4.3...1.4.4) (2024-08-02)
