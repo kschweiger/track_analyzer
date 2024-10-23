@@ -8,8 +8,8 @@ debugpy
 
 # Build tools
 bump-my-version
-build>=1,<2
-setuptools>=72,<73
+build>=1
+setuptools>=64
 setuptools-scm>=8,<9
 uv
 
