@@ -96,6 +96,10 @@ class Track(ABC):
         logger.info("Added segment with postition: %s", len(self.track.segments))
 
     def strip_segements(self) -> bool:
+        """
+        Strip all segments from the track. Duplicate points at the segmentment boardes
+        will be dropped.
+        """
         while len(self.track.segments) != 1:
             if not self.remove_segement(len(self.track.segments) - 1, "before"):
                 return False
@@ -105,6 +109,16 @@ class Track(ABC):
     def remove_segement(
         self, n_segment: int, merge: Literal["before", "after"] = "before"
     ) -> bool:
+        """
+        Remove a given segment from the track and merge it with the previous or next
+        segment. Will return False, of the passed parameters lead to not possible
+        operation.
+
+        :param n_segment: Index of the segment the overview should be generated for,
+        :param merge: Direction of the merge. Possible values of "before" and "after".
+
+        :return: Boolean value reflecting if a segment was removed
+        """
         assert merge in ["before", "after"]
         if n_segment == 0 and merge != "after":
             logger.error("First segement can only be merged with the after method")
