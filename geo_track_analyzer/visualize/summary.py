@@ -6,7 +6,13 @@ from plotly.colors import make_colorscale, sample_colorscale
 from plotly.graph_objs import Figure
 
 from geo_track_analyzer.exceptions import VisualizationSetupError
-from geo_track_analyzer.visualize.constants import DEFAULT_BAR_COLORS, ENRICH_UNITS
+from geo_track_analyzer.visualize.constants import (
+    COLOR_GRADIENTS,
+    DEFAULT_BAR_COLORS,
+    DEFAULT_COLOR_GRADIENT,
+    ENRICH_UNITS,
+)
+from geo_track_analyzer.visualize.utils import get_color_gradient
 
 
 def _preprocess_data(
@@ -39,11 +45,25 @@ def _aggregate_zone_data(
     metric: Literal["heartrate", "power", "cadence"],
     aggregate: Literal["time", "distance", "speed"],
     aggregation_method: Literal["sum", "mean"],
+    time_as_timedelta: bool = False,
 ) -> tuple[pd.DataFrame, str, str]:
     group = data.groupby(f"{metric}_zones")
-    bin_data = group[aggregate].agg(aggregation_method).reset_index()
+    # Make sure that the groups are ordered by metric value
+    bin_data = (
+        pd.concat(
+            [group[aggregate].agg(aggregation_method), group[metric].min()],  # type: ignore
+            axis=1,
+        )
+        .sort_values(metric)[aggregate]
+        .reset_index()
+    )
+    print(bin_data)
     if aggregate == "time":
-        bin_data["time"] = pd.to_datetime(bin_data["time"].astype(int), unit="s")
+        bin_data["time"] = (
+            pd.to_timedelta(bin_data["time"].astype(int), unit="s")
+            if time_as_timedelta
+            else pd.to_datetime(bin_data["time"].astype(int), unit="s")
+        )
         y_title = "duration"
         tickformat = "%H:%M:%S"
     elif aggregate == "distance":
@@ -76,6 +96,7 @@ def plot_track_zones(
     height: None | int = 600,
     width: None | int = 1200,
     strict_data_selection: bool = False,
+    as_pie_chart: bool = False,
 ) -> Figure:
     """Aggregate a value per zone defined for heartrate, power, or cadence.
 
@@ -101,26 +122,57 @@ def plot_track_zones(
         metric,
         aggregate,
         aggregation_method="mean" if aggregate == "speed" else "sum",
+        time_as_timedelta=as_pie_chart,
     )
 
     if use_zone_colors:
         colors = bin_data.colors
     else:
-        col_a, col_b = DEFAULT_BAR_COLORS
-        colors = []
-        for i in range(len(bin_data)):
-            colors.append(col_a if i % 2 == 0 else col_b)
+        if as_pie_chart:
+            col_a, col_b = COLOR_GRADIENTS.get(metric, DEFAULT_COLOR_GRADIENT)
+            colors = get_color_gradient(col_a, col_b, len(bin_data))
+        else:
+            col_a, col_b = DEFAULT_BAR_COLORS
+            colors = []
+            for i in range(len(bin_data)):
+                colors.append(col_a if i % 2 == 0 else col_b)
 
-    fig = go.Figure(
-        go.Bar(
-            x=bin_data[f"{metric}_zones"],
-            y=bin_data[aggregate],
-            marker_color=colors,
-            hoverinfo="skip",
-        ),
-    )
+    if as_pie_chart:
+        unit = ENRICH_UNITS.get(aggregate, "")
+        hover_template = "{value:.2f} {unit}"
+        if aggregate == "time":
+            hover_template = "{value} {unit} "
+        fig = go.Figure(
+            go.Pie(
+                labels=bin_data[f"{metric}_zones"],
+                values=bin_data[aggregate],
+                marker=dict(colors=colors, line=dict(color="#000000", width=1)),
+                hovertemplate="%{hovertext}<extra></extra>",
+                hovertext=[
+                    hover_template.format(value=v, unit=unit)
+                    for v in bin_data[aggregate]
+                ],
+                sort=False,
+                direction="clockwise",
+                hole=0.3,
+                textinfo="label+percent",
+                textposition="outside",
+            )
+        )
+        fig.update_layout(showlegend=False)
+    else:
+        fig = go.Figure(
+            go.Bar(
+                x=bin_data[f"{metric}_zones"],
+                y=bin_data[aggregate],
+                marker_color=colors,
+                hoverinfo="skip",
+            ),
+        )
 
     for i, rcrd in enumerate(bin_data.to_dict("records")):
+        if as_pie_chart:
+            continue
         kwargs: dict[str, Any] = dict(
             x=i,
             showarrow=False,

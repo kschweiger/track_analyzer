@@ -14,7 +14,7 @@ from geo_track_analyzer.visualize.summary import (
 from tests import resources
 
 
-@pytest.fixture()
+@pytest.fixture
 def summary_data() -> pd.DataFrame:
     resource_files = importlib.resources.files(resources)
 
@@ -24,10 +24,12 @@ def summary_data() -> pd.DataFrame:
 
 
 @pytest.mark.parametrize("use_zone_colors", [True, False])
+@pytest.mark.parametrize("as_pie_chart", [True, False])
 @pytest.mark.parametrize("aggregate", ["time", "distance", "speed"])
 def test_plot_track_zones(
     summary_data: pd.DataFrame,
     use_zone_colors: bool,
+    as_pie_chart: bool,
     aggregate: Literal["time", "distance", "speed"],
 ) -> None:
     fig = plot_track_zones(
@@ -35,6 +37,7 @@ def test_plot_track_zones(
         metric="heartrate",
         aggregate=aggregate,
         use_zone_colors=use_zone_colors,
+        as_pie_chart=as_pie_chart,
     )
 
     # fig.show()

@@ -4,6 +4,7 @@ ENRICH_UNITS: dict[str, str] = {
     "heartrate": "bpm",
     "cadence": "rpm",
     "power": "W",
+    "distance": "km",
 }
 
 # Based on plotly.express.colors.sequential.Plotly3
