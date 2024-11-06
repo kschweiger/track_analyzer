@@ -1,4 +1,12 @@
 <!-- insertion marker -->
+<a name="1.6.0"></a>
+
+## [1.6.0](https://github.com/kschweiger/track_analyzer/compare/1.5.0...1.6.0) (2024-11-06)
+
+### Features
+
+- **plot_track_zones:** Add option to visualize as Pie Chart ([5ad0669](https://github.com/kschweiger/track_analyzer/commit/5ad0669c3b5e36e5cd8666171b32871a47bf3fb7))
+
 <a name="1.5.0"></a>
 
 ## [1.5.0](https://github.com/kschweiger/track_analyzer/compare/1.4.4...1.5.0) (2024-10-23)
