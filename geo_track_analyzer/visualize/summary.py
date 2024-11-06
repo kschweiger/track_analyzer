@@ -57,7 +57,6 @@ def _aggregate_zone_data(
         .sort_values(metric)[aggregate]
         .reset_index()
     )
-    print(bin_data)
     if aggregate == "time":
         bin_data["time"] = (
             pd.to_timedelta(bin_data["time"].astype(int), unit="s")

@@ -103,6 +103,13 @@ if __name__ == "__main__":
     data = pd.read_csv("tests/resources/summary_test_data.csv", sep=";")
 
     for agg in ["time", "distance", "speed"]:
+        if agg == "time":
+            plot_track_zones(
+                data, "heartrate", agg, width=None, height=None, as_pie_chart=True
+            ).write_html(
+                f"docs/snippets/examples/visualization/zone_summary_hr_{agg}_pie.html",
+                full_html=False,
+            )
         plot_track_zones(data, "heartrate", agg, width=None, height=None).write_html(
             f"docs/snippets/examples/visualization/zone_summary_hr_{agg}.html",
             full_html=False,

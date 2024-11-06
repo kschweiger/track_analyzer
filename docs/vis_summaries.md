@@ -51,6 +51,10 @@ Currently the following aggregation metrics are supported:
 
 --8<-- "docs/snippets/examples/visualization/zone_summary_hr_speed.html"
 
+- The same data can also be visualized as a Pie Chart by passing `as_pie_chart=True`
+
+--8<-- "docs/snippets/examples/visualization/zone_summary_hr_time_pie.html"
+
 ### Zones per segement
 
 Additionally the some aggregation metrics can be split per segment in a track by passing `kind="segment_zone_summary"`.  Internally this will call the  [`plot_segment_zones`][geo_track_analyzer.visualize.plot_segment_zones] function. See the api documentation for all options that can be passed.
