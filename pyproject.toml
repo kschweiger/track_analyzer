@@ -5,7 +5,7 @@ build-backend = "flit_core.buildapi"
 [project]
 name = "geo-track-analyzer"
 description = "Analyze geospacial data tracks"
-version="1.6.0"
+version="1.6.1"
 authors = [
   { name = "Korbinian Schweiger", email = "korbinian.schweiger@gmail.com" },
 ]

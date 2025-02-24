@@ -1,4 +1,12 @@
 <!-- insertion marker -->
+<a name="1.6.1"></a>
+
+## [1.6.1](https://github.com/kschweiger/track_analyzer/compare/1.6.0...1.6.1) (2025-02-24)
+
+### Code Refactoring
+
+- Harmonize plot kind literal string and move to full uv setup (#27) ([783a2ea](https://github.com/kschweiger/track_analyzer/commit/783a2ea8c622efee89ee013d058870c38da29b86))
+
 <a name="1.6.0"></a>
 
 ## [1.6.0](https://github.com/kschweiger/track_analyzer/compare/1.5.0...1.6.0) (2024-11-06)
