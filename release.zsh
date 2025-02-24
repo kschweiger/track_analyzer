@@ -1,23 +1,23 @@
-#!/bin/zsh
+#!/bin/sh
+
+OLD_VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
 
 echo "Bumping Version"
-bump-my-version bump $1 --commit
-if [[ $? != 0 ]]
-then
+
+uv run python bump.py . $1
+if [[ $? != 0 ]]; then
   echo "Bumping version failed. Exiting..."
   exit 1
 fi
-VERSION=$(bump-my-version show current_version)
 
-echo "Updating changelog"
+VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+
+echo $VERSION
+
 git-changelog --bump ${VERSION}
-if [[ $? != 0 ]]
-then
-  echo "Generating changelog failed. Exiting..."
-  exit 1
-fi
-git add CHANGELOG.md
-git commit -n -m "chore: Updated CHANGELOG.md :memo:"
+
+git add pyproject.toml CHANGELOG.md
+git commit -n -m "build: Bumping ${OLD_VERSION} -> ${VERSION} 🔖"
 
 git tag ${VERSION}
 

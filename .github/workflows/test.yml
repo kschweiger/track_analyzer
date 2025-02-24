@@ -25,18 +25,13 @@ jobs:
     env:
       TEST_ENV: CI
     steps:
-      - uses: actions/checkout@master
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Log python version info (${{ matrix.python-version }})
-        run: python --version
-      - name: Install dependencies
-        run: |
-          pip install -r requirements/prod.txt
-          pip install -r requirements/test.txt
-          pip install -e .
+      - name: Install the project
+        run: uv sync --all-extras
       - name: pytest
         run: |
-          python -m pytest -v --cov-report term-missing --cov=gpx_track_analyzer
+          uv run pytest -v --cov-report term-missing --cov=gpx_track_analyzer
