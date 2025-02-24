@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import warnings
 from abc import ABC, abstractmethod
 from datetime import datetime
 from itertools import pairwise
@@ -669,10 +670,10 @@ class Track(ABC):
             "map-line",
             "map-line-enhanced",
             "map-segments",
-            "zone_summary",
-            "segment_zone_summary",
-            "segment_box",
-            "segment_summary",
+            "zone-summary",
+            "segment-zone-summary",
+            "segment-box",
+            "segment-summary",
         ],
         *,
         segment: None | int | list[int] = None,
@@ -704,7 +705,7 @@ class Track(ABC):
                 metric (heartrate, power, cadence) with defined zones. Pass keyword args
                 for [`plot_track_zones`][geo_track_analyzer.visualize.plot_track_zones],
                 `aggregate` and `metric` are required.
-            - segment_zone_summary : Same as "zone_summary" but split aggregate per
+            - segment_zone_summary : Same as "zone-summary" but split aggregate per
                 segment [`plot_segment_zones`][geo_track_analyzer.visualize.plot_segment_zones]
             - segment_box : Box plot of a metric (heartrate, power, cadence, speed,
                 elevation) per segment. Pass keyword args for [`plot_segments_on_map`][geo_track_analyzer.visualize.plot_segments_on_map]
@@ -737,11 +738,19 @@ class Track(ABC):
             "map-line",
             "map-line-enhanced",
             "map-segments",
-            "zone_summary",
-            "segment_zone_summary",
-            "segment_box",
-            "segment_summary",
+            "zone-summary",
+            "segment-zone-summary",
+            "segment-box",
+            "segment-summary",
         ]
+
+        if "_" in kind and kind.replace("_", "-") in valid_kinds:
+            warnings.warn(
+                "Found %s but in versions >=2 only %s will be supported"
+                % (kind, kind.replace("_", "-")),
+                DeprecationWarning,
+            )
+            kind = kind.replace("_", "-")  # type: ignore
 
         require_elevation = ["profile", "profile-slope"]
         connect_segment_full = ["map-segments"]
@@ -750,20 +759,18 @@ class Track(ABC):
                 f"Kind {kind} is not valid. Pass on of {','.join(valid_kinds)}"
             )
 
-        if kind in ["zone_summary", "segment_zone_summary"] and not all(
-            key in kwargs.keys() for key in ["metric", "aggregate"]
+        if kind in ["zone-summary", "segment-zone-summary"] and not all(
+            key in kwargs for key in ["metric", "aggregate"]
         ):
             raise VisualizationSetupError(
                 f"If {kind} is passed, **metric** and **aggregate** need to be passed"
             )
-        if kind in ["segment_box"] and not all(
-            key in kwargs.keys() for key in ["metric"]
-        ):
+        if kind in ["segment-box"] and not all(key in kwargs for key in ["metric"]):
             raise VisualizationSetupError(
                 f"If {kind} is passed, **metric** needs to be passed"
             )
-        if kind in ["segment_summary"] and not all(
-            key in kwargs.keys() for key in ["aggregate"]
+        if kind in ["segment-summary"] and not all(
+            key in kwargs for key in ["aggregate"]
         ):
             raise VisualizationSetupError(
                 f"If {kind} is passed, **metric** needs to be passed"
@@ -816,13 +823,13 @@ class Track(ABC):
             fig = plot_track_enriched_on_map(data=data, **kwargs)
         elif kind == "map-segments":
             fig = plot_segments_on_map(data=data, **kwargs)
-        elif kind == "zone_summary":
+        elif kind == "zone-summary":
             fig = plot_track_zones(data=data, **kwargs)
-        elif kind == "segment_zone_summary":
+        elif kind == "segment-zone-summary":
             fig = plot_segment_zones(data=data, **kwargs)
-        elif kind == "segment_summary":
+        elif kind == "segment-summary":
             fig = plot_segment_summary(data=data, **kwargs)
-        elif kind == "segment_box":
+        elif kind == "segment-box":
             fig = plot_segment_box_summary(data=data, **kwargs)
 
         return fig

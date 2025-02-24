@@ -1,16 +1,16 @@
 [build-system]
-requires = ["setuptools>=64", "setuptools_scm>=8"]
-build-backend = "setuptools.build_meta"
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
 
 [project]
 name = "geo-track-analyzer"
 description = "Analyze geospacial data tracks"
+version="1.6.0"
 authors = [
   { name = "Korbinian Schweiger", email = "korbinian.schweiger@gmail.com" },
 ]
 readme = "README.md"
 license = { file = "LICENSE" }
-dynamic = ["version"]
 classifiers = [
   "License :: OSI Approved :: MIT License",
   "Topic :: Scientific/Engineering :: GIS",
@@ -20,6 +20,7 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3 :: Only",
 ]
 keywords = ["fit", "gpx", "visualization", "analysis"]
@@ -46,29 +47,47 @@ enhance-elevation = 'geo_track_analyzer:update_elevation'
 
 [project.optional-dependencies]
 cli = ["click>=8,<9", "rich"]
+full = ["geo-track-analyzer[cli]"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/"]
 
 [tool.ruff]
-target-version = "py310"
 line-length = 88
+target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "PD", "PT", "NPY", "N", "W", "RET", "ANN", "RUF"]
-unfixable = ["F841", "RUF005", "RUF015"]
+select = [
+  "E",
+  "F",
+  "I",
+  "PD",
+  "PT",
+  "NPY",
+  "N",
+  "W",
+  "RET",
+  "ANN",
+  "RUF",
+  "SIM",
+  "PERF",
+]
+unfixable = ["F841", "RUF015"]
 ignore = [
-  "ANN101",
-  "RUF009",
-  "E731",
-  "RET505",
+  "ANN202",
+  "ANN205",
+  "ANN001",
   "ANN002",
   "ANN003",
+  "ANN401",
+  "RET502",
+  "RET503",
+  "RET504",
+  "RET505",
   "RUF005",
-  "ANN102",
+  "RUF009",
+  "E731",
 ]
-ignore-init-module-imports = true
-
 [tool.mypy]
 strict_optional = true
 check_untyped_defs = true
@@ -91,6 +110,28 @@ output = "CHANGELOG.md"
 convention = "conventional"
 template = "angular"
 
-[tool.setuptools_scm]
-[tool.setuptools.packages]
-find = {}
+[dependency-groups]
+dev = [
+    "bpython>=0.25",
+    "debugpy>=1.8.12",
+    "pre-commit>=4.1.0",
+    "ruff>=0.9.7",
+    "uv>=0.6.2",
+    "geo-track-analyzer[full]"
+]
+doc = [
+    "mkdocs>=1.6.1",
+    "mkdocs-click>=0.8.1",
+    "mkdocs-material>=9.6.5",
+    "mkdocstrings[python]>=0.28.2",
+]
+test = [
+    "pytest>=8.3.4",
+    "pytest-cov>=6.0.0",
+    "pytest-dependency>=0.6.0",
+    "pytest-mock>=3.14.0",
+    "pytest-retry>=1.7.0",
+    "pytest-sugar>=1.0.0",
+]
+[tool.uv]
+default-groups = ["dev", "test"]
