@@ -47,7 +47,8 @@ enhance-elevation = 'geo_track_analyzer:update_elevation'
 
 [project.optional-dependencies]
 cli = ["click>=8,<9", "rich"]
-full = ["geo-track-analyzer[cli]"]
+vis = ["dash", "click>=8,<9", "rich"]
+full = ["geo-track-analyzer[cli,vis]"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/"]

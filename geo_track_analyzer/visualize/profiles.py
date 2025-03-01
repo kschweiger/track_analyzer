@@ -488,7 +488,7 @@ def plot_track_with_slope(
                 x=this_data.cum_distance_moving,
                 y=this_data.elevation,
                 mode="lines",
-                name=f"Distance {max_distance/1000:.1f} km",
+                name=f"Distance {max_distance / 1000:.1f} km",
                 fill="tozeroy",
                 marker_color=color,
                 hovertemplate=f"Slope: {slope_val} %",
