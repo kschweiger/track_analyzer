@@ -1225,11 +1225,11 @@ class FITTrack(Track):
         points, elevations, times = [], [], []
         heartrates, cadences, powers = [], [], []
 
-        split_at = [0]
+        split_at = set([0])
         for record in fit_data.get_messages(("record", "lap")):  # type: ignore
             record: DataMessage  # type: ignore
             if record.mesg_type.name == "lap":
-                split_at.append(len(points))
+                split_at.add(len(points))
             lat = record.get_value("position_lat")
             long = record.get_value("position_long")
             ele = record.get_value("enhanced_altitude")
@@ -1281,6 +1281,7 @@ class FITTrack(Track):
                 "max_velocity": session_data.get_value("max_speed"),
             }
 
+        split_at = sorted(split_at)
         if len(split_at) == 1:
             split_at.append(len(points))
 
