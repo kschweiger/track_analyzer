@@ -6175,7 +6175,8 @@ NOTE: Tested with Wahoo devices only</p>
 <span class="normal">1315</span>
 <span class="normal">1316</span>
 <span class="normal">1317</span>
-<span class="normal">1318</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">1318</span>
+<span class="normal">1319</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bytes</span><span class="p">,</span>
     <span class="n">stopped_speed_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
@@ -6220,11 +6221,11 @@ NOTE: Tested with Wahoo devices only</p>
     <span class="n">points</span><span class="p">,</span> <span class="n">elevations</span><span class="p">,</span> <span class="n">times</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
     <span class="n">heartrates</span><span class="p">,</span> <span class="n">cadences</span><span class="p">,</span> <span class="n">powers</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
 
-    <span class="n">split_at</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">split_at</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="mi">0</span><span class="p">])</span>
     <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">fit_data</span><span class="o">.</span><span class="n">get_messages</span><span class="p">((</span><span class="s2">&quot;record&quot;</span><span class="p">,</span> <span class="s2">&quot;lap&quot;</span><span class="p">)):</span>  <span class="c1"># type: ignore</span>
         <span class="n">record</span><span class="p">:</span> <span class="n">DataMessage</span>  <span class="c1"># type: ignore</span>
         <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">mesg_type</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;lap&quot;</span><span class="p">:</span>
-            <span class="n">split_at</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">))</span>
+            <span class="n">split_at</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">))</span>
         <span class="n">lat</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="s2">&quot;position_lat&quot;</span><span class="p">)</span>
         <span class="n">long</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="s2">&quot;position_long&quot;</span><span class="p">)</span>
         <span class="n">ele</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="s2">&quot;enhanced_altitude&quot;</span><span class="p">)</span>
@@ -6276,6 +6277,7 @@ NOTE: Tested with Wahoo devices only</p>
             <span class="s2">&quot;max_velocity&quot;</span><span class="p">:</span> <span class="n">session_data</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="s2">&quot;max_speed&quot;</span><span class="p">),</span>
         <span class="p">}</span>
 
+    <span class="n">split_at</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">split_at</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">split_at</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">split_at</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">))</span>
 
