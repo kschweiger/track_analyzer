@@ -1,4 +1,12 @@
 <!-- insertion marker -->
+<a name="1.6.3"></a>
+
+## [1.6.3](https://github.com/kschweiger/track_analyzer/compare/1.6.2...1.6.3) (2025-03-12)
+
+### Bug Fixes
+
+- **FitTrack:** Segment splitting logic could result in empty segments ([cdd6457](https://github.com/kschweiger/track_analyzer/commit/cdd645717be42ba1ace2640360115ec176e4a1b3))
+
 <a name="1.6.2"></a>
 
 ## [1.6.2](https://github.com/kschweiger/track_analyzer/compare/1.6.1...1.6.2) (2025-02-24)
