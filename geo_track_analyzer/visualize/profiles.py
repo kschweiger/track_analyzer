@@ -7,7 +7,8 @@ from plotly.graph_objs import Figure
 from plotly.subplots import make_subplots
 
 from geo_track_analyzer.exceptions import VisualizationSetupError
-from geo_track_analyzer.visualize.utils import get_slope_colors, group_dataframe
+from geo_track_analyzer.visualize.metrics import _add_scatter_cont, _add_scatter_disonct
+from geo_track_analyzer.visualize.utils import get_slope_colors
 
 logger = logging.getLogger(__name__)
 
@@ -104,7 +105,6 @@ def _add_secondary(
 
 def _add_secondary_cont(
     fig: Figure,
-    # data: pd.DataFrame,
     x: pd.Series,
     y: pd.Series,
     y_range: None | tuple[float, float],
@@ -116,25 +116,19 @@ def _add_secondary_cont(
     show_legend: bool = False,
     y_title: None | str = None,
 ) -> None:
-    scatter_kwargs = dict(
+    _add_scatter_cont(
+        fig=fig,
         x=x,
         y=y,
+        y_range=y_range,
+        title=title,
         mode=mode,
-        name=title,
-        legendgroup=legend_group,
         fill=fill,
-        showlegend=show_legend,
-    )
-    if color is not None:
-        scatter_kwargs["line_color"] = color
-    fig.add_trace(
-        go.Scatter(**scatter_kwargs),
-        secondary_y=True,
-    )
-    fig.update_yaxes(
-        title_text=title if y_title is None else y_title,
-        secondary_y=True,
-        range=y_range,
+        color=color,
+        legend_group=legend_group,
+        show_legend=show_legend,
+        y_title=y_title,
+        is_secondary=True,
     )
 
 
@@ -149,39 +143,17 @@ def _add_secondary_disonct(
     fill: None | str,
     min_zone_size: float,
 ) -> None:
-    if f"{secondary}_zones" not in data.columns:
-        raise VisualizationSetupError("Zone data is not provided in passed dataframe")
-
-    zone_data = group_dataframe(
-        data, f"{secondary}_zones", int(len(data) * min_zone_size)
-    )
-    seen_group_names = []
-    y_max = -99
-    for data_ in zone_data[::-1]:
-        group_name = data_[f"{secondary}_zones"].iloc[-1]
-
-        y_data = y_converter(data_[secondary])
-        y_max = max(y_max, y_data.max() * y_range_max_factor)
-
-        _add_secondary_cont(
-            fig=fig,
-            x=data_.cum_distance_moving,
-            y=y_data,
-            y_range=None,
-            title=group_name,
-            mode=mode,
-            fill=fill,
-            color=data_[f"{secondary}_zone_colors"].iloc[-1],
-            legend_group=group_name,
-            show_legend=group_name not in seen_group_names,
-            y_title=title,
-        )
-        if group_name not in seen_group_names:
-            seen_group_names.append(group_name)
-
-    fig.update_yaxes(
-        range=(0, y_max),
-        secondary_y=True,
+    _add_scatter_disonct(
+        fig=fig,
+        data=data,
+        metric=secondary,
+        y_converter=y_converter,
+        y_range_max_factor=y_range_max_factor,
+        title=title,
+        mode=mode,
+        fill=fill,
+        min_zone_size=min_zone_size,
+        is_secondary=True,
     )
 
 
@@ -488,7 +460,7 @@ def plot_track_with_slope(
                 x=this_data.cum_distance_moving,
                 y=this_data.elevation,
                 mode="lines",
-                name=f"Distance {max_distance/1000:.1f} km",
+                name=f"Distance {max_distance / 1000:.1f} km",
                 fill="tozeroy",
                 marker_color=color,
                 hovertemplate=f"Slope: {slope_val} %",

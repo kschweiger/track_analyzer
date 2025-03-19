@@ -33,6 +33,7 @@ from geo_track_analyzer.utils.base import (
 )
 from geo_track_analyzer.utils.internal import _points_eq, get_extended_track_point
 from geo_track_analyzer.visualize import (
+    plot_metrics,
     plot_segment_box_summary,
     plot_segment_summary,
     plot_segment_zones,
@@ -516,7 +517,7 @@ class Track(ABC):
         )
 
         # Reset saved processed data
-        for key in self._processed_track_data.keys():
+        for key in self._processed_track_data:
             self._processed_track_data.pop(key)
         if n_segment in self._processed_segment_data:
             logger.debug(
@@ -674,6 +675,7 @@ class Track(ABC):
             "segment-zone-summary",
             "segment-box",
             "segment-summary",
+            "metrics",
         ],
         *,
         segment: None | int | list[int] = None,
@@ -713,6 +715,9 @@ class Track(ABC):
             - segment_summary : Visualize a aggregate (total_time, total_distance,
                 avg_speed, max_speed) per segment. Pass keyword args for [`plot_segment_summary`][geo_track_analyzer.visualize.plot_segment_summary]
                 `aggregate` is required.
+            - metrics: Visualize the progression of of a metric (elevation, heartrate,
+                power, cadence, power) over the course of a track. Can be plotted over distance
+                and duration.
         :param segment: Select a specific segment, multiple segments or all segmenets,
             defaults to None
         :param reduce_pp_intervals: Optionally pass a distance in m which is used to
@@ -742,6 +747,7 @@ class Track(ABC):
             "segment-zone-summary",
             "segment-box",
             "segment-summary",
+            "metrics",
         ]
 
         if "_" in kind and kind.replace("_", "-") in valid_kinds:
@@ -831,6 +837,8 @@ class Track(ABC):
             fig = plot_segment_summary(data=data, **kwargs)
         elif kind == "segment-box":
             fig = plot_segment_box_summary(data=data, **kwargs)
+        elif kind == "metrics":
+            fig = plot_metrics(data=data, **kwargs)
 
         return fig
 

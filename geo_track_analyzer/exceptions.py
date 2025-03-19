@@ -32,3 +32,7 @@ class VisualizationSetupError(Exception):
 
 class TrackAnalysisError(Exception):
     pass
+
+
+class VisualizationSetupWarning(Warning):
+    pass
