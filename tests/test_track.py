@@ -14,12 +14,12 @@ from geo_track_analyzer.exceptions import (
     VisualizationSetupError,
 )
 from geo_track_analyzer.model import SegmentOverview, ZoneInterval, Zones
-from geo_track_analyzer.track import ByteTrack, GPXFileTrack, PyTrack, Track
+from geo_track_analyzer.track import ByteTrack, FITTrack, GPXFileTrack, PyTrack, Track
 from geo_track_analyzer.utils.internal import get_extension_value
 from tests import resources
 
 
-@pytest.fixture()
+@pytest.fixture
 def two_segment_py_data() -> tuple[tuple[list, list, list], tuple[list, list, list]]:
     segment_1_points = [
         (46.74025, 11.95624),
@@ -65,7 +65,7 @@ def two_segment_py_data() -> tuple[tuple[list, list, list], tuple[list, list, li
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def generate_mock_track() -> GPX:
     gpx = GPX()
 
@@ -810,3 +810,11 @@ def test_strip_segments() -> None:
     assert len(track.track.segments) == 1
     exp_total_points = sum([len(x) for x in points])
     assert len(track.track.segments[0].points) == exp_total_points
+
+
+def test_fit_track() -> None:
+    resource_files = importlib.resources.files(resources)
+
+    FITTrack((resource_files / "MyWhoosh_1.fit").read_bytes())
+
+    assert True
