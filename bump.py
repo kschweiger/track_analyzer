@@ -19,12 +19,14 @@ def parse_mode(value) -> BumpMode:
         )
 
 
-def update_version(filename: Path, old_version: str, new_version: str) -> None:
+def update_version(
+    filename: Path, old_version: str, new_version: str, starts_with: str
+) -> None:
     times_replaced = 0
     updated_lines = []
     with open(filename, "r", encoding="utf-8") as file:
         for line in file:
-            if line.lstrip().startswith("version"):
+            if line.lstrip().startswith(starts_with):
                 updated_lines.append(line.replace(old_version, new_version))
                 times_replaced += 1
             else:
@@ -40,23 +42,47 @@ def main() -> None:
     )
     parser.add_argument("path", help="Input file or directory path")
     parser.add_argument(
-        "mode", type=parse_mode, help="Bump mode: major, minor, or patch"
+        "mode",
+        type=parse_mode,
+        help="Bump mode: major, minor, or patch",
     )
     parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Run in dry-run mode (no changes will be made)",
     )
+    parser.add_argument(
+        "--init",
+        help="Replace the __version__ in the package init",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--package",
+        help="Folder that contains the package",
+        default=None,
+    )
     args = parser.parse_args()
+
+    print(args)
 
     if args.dry_run:
         print("Dry run mode enabled")
 
+    if args.init and not args.package:
+        print("If --init is passed, package must also be passed")
+        exit(1)
     mode = args.mode
     pyproject = Path(f"{args.path}/pyproject.toml")
     if not pyproject.is_file():
         print(f"{pyproject} is no valid file")
         exit(1)
+
+    init_file = None
+    if args.init:
+        init_file = Path(f"{args.path}/{args.package}/__init__.py")
+        if not init_file.is_file():
+            print(f"{init_file} does not exists")
+            exit(1)
 
     with open(pyproject, "rb") as f:
         pyproject_data = tomllib.load(f)
@@ -69,7 +95,6 @@ def main() -> None:
     major_part = int(version_parts[0])
     minor_part = int(version_parts[1])
     patch_part = int(version_parts[2])
-    print(f"Crrr: Major {major_part} / Minor {minor_part} / Patch {patch_part}")
 
     if mode == BumpMode.MAJOR:
         new_version = f"{major_part + 1}.0.0"
@@ -80,7 +105,9 @@ def main() -> None:
 
     print(f"New: {new_version}")
     if not args.dry_run:
-        update_version(pyproject, version, new_version)
+        update_version(pyproject, version, new_version, "version")
+        if init_file:
+            update_version(init_file, version, new_version, "__version__")
 
 
 if __name__ == "__main__":
