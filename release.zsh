@@ -4,7 +4,7 @@ OLD_VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproje
 
 echo "Bumping Version"
 
-uv run python bump.py . $1
+uv run python bump.py . $1 --init --package geo_track_analyzer
 if [[ $? != 0 ]]; then
   echo "Bumping version failed. Exiting..."
   exit 1

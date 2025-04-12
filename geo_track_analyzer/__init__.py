@@ -13,19 +13,19 @@ from .track import ByteTrack, FITTrack, GPXFileTrack, PyTrack, SegmentTrack, Tra
 
 __all__ = [
     "ByteTrack",
+    "ElevationEnhancer",
+    "Enhancer",
+    "EnhancerType",
     "FITTrack",
     "GPXFileTrack",
+    "OpenElevationEnhancer",
+    "OpenTopoElevationEnhancer",
     "PyTrack",
     "SegmentTrack",
     "Track",
-    "EnhancerType",
-    "ElevationEnhancer",
-    "Enhancer",
-    "OpenElevationEnhancer",
-    "OpenTopoElevationEnhancer",
+    "extract_track",
     "get_enhancer",
     "update_elevation",
-    "extract_track",
 ]
 
-__version__ = "1.4.0"
+__version__ = "1.6.3"
