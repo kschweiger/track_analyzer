@@ -44,7 +44,7 @@ def create_tables(
     points_stmt = f"""
         CREATE TABLE IF NOT EXISTS {schema}.{points_table} (
         id SERIAL PRIMARY KEY,
-        track_id INTEGER REFERENCES postgis_testing_2.gpx_tracks(id),
+        track_id INTEGER REFERENCES {schema}.{track_table}(id),
         segment_id INTEGER NOT NULL,
         geom GEOGRAPHY(POINT, 4326),
         elevation DOUBLE PRECISION DEFAULT NULL,
