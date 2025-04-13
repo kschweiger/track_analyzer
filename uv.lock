@@ -328,13 +328,11 @@ cli = [
 ]
 full = [
     { name = "click" },
+    { name = "psycopg2" },
     { name = "rich" },
-]
-postgis = [
     { name = "sqlalchemy" },
 ]
-psycopg2 = [
-    { name = "psycopg2" },
+postgis = [
     { name = "sqlalchemy" },
 ]
 
@@ -368,20 +366,19 @@ test = [
 requires-dist = [
     { name = "click", marker = "extra == 'cli'", specifier = ">=8,<9" },
     { name = "fitparse", specifier = "~=1.2" },
-    { name = "geo-track-analyzer", extras = ["cli"], marker = "extra == 'full'" },
-    { name = "geo-track-analyzer", extras = ["postgis"], marker = "extra == 'psycopg2'" },
+    { name = "geo-track-analyzer", extras = ["cli", "postgis"], marker = "extra == 'full'" },
     { name = "gpxpy", specifier = "~=1.6" },
     { name = "numpy", specifier = ">=1,<2" },
     { name = "pandas", specifier = ">=2,<3" },
     { name = "plotly", specifier = ">=5,<6" },
-    { name = "psycopg2", marker = "extra == 'psycopg2'" },
+    { name = "psycopg2", marker = "extra == 'full'" },
     { name = "pydantic", specifier = ">=2,<3" },
     { name = "pydantic-numpy", specifier = ">=5,<6" },
     { name = "requests", specifier = ">=2,<3" },
     { name = "rich", marker = "extra == 'cli'" },
     { name = "sqlalchemy", marker = "extra == 'postgis'" },
 ]
-provides-extras = ["cli", "postgis", "psycopg2", "full"]
+provides-extras = ["cli", "postgis", "full"]
 
 [package.metadata.requires-dev]
 dev = [
