@@ -48,8 +48,7 @@ enhance-elevation = 'geo_track_analyzer:update_elevation'
 [project.optional-dependencies]
 cli = ["click>=8,<9", "rich"]
 postgis = ["SQLAlchemy"]
-psycopg2 = ["psycopg2", "geo-track-analyzer[postgis]"]
-full = ["geo-track-analyzer[cli]"]
+full = ["geo-track-analyzer[cli,postgis]", "psycopg2"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/"]
