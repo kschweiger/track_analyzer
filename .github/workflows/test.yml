@@ -3,16 +3,32 @@ name: Testing
 on:
   push:
     branches:
-      # - main
-      # - develop
-      - "*"
+      - main
+      - develop
   pull_request:
     branches:
       - main
       - develop
 
 jobs:
-  test:
+  test-base:
+    name: Test base version
+    runs-on: ubuntu-latest
+    env:
+      TEST_ENV: CI
+      SKIP_EXTRA_TEST: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: 3.12
+      - name: Install the project
+        run: uv sync --no-group dev --no-group doc --no-cache
+      - name: pytest
+        run: |
+          uv run --no-group dev --no-group doc pytest
+  test-all:
     name: ${{ matrix.os }} / ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}-latest
     strategy:
@@ -21,8 +37,8 @@ jobs:
           - ubuntu
         python-version:
           - "3.13"
-          # - "3.12"
-          # - "3.11"
+          - "3.12"
+          - "3.11"
     services:
       postgres:
         image: postgis/postgis
@@ -54,7 +70,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install the project
-        run: uv sync --all-extras
+        run: uv sync --no-group dev --no-group doc --all-extras --no-cache
       - name: pytest
         run: |
-          uv run pytest -v --cov-report term-missing --cov=gpx_track_analyzer
+          uv run --no-group dev --no-group doc pytest -v --cov-report term-missing --cov=gpx_track_analyzer
+
+
