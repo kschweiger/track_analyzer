@@ -1,0 +1,69 @@
+annotated-types==0.7.0
+    # via pydantic
+certifi==2025.1.31
+    # via requests
+charset-normalizer==3.4.1
+    # via requests
+click==8.1.8
+    # via geo-track-analyzer (pyproject.toml)
+compress-pickle==2.1.0
+    # via pydantic-numpy
+fitparse==1.2.0
+    # via geo-track-analyzer (pyproject.toml)
+gpxpy==1.6.2
+    # via geo-track-analyzer (pyproject.toml)
+idna==3.10
+    # via requests
+lz4==4.4.3
+    # via compress-pickle
+markdown-it-py==3.0.0
+    # via rich
+mdurl==0.1.2
+    # via markdown-it-py
+numpy==1.26.4
+    # via
+    #   geo-track-analyzer (pyproject.toml)
+    #   pandas
+    #   pydantic-numpy
+packaging==24.2
+    # via plotly
+pandas==2.2.3
+    # via geo-track-analyzer (pyproject.toml)
+plotly==5.24.1
+    # via geo-track-analyzer (pyproject.toml)
+pydantic==2.10.6
+    # via
+    #   geo-track-analyzer (pyproject.toml)
+    #   pydantic-numpy
+pydantic-core==2.27.2
+    # via pydantic
+pydantic-numpy==5.0.2
+    # via geo-track-analyzer (pyproject.toml)
+pygments==2.19.1
+    # via rich
+python-dateutil==2.9.0.post0
+    # via pandas
+pytz==2025.1
+    # via pandas
+requests==2.32.3
+    # via geo-track-analyzer (pyproject.toml)
+rich==13.9.4
+    # via geo-track-analyzer (pyproject.toml)
+ruamel-yaml==0.18.10
+    # via pydantic-numpy
+ruamel-yaml-clib==0.2.12
+    # via ruamel-yaml
+semver==3.0.4
+    # via pydantic-numpy
+six==1.17.0
+    # via python-dateutil
+tenacity==9.0.0
+    # via plotly
+typing-extensions==4.12.2
+    # via
+    #   pydantic
+    #   pydantic-core
+tzdata==2025.1
+    # via pandas
+urllib3==2.3.0
+    # via requests

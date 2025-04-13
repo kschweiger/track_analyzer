@@ -1,17 +1,18 @@
+import os
 from pathlib import Path, PosixPath
 from typing import Type
 
 import pytest
-from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
-from geo_track_analyzer.cli._update_elevation import convert_kwargs
-from geo_track_analyzer.cli._update_elevation import main as update_elevation
 from geo_track_analyzer.enhancer import ElevationEnhancer
 from geo_track_analyzer.track import GPXFileTrack, PyTrack
 
 
+@pytest.mark.skipif(os.environ.get("SKIP_EXTRA_TEST") == "1", reason="DB tests skipped")
 def test_update_elevation_convert_kwargs() -> None:
+    from geo_track_analyzer.cli._update_elevation import convert_kwargs
+
     res = convert_kwargs(("AAA=XXX", "BBB=True", "CCC=False", "DDD=true", "EEE=false"))
 
     assert res["AAA"] == "XXX"
@@ -25,14 +26,24 @@ def test_update_elevation_convert_kwargs() -> None:
     assert not res["EEE"]
 
 
+@pytest.mark.skipif(os.environ.get("SKIP_EXTRA_TEST") == "1", reason="DB tests skipped")
 def test_update_elevation_fail_no_args() -> None:
+    from click.testing import CliRunner
+
+    from geo_track_analyzer.cli._update_elevation import main as update_elevation
+
     runner = CliRunner()
     result = runner.invoke(update_elevation, [])
 
     assert result.exit_code == 2
 
 
+@pytest.mark.skipif(os.environ.get("SKIP_EXTRA_TEST") == "1", reason="DB tests skipped")
 def test_update_elevation_fail_no_gpx(tmp_path: PosixPath) -> None:
+    from click.testing import CliRunner
+
+    from geo_track_analyzer.cli._update_elevation import main as update_elevation
+
     runner = CliRunner()
     with runner.isolated_filesystem(temp_dir=tmp_path):
         with open("hello.txt", "w") as f:
@@ -52,10 +63,15 @@ def test_update_elevation_fail_no_gpx(tmp_path: PosixPath) -> None:
         assert result.exit_code == 2
 
 
+@pytest.mark.skipif(os.environ.get("SKIP_EXTRA_TEST") == "1", reason="DB tests skipped")
 @pytest.mark.parametrize("raw_args", [["aaa"], ["aaa=xy="]])
 def test_update_elevation_fail_raw_arg_conversion(
     tmp_path: PosixPath, raw_args: list[str]
 ) -> None:
+    from click.testing import CliRunner
+
+    from geo_track_analyzer.cli._update_elevation import main as update_elevation
+
     runner = CliRunner()
     with runner.isolated_filesystem(temp_dir=tmp_path):
         with open("hello.gpx", "w") as f:
@@ -76,11 +92,16 @@ def test_update_elevation_fail_raw_arg_conversion(
         assert result.exit_code == 2
 
 
+@pytest.mark.skipif(os.environ.get("SKIP_EXTRA_TEST") == "1", reason="DB tests skipped")
 def test_update_elevation_succ(
     mocker: MockerFixture,
     tmp_path: PosixPath,
     mock_elevation_enhancer: Type[ElevationEnhancer],
 ) -> None:
+    from click.testing import CliRunner
+
+    from geo_track_analyzer.cli._update_elevation import main as update_elevation
+
     mocker.patch(
         "geo_track_analyzer.cli._update_elevation.get_enhancer",
         return_value=mock_elevation_enhancer,

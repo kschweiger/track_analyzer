@@ -1,6 +1,8 @@
 # Command line interface
 
-Not all dependencies for the command line interface utilities are not installed by default. Please use the `cli` extra during installation.
+???+ note "Extra"
+
+    Not all dependencies for the command line interface utilities are not installed by default. Please use the `cli` extra during installation.
 
 -----------------------------
 
