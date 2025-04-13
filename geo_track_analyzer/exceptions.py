@@ -14,6 +14,10 @@ class TrackInitializationError(Exception):
     pass
 
 
+class DBTrackInitializationError(TrackInitializationError):
+    pass
+
+
 class TrackTransformationError(Exception):
     pass
 
