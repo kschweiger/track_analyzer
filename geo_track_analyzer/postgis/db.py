@@ -24,6 +24,17 @@ def create_tables(
     points_table: str,
     extensions: list[tuple[str, str]] | None = None,
 ) -> None:
+    """
+    Create the tables for the tracks and points using the passed Engine
+
+    :param engine: SQLLalchemy Engine for the Postgres database
+    :param schema: Name of the schema in the database
+    :param track_table: Name of the table containing track information
+    :param points_table: Name of the table containing the points of
+        all tracks
+    :param extensions: Extensions columns (tuple of name and type). If None
+        is passed heartrate, cadence, power, and temperature are created
+    """
     track_stmt = f"""
         CREATE TABLE IF NOT EXISTS {schema}.{track_table} (
             id SERIAL PRIMARY KEY,
@@ -154,6 +165,19 @@ def insert_track(
     points_table: str,
     source: str,
 ) -> int | None:
+    """
+    Insert a track into the database
+
+    :param track: Track to be inserted
+    :param engine: SQLLalchemy Engine for the Postgres database
+    :param schema: Name of the schema in the database
+    :param track_table: Name of the table containing track information
+    :param points_table: Name of the table containing the points of
+        all tracks
+    :param source: Set a source of the track in the track table.
+
+    :return: None if insertion failed and track_id if successfull
+    """
     start_time = track.track.get_time_bounds().start_time
 
     with engine.connect() as conn:
@@ -241,6 +265,19 @@ def load_track(
     points_table: str,
     **track_kwargs,
 ) -> Track:
+    """
+    Insert a track into the database
+
+    :param track_id: id of the track in the database
+    :param engine: SQLLalchemy Engine for the Postgres database
+    :param schema: Name of the schema in the database
+    :param track_table: Name of the table containing track information
+    :param points_table: Name of the table containing the points of
+        all tracks
+    :param track_kwargs: Additional keyword arguments passed to the Track.
+
+    :return: Track Object.
+    """
     track_stmt = f"SELECT * FROM {schema}.{track_table} WHERE id = {track_id}"
     track = None
     with engine.connect() as conn:
