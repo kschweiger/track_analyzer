@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Literal
 
 import numpy as np
@@ -15,7 +15,7 @@ from geo_track_analyzer.processing import (
     split_data,
     split_data_by_time,
 )
-from geo_track_analyzer.track import Track
+from geo_track_analyzer.track import PyTrack, Track
 from geo_track_analyzer.utils.base import distance
 
 
@@ -272,3 +272,35 @@ def test_add_zones_to_dataframe() -> None:
             ]
         )
     )
+
+
+@pytest.mark.parametrize(
+    ("required_extensions", "exp_extension_cols"),
+    [
+        (None, ["AAA"]),
+        ({"BBB"}, ["AAA", "BBB"]),
+        ({"AAA", "BBB"}, ["AAA", "BBB"]),
+    ],
+)
+def test_get_processed_segment_data(
+    required_extensions: set[str] | None, exp_extension_cols: list[str]
+) -> None:
+    track = PyTrack(
+        points=[(1, 1), (2, 2), (3, 3), (4, 4)],
+        elevations=[10, 20, 30, 40],
+        times=[
+            datetime(2023, 8, 1, 10, 6),
+            datetime(2023, 8, 1, 10, 7),
+            datetime(2023, 8, 1, 10, 8),
+            datetime(2023, 8, 1, 10, 9),
+        ],
+        extensions={"AAA": [1, 2, 3, 4]},
+    )
+
+    _, _, _, _, data = get_processed_segment_data(
+        track.track.segments[0],
+        extensions=track.extensions,
+        require_extensions=required_extensions,
+    )
+
+    assert all(c in data.columns for c in exp_extension_cols)

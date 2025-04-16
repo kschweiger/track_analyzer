@@ -301,9 +301,11 @@ def load_track(
                     ),
                     elevations=segment_data["elevation"],  # type: ignore
                     times=segment_data["time"],  # type: ignore
-                    heartrate=segment_data["heartrate"],  # type: ignore
-                    cadence=segment_data["cadence"],  # type: ignore
-                    power=segment_data["power"],  # type: ignore
+                    extensions=dict(
+                        heartrate=segment_data["heartrate"],  # type: ignore
+                        cadence=segment_data["cadence"],  # type: ignore
+                        power=segment_data["power"],  # type: ignore
+                    ),
                     **track_kwargs,
                 )
             else:
@@ -314,9 +316,11 @@ def load_track(
                     ),
                     elevations=segment_data["elevation"],  # type: ignore
                     times=segment_data["time"],  # type: ignore
-                    heartrate=segment_data["heartrate"],  # type: ignore
-                    cadence=segment_data["cadence"],  # type: ignore
-                    power=segment_data["power"],  # type: ignore
+                    extensions=dict(
+                        heartrate=segment_data["heartrate"],  # type: ignore
+                        cadence=segment_data["cadence"],  # type: ignore
+                        power=segment_data["power"],  # type: ignore
+                    ),
                 )
     assert track is not None
     track.track.name = track_data["track_name"]

@@ -168,7 +168,7 @@ def plot_track_enriched_on_map(
         if overwrite_color_gradient:
             color_min, color_max = overwrite_color_gradient
         else:
-            if enrich_with_column in COLOR_GRADIENTS.keys():
+            if enrich_with_column in COLOR_GRADIENTS:
                 color_min, color_max = COLOR_GRADIENTS[enrich_with_column]
             else:
                 color_min, color_max = DEFAULT_COLOR_GRADIENT
@@ -303,17 +303,23 @@ def plot_segments_on_map(
 
     fig = go.Figure()
     for i_segment, frame in plot_data.groupby(by="segment"):
-        mean_heartrate = frame.heartrate.agg("mean")
-        min_heartrate = frame.heartrate.agg("min")
-        max_heartrate = frame.heartrate.agg("max")
+        if "heartrate" in frame:
+            mean_heartrate = frame.heartrate.agg("mean")
+            min_heartrate = frame.heartrate.agg("min")
+            max_heartrate = frame.heartrate.agg("max")
+        else:
+            mean_heartrate, min_heartrate, max_heartrate = np.nan, np.nan, np.nan
 
         mean_speed = frame.speed.agg("mean") * 3.6
         min_speed = frame.speed.agg("min") * 3.6
         max_speed = frame.speed.agg("max") * 3.6
 
-        mean_power = frame.power.agg("mean")
-        min_power = frame.power.agg("min")
-        max_power = frame.power.agg("max")
+        if "power" in frame:
+            mean_power = frame.power.agg("mean")
+            min_power = frame.power.agg("min")
+            max_power = frame.power.agg("max")
+        else:
+            mean_power, min_power, max_power = np.nan, np.nan, np.nan
 
         distance = frame.distance.sum() / 1000
         if frame.time.isna().all():

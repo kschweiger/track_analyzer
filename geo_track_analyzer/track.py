@@ -3,9 +3,10 @@ from __future__ import annotations
 import logging
 import warnings
 from abc import ABC, abstractmethod
+from copy import copy
 from datetime import datetime
 from itertools import pairwise
-from typing import Dict, Literal, Sequence, final
+from typing import Dict, Literal, Sequence, TypeVar, final
 
 import gpxpy
 import numpy as np
@@ -31,7 +32,12 @@ from geo_track_analyzer.utils.base import (
     get_point_distance,
     interpolate_segment,
 )
-from geo_track_analyzer.utils.internal import _points_eq, get_extended_track_point
+from geo_track_analyzer.utils.internal import (
+    BackFillExtensionDict,
+    _points_eq,
+    get_extended_track_point,
+    get_extensions_in_points,
+)
 from geo_track_analyzer.visualize import (
     plot_metrics,
     plot_segment_box_summary,
@@ -44,6 +50,8 @@ from geo_track_analyzer.visualize import (
     plot_track_with_slope,
     plot_track_zones,
 )
+
+N = TypeVar("N", int, float)
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +68,8 @@ class Track(ABC):
         self,
         stopped_speed_threshold: float,
         max_speed_percentile: int,
+        extensions: set[str] | None = None,
+        require_data_extensions: set[str] | None = None,
         heartrate_zones: None | Zones = None,
         power_zones: None | Zones = None,
         cadence_zones: None | Zones = None,
@@ -77,6 +87,8 @@ class Track(ABC):
 
         self.session_data: Dict[str, str | int | float] = {}
 
+        self.require_data_extensions = require_data_extensions
+        self.extensions: set[str] = set() if extensions is None else extensions
         self.heartrate_zones = heartrate_zones
         self.power_zones = power_zones
         self.cadence_zones = cadence_zones
@@ -179,6 +191,10 @@ class Track(ABC):
         gpx.author_email = email
 
         return gpx.to_xml()
+
+    def _update_extensions(self) -> None:
+        for segment in self.track.segments:
+            self.extensions.update(get_extensions_in_points(segment.points))
 
     def get_track_overview(
         self, connect_segments: Literal["full", "forward"] = "forward"
@@ -396,6 +412,8 @@ class Track(ABC):
                 heartrate_zones=self.heartrate_zones,
                 power_zones=self.power_zones,
                 cadence_zones=self.cadence_zones,
+                extensions=self.extensions,
+                require_extensions=self.require_data_extensions,
             )
 
             if data.time.notna().any():
@@ -432,6 +450,8 @@ class Track(ABC):
             heartrate_zones=self.heartrate_zones,
             power_zones=self.power_zones,
             cadence_zones=self.cadence_zones,
+            extensions=self.extensions,
+            require_extensions=self.require_data_extensions,
         )
 
         if processed_data.time.notna().any():
@@ -782,6 +802,13 @@ class Track(ABC):
                 f"If {kind} is passed, **metric** needs to be passed"
             )
 
+        require_extensions = (
+            set()
+            if self.require_data_extensions is None
+            else copy(self.require_data_extensions)
+        )
+        require_extensions.update({"heartrate", "power", "cadence"})
+
         if segment is None:
             from geo_track_analyzer.utils.track import extract_track_data_for_plot
 
@@ -791,6 +818,7 @@ class Track(ABC):
                 require_elevation=require_elevation,
                 intervals=reduce_pp_intervals,
                 connect_segments="full" if kind in connect_segment_full else "forward",
+                extensions=self.extensions,
             )
         elif isinstance(segment, int):
             from geo_track_analyzer.utils.track import extract_segment_data_for_plot
@@ -801,6 +829,7 @@ class Track(ABC):
                 kind=kind,
                 require_elevation=require_elevation,
                 intervals=reduce_pp_intervals,
+                extensions=self.extensions,
             )
         else:
             from geo_track_analyzer.utils.track import (
@@ -813,6 +842,7 @@ class Track(ABC):
                 kind=kind,
                 require_elevation=require_elevation,
                 intervals=reduce_pp_intervals,
+                extensions=self.extensions,
             )
 
         if use_distance_segments is not None:
@@ -889,6 +919,7 @@ class GPXFileTrack(Track):
         n_track: int = 0,
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
+        require_data_extensions: set[str] | None = None,
         heartrate_zones: None | Zones = None,
         power_zones: None | Zones = None,
         cadence_zones: None | Zones = None,
@@ -910,6 +941,7 @@ class GPXFileTrack(Track):
             stopped_speed_threshold=stopped_speed_threshold,
             max_speed_percentile=max_speed_percentile,
             heartrate_zones=heartrate_zones,
+            require_data_extensions=require_data_extensions,
             power_zones=power_zones,
             cadence_zones=cadence_zones,
         )
@@ -919,6 +951,7 @@ class GPXFileTrack(Track):
         gpx = self._get_gpx(gpx_file)
 
         self._track = gpx.tracks[n_track]
+        self._update_extensions()
 
     @staticmethod
     def _get_gpx(gpx_file: str) -> GPX:
@@ -940,6 +973,7 @@ class ByteTrack(Track):
         n_track: int = 0,
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
+        require_data_extensions: set[str] | None = None,
         heartrate_zones: None | Zones = None,
         power_zones: None | Zones = None,
         cadence_zones: None | Zones = None,
@@ -959,6 +993,7 @@ class ByteTrack(Track):
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
             max_speed_percentile=max_speed_percentile,
+            require_data_extensions=require_data_extensions,
             heartrate_zones=heartrate_zones,
             power_zones=power_zones,
             cadence_zones=cadence_zones,
@@ -967,6 +1002,7 @@ class ByteTrack(Track):
         gpx = gpxpy.parse(bytefile)
 
         self._track = gpx.tracks[n_track]
+        self._update_extensions()
 
     @property
     def track(self) -> GPXTrack:
@@ -982,11 +1018,10 @@ class PyTrack(Track):
         points: list[tuple[float, float]],
         elevations: None | list[float],
         times: None | list[datetime],
-        heartrate: None | list[int] = None,
-        cadence: None | list[int] = None,
-        power: None | list[int] = None,
+        extensions: dict[str, list[N | None] | None] | None = None,
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
+        require_data_extensions: set[str] | None = None,
         heartrate_zones: None | Zones = None,
         power_zones: None | Zones = None,
         cadence_zones: None | Zones = None,
@@ -1009,12 +1044,17 @@ class PyTrack(Track):
         :raises TrackInitializationError: Raised if number of elevation, time, heatrate,
             or cadence values do not match passed points
         """
+        if extensions is None:
+            extensions = dict()
+
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
             max_speed_percentile=max_speed_percentile,
+            require_data_extensions=require_data_extensions,
             heartrate_zones=heartrate_zones,
             power_zones=power_zones,
             cadence_zones=cadence_zones,
+            extensions=set(extensions.keys()),
         )
 
         gpx = GPX()
@@ -1026,9 +1066,7 @@ class PyTrack(Track):
             points=points,
             elevations=elevations,
             times=times,
-            heartrate=heartrate,
-            cadence=cadence,
-            power=power,
+            extensions=extensions,
         )
 
         gpx_track.segments.append(gpx_segment)
@@ -1044,15 +1082,10 @@ class PyTrack(Track):
         points: list[tuple[float, float]],
         elevations: None | list[float],
         times: None | list[datetime],
-        heartrate: None | list[int] = None,
-        cadence: None | list[int] = None,
-        power: None | list[int] = None,
+        extensions: dict[str, list[N | None] | None],
     ) -> GPXTrackSegment:
         elevations_: list[None] | list[float]
         times_: list[None] | list[datetime]
-        heartrate_: list[None] | list[int]
-        cadence_: list[None] | list[int]
-        power_: list[None] | list[int]
 
         if elevations is not None:
             if len(points) != len(elevations):
@@ -1072,45 +1105,28 @@ class PyTrack(Track):
         else:
             times_ = len(points) * [None]
 
-        if heartrate is not None:
-            if len(points) != len(heartrate):
+        for key, values in extensions.items():
+            if values is None:
+                continue
+            if len(points) != len(values):
                 raise TrackInitializationError(
-                    "Different number of points and heartrate was passed"
+                    f"Different number of points and {key} was passed"
                 )
-            heartrate_ = heartrate
-        else:
-            heartrate_ = len(points) * [None]
-
-        if cadence is not None:
-            if len(points) != len(cadence):
-                raise TrackInitializationError(
-                    "Different number of points and cadence was passed"
-                )
-            cadence_ = cadence
-        else:
-            cadence_ = len(points) * [None]
-
-        if power is not None:
-            if len(points) != len(power):
-                raise TrackInitializationError(
-                    "Different number of points and cadence was passed"
-                )
-            power_ = power
-        else:
-            power_ = len(points) * [None]
 
         gpx_segment = GPXTrackSegment()
 
-        for (lat, lng), ele, time, hr, cad, pw in zip(
-            points, elevations_, times_, heartrate_, cadence_, power_
-        ):
+        for idx_point in range(len(points)):
+            lat, lng = points[idx_point]
+            ele = elevations_[idx_point]
+            time = times_[idx_point]
+
             this_extensions = {}
-            if hr is not None:
-                this_extensions["heartrate"] = hr
-            if cad is not None:
-                this_extensions["cadence"] = cad
-            if pw is not None:
-                this_extensions["power"] = pw
+            for key in extensions:
+                if extensions[key] is None:
+                    this_extensions[key] = None
+                else:
+                    this_extensions[key] = extensions[key][idx_point]
+
             this_point = get_extended_track_point(lat, lng, ele, time, this_extensions)
 
             gpx_segment.points.append(this_point)
@@ -1122,17 +1138,12 @@ class PyTrack(Track):
         points: list[tuple[float, float]],
         elevations: None | list[float],
         times: None | list[datetime],
-        heartrate: None | list[int] = None,
-        cadence: None | list[int] = None,
-        power: None | list[int] = None,
+        extensions: dict[str, list[N | None] | None] | None = None,
     ) -> None:
+        if extensions is None:
+            extensions = dict()
         gpx_segment = self._create_segmeent(
-            points=points,
-            elevations=elevations,
-            times=times,
-            heartrate=heartrate,
-            cadence=cadence,
-            power=power,
+            points=points, elevations=elevations, times=times, extensions=extensions
         )
         super().add_segmeent(gpx_segment)
 
@@ -1148,6 +1159,7 @@ class SegmentTrack(Track):
         segment: GPXTrackSegment,
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
+        require_data_extensions: set[str] | None = None,
         heartrate_zones: None | Zones = None,
         power_zones: None | Zones = None,
         cadence_zones: None | Zones = None,
@@ -1163,13 +1175,6 @@ class SegmentTrack(Track):
         :param power_zones: Optional power Zones, defaults to None
         :param cadence_zones: Optional cadence Zones, defaults to None
         """
-        super().__init__(
-            stopped_speed_threshold=stopped_speed_threshold,
-            max_speed_percentile=max_speed_percentile,
-            heartrate_zones=heartrate_zones,
-            power_zones=power_zones,
-            cadence_zones=cadence_zones,
-        )
         gpx = GPX()
 
         gpx_track = GPXTrack()
@@ -1177,6 +1182,15 @@ class SegmentTrack(Track):
 
         gpx_track.segments.append(segment)
 
+        super().__init__(
+            stopped_speed_threshold=stopped_speed_threshold,
+            max_speed_percentile=max_speed_percentile,
+            require_data_extensions=require_data_extensions,
+            heartrate_zones=heartrate_zones,
+            power_zones=power_zones,
+            cadence_zones=cadence_zones,
+            extensions=get_extensions_in_points(segment.points),
+        )
         self._track = gpx.tracks[0]
 
     @property
@@ -1194,6 +1208,7 @@ class FITTrack(Track):
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
         strict_elevation_loading: bool = False,
+        require_data_extensions: set[str] | None = None,
         heartrate_zones: None | Zones = None,
         power_zones: None | Zones = None,
         cadence_zones: None | Zones = None,
@@ -1215,6 +1230,7 @@ class FITTrack(Track):
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
             max_speed_percentile=max_speed_percentile,
+            require_data_extensions=require_data_extensions,
             heartrate_zones=heartrate_zones,
             power_zones=power_zones,
             cadence_zones=cadence_zones,
@@ -1231,9 +1247,20 @@ class FITTrack(Track):
         )
 
         points, elevations, times = [], [], []
-        heartrates, cadences, powers = [], [], []
+
+        rename_keys = {
+            "heart_rate": "heartrate",
+            "distance": "raw_distance",
+            "speed": "raw_speed",
+            "calories": "cum_calories",
+        }
+        alias_keys = {"enhanced_speed": ["speed"]}
+        alias_values = set()
+        for value in alias_keys.values():
+            alias_values.update(value)
 
         split_at = set([0])
+        extensions = BackFillExtensionDict()
         for record in fit_data.get_messages(("record", "lap")):  # type: ignore
             record: DataMessage  # type: ignore
             if record.mesg_type.name == "lap":
@@ -1241,11 +1268,9 @@ class FITTrack(Track):
             lat = record.get_value("position_lat")
             long = record.get_value("position_long")
             ele = record.get_value("enhanced_altitude")
+            if ele is None and (alt := record.get_value("altitude")) is not None:
+                ele = alt
             ts = record.get_value("timestamp")
-
-            hr = record.get_value("heart_rate")
-            cad = record.get_value("cadence")
-            pw = record.get_value("power")
 
             check_vals = [lat, long, ts]
             if strict_elevation_loading:
@@ -1262,13 +1287,35 @@ class FITTrack(Track):
                 )
                 continue
 
+            record_extensions = {}
+            extension_names = []
+            for field in record.fields:
+                if field.name in [
+                    "position_long",
+                    "position_lat",
+                    "enhanced_altitude",
+                    "altitude",
+                    "timestamp",
+                ]:
+                    continue
+                extension_names.append(field.name)
+
+            for name in extension_names:
+                if name in alias_values:
+                    continue
+                value = record.get_value(name)
+                if name in alias_keys and value is None:
+                    for alias in alias_keys[name]:
+                        value = record.get_value(alias)
+                        if value is not None:
+                            break
+                record_extensions[rename_keys.get(name, name)] = value
+
+            extensions.fill(record_extensions)
+
             points.append((lat, long))
             elevations.append(ele)
             times.append(ts)
-
-            heartrates.append(hr)
-            cadences.append(cad)
-            powers.append(pw)
 
         if not strict_elevation_loading and set(elevations) != {None}:
             elevations = fill_list(elevations)
@@ -1301,30 +1348,25 @@ class FITTrack(Track):
         for start_idx, end_idx in pairwise(split_at):
             gpx_segment = GPXTrackSegment()
 
-            for (lat, lng), ele, time, hr, cad, pw in zip(
-                points[start_idx:end_idx],
-                elevations[start_idx:end_idx],
-                times[start_idx:end_idx],
-                heartrates[start_idx:end_idx],
-                cadences[start_idx:end_idx],
-                powers[start_idx:end_idx],
-            ):
-                this_extensions = {}
-                if hr is not None:
-                    this_extensions["heartrate"] = hr
-                if cad is not None:
-                    this_extensions["cadence"] = cad
-                if pw is not None:
-                    this_extensions["power"] = pw
-                this_point = get_extended_track_point(
-                    lat, lng, ele, time, this_extensions
-                )
+            _points = points[start_idx:end_idx]
+            _elevations = elevations[start_idx:end_idx]
+            _times = times[start_idx:end_idx]
+            _extensions = {
+                key: value[start_idx:end_idx] for key, value in extensions.items()
+            }
 
+            for i in range(len(_points)):
+                this_extensions = {key: _extensions[key][i] for key in _extensions}
+                lat, lng = _points[i]
+                this_point = get_extended_track_point(
+                    lat, lng, _elevations[i], _times[i], this_extensions
+                )
                 gpx_segment.points.append(this_point)
 
             gpx_track.segments.append(gpx_segment)
 
         self._track = gpx.tracks[0]
+        self._update_extensions()
 
     @property
     def track(self) -> GPXTrack:

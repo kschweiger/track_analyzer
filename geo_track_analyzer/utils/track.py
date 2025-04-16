@@ -17,6 +17,8 @@ def extract_track_data_for_plot(
     require_elevation: list[str],
     intervals: None | int = None,
     connect_segments: Literal["full", "forward"] = "forward",
+    extensions: set[str] | None = None,
+    require_extensions: set[str] | None = None,
 ) -> pd.DataFrame:
     """Extract the data from a Track as DataFrame for plotting.
 
@@ -45,6 +47,8 @@ def extract_track_data_for_plot(
         heartrate_zones=track.heartrate_zones,
         power_zones=track.power_zones,
         cadence_zones=track.cadence_zones,
+        extensions=extensions,
+        require_extensions=require_extensions,
     )
 
     return data
@@ -57,6 +61,8 @@ def extract_multiple_segment_data_for_plot(
     require_elevation: list[str],
     intervals: None | int = None,
     connect_segments: Literal["full", "forward"] = "forward",
+    extensions: set[str] | None = None,
+    require_extensions: set[str] | None = None,
 ) -> pd.DataFrame:
     """Extract the data for a two or more segments from a Track as DataFrame for
     plotting.
@@ -74,7 +80,7 @@ def extract_multiple_segment_data_for_plot(
         raise VisualizationSetupError("Pass at least two segment ids")
     if max(segments) >= track.n_segments or min(segments) < 0:
         raise VisualizationSetupError(
-            f"Passed ids must be between 0 and {len(segments)-1}. Got {segments}"
+            f"Passed ids must be between 0 and {len(segments) - 1}. Got {segments}"
         )
 
     data = extract_track_data_for_plot(
@@ -83,6 +89,8 @@ def extract_multiple_segment_data_for_plot(
         require_elevation=require_elevation,
         intervals=intervals,
         connect_segments=connect_segments,
+        extensions=extensions,
+        require_extensions=require_extensions,
     )
 
     return data[data.segment.isin(segments)]
@@ -94,6 +102,8 @@ def extract_segment_data_for_plot(
     kind: str,
     require_elevation: list[str],
     intervals: None | int = None,
+    extensions: set[str] | None = None,
+    require_extensions: set[str] | None = None,
 ) -> pd.DataFrame:
     """Extract the data for a segment from a Track as DataFrame for plotting.
 
@@ -127,6 +137,8 @@ def extract_segment_data_for_plot(
         heartrate_zones=track.heartrate_zones,
         power_zones=track.power_zones,
         cadence_zones=track.cadence_zones,
+        extensions=extensions,
+        require_extensions=require_extensions,
     )
 
     return data
