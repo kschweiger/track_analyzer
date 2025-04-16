@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Callable, ClassVar, Dict, Union
+from typing import Any, Callable, ClassVar, Dict, Generic, Hashable, TypeVar, Union
 from xml.etree.ElementTree import Element
 
 from gpxpy.gpx import GPXTrackPoint
@@ -8,9 +8,27 @@ from pydantic_core import CoreSchema, core_schema
 
 from geo_track_analyzer.exceptions import GPXPointExtensionError
 
+_KT = TypeVar("_KT", bound=Hashable)
+_VT = TypeVar("_VT")
+
+
+class BackFillExtensionDict(dict[_KT, list[_VT | None]], Generic[_KT, _VT]):
+    def __missing__(self, key: _KT) -> list[_VT | None]:
+        value: list[_VT | None] = []
+        if self and key not in self:
+            value = [None] * min(len(v) for v in self.values())
+        self[key] = value
+        return value
+
+    def fill(self, data: dict[_KT, _VT | None]) -> None:
+        for key, value in data.items():
+            self[key].append(value)
+        for key in [_key for _key in self if _key not in data]:
+            self[key].append(None)
+
 
 class ExtensionFieldElement(Element):
-    def __init__(self, name: str, text: str) -> None:
+    def __init__(self, name: str, text: str | None) -> None:
         super().__init__(name)
         self.text = text
 
@@ -35,7 +53,9 @@ def get_extended_track_point(
     """
     this_point = GPXTrackPoint(lat, lng, elevation=ele, time=timestamp)
     for key, value in extensions.items():
-        this_point.extensions.append(ExtensionFieldElement(name=key, text=str(value)))
+        this_point.extensions.append(
+            ExtensionFieldElement(name=key, text=None if value is None else str(value))
+        )
 
     return this_point
 
@@ -44,10 +64,19 @@ def get_extension_value(point: GPXTrackPoint, key: str) -> str:
     for ext in point.extensions:
         if ext.tag == key:
             if ext.text is None:
-                GPXPointExtensionError("Key %s was not initilized with a value" % key)
+                raise GPXPointExtensionError(
+                    "Key %s was not initilized with a value" % key
+                )
             return ext.text  # type: ignore
 
     raise GPXPointExtensionError("Key %s could not be found" % key)
+
+
+def get_extensions_in_points(points: list[GPXTrackPoint]) -> set[str]:
+    found_extensions: set[str] = set()
+    for point in points:
+        found_extensions.update({str(ext.tag) for ext in point.extensions})
+    return found_extensions
 
 
 def _points_eq(p1: GPXTrackPoint, p2: GPXTrackPoint) -> bool:

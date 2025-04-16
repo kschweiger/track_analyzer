@@ -35,6 +35,7 @@ from geo_track_analyzer.utils.base import (
     split_segment_by_id,
 )
 from geo_track_analyzer.utils.internal import (
+    BackFillExtensionDict,
     ExtensionFieldElement,
     _points_eq,
     get_extended_track_point,
@@ -445,16 +446,10 @@ def test_interpolate_points(
     exp_seconds: None | list[int],
 ) -> None:
     time_1: None | datetime
-    if seconds_1 is not None:
-        time_1 = datetime(2023, 1, 1, 12, 0, seconds_1)
-    else:
-        time_1 = None
+    time_1 = datetime(2023, 1, 1, 12, 0, seconds_1) if seconds_1 is not None else None
 
     time_2: None | datetime
-    if seconds_2 is not None:
-        time_2 = datetime(2023, 1, 1, 12, 0, seconds_2)
-    else:
-        time_2 = None
+    time_2 = datetime(2023, 1, 1, 12, 0, seconds_2) if seconds_2 is not None else None
 
     point_1 = get_extended_track_point(1.100, 1.100, elevation_1, time_1, {})
     point_2 = get_extended_track_point(1.105, 1.105, elevation_2, time_2, {})
@@ -739,3 +734,20 @@ def test_generate_distance_segments(
 )
 def test_points_quadruple_eq(p1: GPXTrackPoint, p2: GPXTrackPoint, res: bool) -> None:
     assert _points_eq(p1, p2) == res
+
+
+def test_back_fill_dict_empty() -> None:
+    bf_dict = BackFillExtensionDict()
+    bf_dict["key1"].append(1)
+
+    assert list(bf_dict.keys()) == ["key1"]
+    assert bf_dict["key1"] == [1]
+
+
+def test_back_fill_dict_backfill() -> None:
+    bf_dict = BackFillExtensionDict()
+    bf_dict["key1"] = [1, 2, 3]
+
+    bf_dict["key2"].append(11)
+
+    assert bf_dict["key2"] == [None, None, None, 11]

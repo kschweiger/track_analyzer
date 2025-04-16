@@ -1,4 +1,5 @@
 import logging
+from copy import copy
 from datetime import timedelta
 from typing import Any, Callable, Dict, Literal, Union
 
@@ -61,6 +62,8 @@ def get_processed_track_data(
     heartrate_zones: None | Zones = None,
     power_zones: None | Zones = None,
     cadence_zones: None | Zones = None,
+    extensions: set[str] | None = None,
+    require_extensions: set[str] | None = None,
 ) -> tuple[float, float, float, float, pd.DataFrame]:
     """
     Process GPX track data and return a tuple of calculated values. The connect_segmen
@@ -118,6 +121,8 @@ def get_processed_track_data(
             stopped_speed_threshold,
             extend_segment_start=extend_segment_start,
             extend_segment_end=extend_segment_post,
+            extensions=extensions,
+            require_extensions=require_extensions,
         )
 
         track_time += time
@@ -164,6 +169,8 @@ def get_processed_segment_data(
     heartrate_zones: None | Zones = None,
     power_zones: None | Zones = None,
     cadence_zones: None | Zones = None,
+    extensions: set[str] | None = None,
+    require_extensions: set[str] | None = None,
 ) -> tuple[float, float, float, float, pd.DataFrame]:
     """
     Calculate the speed and distance from point to point for a segment. This follows
@@ -196,9 +203,6 @@ def get_processed_segment_data(
         "elevation": [],
         "speed": [],
         "distance": [],
-        "heartrate": [],
-        "cadence": [],
-        "power": [],
         "time": [],
         "cum_time": [],
         "cum_time_moving": [],
@@ -208,6 +212,17 @@ def get_processed_segment_data(
         "moving": [],
     }
 
+    _extensions: set[str] = set() if extensions is None else extensions
+    _require_extensions: set[str] = (
+        set() if require_extensions is None else require_extensions
+    )
+
+    data_extensions = copy(_extensions)
+    data_extensions.update(_require_extensions)
+    if data_extensions:
+        for key in data_extensions:
+            data[key] = []
+
     if segment.has_times():
         (
             time,
@@ -215,9 +230,18 @@ def get_processed_segment_data(
             stopped_time,
             stopped_distance,
             data,
-        ) = _get_processed_data_w_time(segment, data, threshold_ms)
+        ) = _get_processed_data_w_time(
+            segment,
+            data,
+            threshold_ms,
+            extensions=data_extensions,
+        )
     else:
-        distance, data = _get_processed_data_wo_time(segment, data)
+        distance, data = _get_processed_data_wo_time(
+            segment,
+            data,
+            extensions=data_extensions,
+        )
         time, stopped_distance, stopped_time = 0, 0, 0
 
     data_df = pd.DataFrame(data)
@@ -233,7 +257,10 @@ def get_processed_segment_data(
 
 
 def _get_processed_data_w_time(
-    segment: GPXTrackSegment, data: Dict[str, list[Any]], threshold_ms: float
+    segment: GPXTrackSegment,
+    data: Dict[str, list[Any]],
+    threshold_ms: float,
+    extensions: set[str],
 ) -> tuple[float, float, float, float, Dict[str, list[Any]]]:
     time = 0.0
     stopped_time = 0.0
@@ -258,60 +285,62 @@ def _get_processed_data_w_time(
                 point_distance = point.distance_2d(previous)
 
             seconds = timedelta.total_seconds()
-            if seconds > 0 and point_distance is not None:
-                if point_distance:
-                    is_stopped = (
-                        True if (point_distance / seconds) <= threshold_ms else False
-                    )
+            if seconds > 0 and point_distance is not None and point_distance:
+                is_stopped = (point_distance / seconds) <= threshold_ms
 
-                    data["distance"].append(point_distance)
+                data["distance"].append(point_distance)
 
-                    if is_stopped:
-                        stopped_time += seconds
-                        stopped_distance += point_distance
-                        cum_stopped += point_distance
-                        data["moving"].append(False)
-                    else:
-                        time += seconds
-                        distance += point_distance
-                        cum_moving += point_distance
-                        data["moving"].append(True)
+                if is_stopped:
+                    stopped_time += seconds
+                    stopped_distance += point_distance
+                    cum_stopped += point_distance
+                    data["moving"].append(False)
+                else:
+                    time += seconds
+                    distance += point_distance
+                    cum_moving += point_distance
+                    data["moving"].append(True)
 
-                    cum_distance += point_distance
-                    cum_time += seconds
-                    data["time"].append(seconds)
-                    data["cum_time"].append(cum_time)
+                cum_distance += point_distance
+                cum_time += seconds
+                data["time"].append(seconds)
+                data["cum_time"].append(cum_time)
 
-                    data["cum_distance"].append(cum_distance)
-                    data["cum_distance_moving"].append(cum_moving)
-                    data["cum_distance_stopped"].append(cum_stopped)
+                data["cum_distance"].append(cum_distance)
+                data["cum_distance_moving"].append(cum_moving)
+                data["cum_distance_stopped"].append(cum_stopped)
 
-                    data["latitude"].append(point.latitude)
-                    data["longitude"].append(point.longitude)
-                    if point.has_elevation():
-                        data["elevation"].append(point.elevation)
-                    else:
-                        data["elevation"].append(None)
+                data["latitude"].append(point.latitude)
+                data["longitude"].append(point.longitude)
+                if point.has_elevation():
+                    data["elevation"].append(point.elevation)
+                else:
+                    data["elevation"].append(None)
 
-                    if not is_stopped:
-                        data["speed"].append(point_distance / seconds)
-                        cum_time_moving += seconds
-                        data["cum_time_moving"].append(cum_time_moving)
-                    else:
-                        data["speed"].append(None)
-                        data["cum_time_moving"].append(None)
+                if not is_stopped:
+                    data["speed"].append(point_distance / seconds)
+                    cum_time_moving += seconds
+                    data["cum_time_moving"].append(cum_time_moving)
+                else:
+                    data["speed"].append(None)
+                    data["cum_time_moving"].append(None)
 
-                    for key in ["heartrate", "cadence", "power"]:
-                        try:
-                            data[key].append(float(get_extension_value(point, key)))
-                        except GPXPointExtensionError:
-                            data[key].append(None)
+                for key in extensions:
+                    try:
+                        data[key].append(float(get_extension_value(point, key)))
+                    except GPXPointExtensionError:
+                        data[key].append(None)
 
+    print(extensions)
+    for key, values in data.items():
+        print(key, len(values))
     return time, distance, stopped_time, stopped_distance, data
 
 
 def _get_processed_data_wo_time(
-    segment: GPXTrackSegment, data: Dict[str, list[Any]]
+    segment: GPXTrackSegment,
+    data: Dict[str, list[Any]],
+    extensions: set[str],
 ) -> tuple[float, Dict[str, list[Any]]]:
     cum_distance = 0
     distance = 0.0
@@ -341,7 +370,7 @@ def _get_processed_data_wo_time(
             data["speed"].append(None)
             data["moving"].append(True)
 
-            for key in ["heartrate", "cadence", "power"]:
+            for key in extensions:
                 try:
                     data[key].append(float(get_extension_value(point, key)))
                 except GPXPointExtensionError:

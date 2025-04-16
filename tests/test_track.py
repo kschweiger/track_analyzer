@@ -348,9 +348,11 @@ def test_pytrack_extensions() -> None:
         [(1, 1)],
         [100],
         [datetime(2023, 1, 1, 10)],
-        heartrate=[100],
-        cadence=[80],
-        power=[200],
+        dict(
+            heartrate=[100],
+            cadence=[80],
+            power=[200],
+        ),
     )
 
     point = track.track.segments[0].points[0]
@@ -365,9 +367,11 @@ def test_pytrack_add_segement() -> None:
         [(1, 1)],
         [100],
         [datetime(2023, 1, 1, 10)],
-        heartrate=[100],
-        cadence=[80],
-        power=[200],
+        dict(
+            heartrate=[100],
+            cadence=[80],
+            power=[200],
+        ),
     )
 
     assert len(track.track.segments) == 1
@@ -376,9 +380,11 @@ def test_pytrack_add_segement() -> None:
         [(2, 2)],
         [200],
         [datetime(2023, 2, 1, 10)],
-        heartrate=[60],
-        cadence=[20],
-        power=[100],
+        dict(
+            heartrate=[60],
+            cadence=[20],
+            power=[100],
+        ),
     )
 
     assert len(track.track.segments) == 2
