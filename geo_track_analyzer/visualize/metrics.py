@@ -25,6 +25,7 @@ class PlotMetric(StrEnum):
     POWER = auto()
     CADENCE = auto()
     SPEED = auto()
+    TEMPERATURE = auto()
 
 
 class PlotBase(StrEnum):
