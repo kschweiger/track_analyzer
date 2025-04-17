@@ -58,6 +58,7 @@ def full_track() -> Track:
             heartrate=[80] * 20 + [100] * 30 + [140] * 30 + [90] * 20,
             cadence=[70] * 30 + [80] * 30 + [70] * 40,
             power=[200] * 50 + [400] * 50,
+            temperature=[17] * 30 + [18] * 40 + [19] * 30,
         ),
         heartrate_zones=Zones(
             intervals=[

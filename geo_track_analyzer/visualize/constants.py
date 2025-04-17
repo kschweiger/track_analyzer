@@ -5,6 +5,7 @@ ENRICH_UNITS: dict[str, str] = {
     "cadence": "rpm",
     "power": "W",
     "distance": "km",
+    "temperature": "°C",
 }
 
 # Based on plotly.express.colors.sequential.Plotly3
