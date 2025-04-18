@@ -30,9 +30,11 @@ def nan_track() -> Track:
         points=points,
         elevations=[200 + random.randrange(20) for _ in range(100)],
         times=datetime_list,
-        heartrate=[np.nan] * 100,
-        cadence=[70] * 30 + [80] * 30 + [70] * 40,
-        power=[200] * 50 + [400] * 50,
+        extensions=dict(
+            heartrate=[np.nan] * 100,
+            cadence=[70] * 30 + [80] * 30 + [70] * 40,
+            power=[200] * 50 + [400] * 50,
+        ),
     )
 
 
@@ -52,9 +54,12 @@ def full_track() -> Track:
         points=points,
         elevations=[200 + random.randrange(20) for _ in range(100)],
         times=datetime_list,
-        heartrate=[80] * 20 + [100] * 30 + [140] * 30 + [90] * 20,
-        cadence=[70] * 30 + [80] * 30 + [70] * 40,
-        power=[200] * 50 + [400] * 50,
+        extensions=dict(
+            heartrate=[80] * 20 + [100] * 30 + [140] * 30 + [90] * 20,
+            cadence=[70] * 30 + [80] * 30 + [70] * 40,
+            power=[200] * 50 + [400] * 50,
+            temperature=[17] * 30 + [18] * 40 + [19] * 30,
+        ),
         heartrate_zones=Zones(
             intervals=[
                 ZoneInterval(start=None, end=85, color="#FF0000"),

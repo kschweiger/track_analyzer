@@ -67,9 +67,11 @@ def test_2d_plot_w_extensions(flag: dict[str, bool]) -> None:
             datetime(2024, 1, 1, 14),
             datetime(2024, 1, 1, 15),
         ],
-        heartrate=[100, 80, 90, 70],
-        cadence=[80, 70, 70, 60],
-        power=[200, 300, 450, 500],
+        extensions=dict(
+            heartrate=[100, 80, 90, 70],
+            cadence=[80, 70, 70, 60],
+            power=[200, 300, 450, 500],
+        ),
     )
     data = track.get_segment_data(0)
     fig = plot_track_2d(data, **flag)
@@ -106,6 +108,11 @@ def test_2d_plot_w_extensions_plot_no_data_error(flag: dict[str, bool]) -> None:
         points=[(1, 1), (2, 2), (3, 3), (4, 4)],
         elevations=[100, 200, 220, 200],
         times=None,
+        extensions={
+            "heartrate": None,
+            "power": None,
+            "cadence": None,
+        },
     )
     data = track.get_segment_data(0)
     with pytest.raises(VisualizationSetupError):
@@ -179,9 +186,11 @@ def test_2d_plot_w_extensions_zones(flag: dict[str, bool]) -> None:
         points=[(i, i) for i in range(100)],
         elevations=[200 + random.randrange(20) for _ in range(100)],
         times=None,
-        heartrate=[80] * 20 + [100] * 30 + [140] * 30 + [90] * 20,
-        cadence=[70] * 30 + [80] * 30 + [70] * 40,
-        power=[200] * 50 + [400] * 50,
+        extensions=dict(
+            heartrate=[80] * 20 + [100] * 30 + [140] * 30 + [90] * 20,
+            cadence=[70] * 30 + [80] * 30 + [70] * 40,
+            power=[200] * 50 + [400] * 50,
+        ),
         heartrate_zones=Zones(
             intervals=[
                 ZoneInterval(start=None, end=85, color="#FF0000"),
@@ -204,9 +213,7 @@ def test_2d_plot_w_extensions_zones(flag: dict[str, bool]) -> None:
         ),
     )
     data = extract_track_data_for_plot(
-        track=track,
-        kind="a",
-        require_elevation=["b"],
+        track=track, kind="a", require_elevation=["b"], extensions=track.extensions
     )
     fig = plot_track_2d(data, **flag)
     # fig.show()

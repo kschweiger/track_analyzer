@@ -294,30 +294,23 @@ def load_track(
         segments = _load_points(conn, track_id, schema, points_table, extensions)
         for i, segment_id in enumerate(sorted(segments.keys())):
             segment_data = segments[segment_id]
+            extension_data = {}
+            for extension in extensions:
+                extension_data[extension] = segment_data[extension]
+            _data = dict(
+                points=list(zip(segment_data["latitude"], segment_data["longitude"])),
+                elevations=segment_data["elevation"],
+                times=segment_data["time"],
+                extensions=extension_data,
+            )
             if i == 0:
                 track = PyTrack(
-                    points=list(  # type: ignore
-                        zip(segment_data["latitude"], segment_data["longitude"])
-                    ),
-                    elevations=segment_data["elevation"],  # type: ignore
-                    times=segment_data["time"],  # type: ignore
-                    heartrate=segment_data["heartrate"],  # type: ignore
-                    cadence=segment_data["cadence"],  # type: ignore
-                    power=segment_data["power"],  # type: ignore
+                    **_data,
                     **track_kwargs,
                 )
             else:
                 assert track is not None
-                track.add_segmeent(
-                    points=list(  # type: ignore
-                        zip(segment_data["latitude"], segment_data["longitude"])
-                    ),
-                    elevations=segment_data["elevation"],  # type: ignore
-                    times=segment_data["time"],  # type: ignore
-                    heartrate=segment_data["heartrate"],  # type: ignore
-                    cadence=segment_data["cadence"],  # type: ignore
-                    power=segment_data["power"],  # type: ignore
-                )
+                track.add_segmeent(**_data)  # type: ignore
     assert track is not None
     track.track.name = track_data["track_name"]
     return track
