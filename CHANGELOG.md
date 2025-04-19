@@ -1,4 +1,19 @@
 <!-- insertion marker -->
+<a name="1.7.0"></a>
+
+## [1.7.0](https://github.com/kschweiger/track_analyzer/compare/1.6.3...1.7.0) (2025-04-19)
+
+### Features
+
+- **visualization:** Add temperatur to metric plots ([69396e5](https://github.com/kschweiger/track_analyzer/commit/69396e5729a96b64cc22f5edd0c584f17685269e))
+- Generic extensions and required extensions in data ([b9ebf41](https://github.com/kschweiger/track_analyzer/commit/b9ebf414a98453ca12d3ac83fa91336f11e0ea90))
+- Postgis integration (#28) ([4556e03](https://github.com/kschweiger/track_analyzer/commit/4556e036602f0c2652cf301eee48d4bda0e763d5))
+- **visualize:** Add new generic metric visualization ([998ac53](https://github.com/kschweiger/track_analyzer/commit/998ac53ff627bdadd887ddb86fe83884c673e9fc))
+
+### Code Refactoring
+
+- **db:** Loading tracks loads all extensions defined in table ([632fd9d](https://github.com/kschweiger/track_analyzer/commit/632fd9dfe89c84ceeef8a737bc4a8ac45997f0a9))
+
 <a name="1.6.3"></a>
 
 ## [1.6.3](https://github.com/kschweiger/track_analyzer/compare/1.6.2...1.6.3) (2025-03-12)
