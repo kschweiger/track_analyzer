@@ -1,4 +1,12 @@
 <!-- insertion marker -->
+<a name="1.7.1"></a>
+
+## [1.7.1](https://github.com/kschweiger/track_analyzer/compare/1.7.0...1.7.1) (2025-10-30)
+
+### Bug Fixes
+
+- **enhance-elevation:** Deactivate case-sensitivity for --enhancer option ([cdfbd9d](https://github.com/kschweiger/track_analyzer/commit/cdfbd9dbfecbadfd44070b116b5f4560d45f34f5))
+
 <a name="1.7.0"></a>
 
 ## [1.7.0](https://github.com/kschweiger/track_analyzer/compare/1.6.3...1.7.0) (2025-04-19)
