@@ -331,9 +331,9 @@ def _get_processed_data_w_time(
                     except GPXPointExtensionError:
                         data[key].append(None)
 
-    print(extensions)
-    for key, values in data.items():
-        print(key, len(values))
+    # print(extensions)
+    # for key, values in data.items():
+    #     print(key, len(values))
     return time, distance, stopped_time, stopped_distance, data
 
 
