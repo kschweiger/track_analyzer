@@ -21,7 +21,7 @@ def engine():  # noqa: ANN201
     db_port = os.environ["DB_PORT"]
     db_database = os.environ["DB_DATABASE"]
     _engine = create_engine(
-        f"postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_database}"
+        f"postgresql+psycopg://{db_user}:{db_password}@{db_host}:{db_port}/{db_database}"
     )
 
     with _engine.connect() as conn:
