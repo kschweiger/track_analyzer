@@ -43,7 +43,7 @@ def convert_kwargs(raw_kwargs: tuple[str, ...]) -> dict[str, str | bool]:
 @click.argument("filename", type=click.Path(exists=True))
 @click.option(
     "--enhancer",
-    type=click.Choice(list(EnhancerType), case_sensitive=True),
+    type=click.Choice(list(EnhancerType), case_sensitive=False),
     help="Specify the enhancer type to be used to make the requests.",
     required=True,
 )
@@ -123,7 +123,7 @@ def main(
         console.print(":white_check_mark: Enhancer initialized")
 
     with console.status("Running elevation enhancement"):
-        this_enhancer.enhance_track(track.track, inplace=True)  # noqa: PD002
+        this_enhancer.enhance_track(track.track, inplace=True)
     console.print(":white_check_mark: Enhancement done")
 
     new_file_name = filename.replace(".gpx", f"_{postfix}.gpx")
