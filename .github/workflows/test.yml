@@ -36,6 +36,7 @@ jobs:
         os:
           - ubuntu
         python-version:
+          - "3.14"
           - "3.13"
           - "3.12"
           - "3.11"
@@ -74,5 +75,3 @@ jobs:
       - name: pytest
         run: |
           uv run --no-group dev --no-group doc pytest -v --cov-report term-missing --cov=gpx_track_analyzer
-
-
