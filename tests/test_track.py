@@ -413,6 +413,16 @@ def test_track_overiew(
     assert track_overview_pre_add != track_overview_post_add
 
 
+def test_track_over_extensions(
+    track_for_test: Track,
+) -> None:
+    overview = track_for_test.get_track_overview()
+
+    assert overview.heartrate is not None
+    assert overview.cadence is not None
+    assert overview.power is not None
+
+
 @pytest.mark.parametrize("conn_segments", ["forward", "full"])
 def test_track_data(
     mocker: MockerFixture,

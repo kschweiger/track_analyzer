@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Generic, TypeVar
 
 import numpy as np
 from gpxpy.gpx import GPXTrackPoint
@@ -13,6 +13,8 @@ from pydantic import (
 from pydantic_numpy import np_array_pydantic_annotated_typing
 
 from geo_track_analyzer.utils.internal import GPXTrackPointAfterValidator
+
+T = TypeVar("T")
 
 
 class Model(BaseModel):
@@ -49,6 +51,13 @@ class ElevationMetrics(Model):
     """Slopes between points in a uphill/downhill section"""
 
 
+class SegmentOverviewMetric(Model, Generic[T]):
+    """Collection max/average metric in a segement"""
+
+    max: T
+    avg: T
+
+
 class SegmentOverview(Model):
     """Collection of metrics for a Segment"""
 
@@ -64,12 +73,8 @@ class SegmentOverview(Model):
     total_distance: float
     """Total distance of the segment in m"""
 
-    max_velocity: None | float
-    """Maximum velocity in the segment in m/s (only considering velocities below the XX
-    percentile)"""
-
-    avg_velocity: None | float
-    """Average velocity in the segment in m/s (only considering velocities below the XX
+    velocity: SegmentOverviewMetric[float] | None
+    """Velocity in the segment in m/s (only considering velocities below the XX
     percentile)"""
 
     max_elevation: None | float
@@ -84,6 +89,15 @@ class SegmentOverview(Model):
     downhill_elevation: None | float
     """Elevation traveled downhill in m"""
 
+    heartrate: SegmentOverviewMetric[int] | None = Field(default=None)
+    """ Heartrate metrics in bpm"""
+
+    power: SegmentOverviewMetric[int] | None = Field(default=None)
+    """ Power metrics in watts"""
+
+    cadence: SegmentOverviewMetric[int] | None = Field(default=None)
+    """ Cadence metrics in rpm"""
+
     # Attributes that will be calculated from primary attributes
     moving_distance_km: float = Field(default=-1)
     """moving_distance converted the km"""
@@ -91,21 +105,20 @@ class SegmentOverview(Model):
     total_distance_km: float = Field(default=-1)
     """total_distance converted the km"""
 
-    max_velocity_kmh: None | float = Field(default=None)
-    """max_velocity converted the km/h"""
-
-    avg_velocity_kmh: None | float = Field(default=None)
-    """avg_speed converted the km/h"""
+    velocity_kmh: SegmentOverviewMetric[None | float] | None = Field(default=None)
+    """ Velocity in the segment in km/h """
 
     @model_validator(mode="after")  # type: ignore
     def set_km_attr(self) -> "SegmentOverview":
         self.moving_distance_km = self.moving_distance / 1000
         self.total_distance_km = self.total_distance / 1000
-        self.max_velocity_kmh = (
-            None if self.max_velocity is None else 3.6 * self.max_velocity
-        )
-        self.avg_velocity_kmh = (
-            None if self.avg_velocity is None else 3.6 * self.avg_velocity
+        self.velocity_kmh = (
+            SegmentOverviewMetric(
+                max=3.6 * self.velocity.max,
+                avg=3.6 * self.velocity.avg,
+            )
+            if self.velocity is not None
+            else None
         )
         return self
 
@@ -135,7 +148,7 @@ class SegmentOverlap(Model):
     """Index of the last point in match segment"""
 
     def __repr__(self) -> str:
-        ret_str = f"Overlap {self.overlap*100:.2f}%, Inverse: {self.inverse},"
+        ret_str = f"Overlap {self.overlap * 100:.2f}%, Inverse: {self.inverse},"
         ret_str += f" Plate: {self.plate.shape}, Points: "
         point_strs = []
         for point, idx in zip(

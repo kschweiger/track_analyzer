@@ -21,7 +21,13 @@ from geo_track_analyzer.exceptions import (
     TrackTransformationError,
     VisualizationSetupError,
 )
-from geo_track_analyzer.model import PointDistance, Position3D, SegmentOverview, Zones
+from geo_track_analyzer.model import (
+    PointDistance,
+    Position3D,
+    SegmentOverview,
+    SegmentOverviewMetric,
+    Zones,
+)
 from geo_track_analyzer.processing import (
     get_processed_segment_data,
     get_processed_track_data,
@@ -285,6 +291,10 @@ class Track(ABC):
         uphill = None
         downhill = None
 
+        if (max_speed is None and avg_speed is not None) or (
+            max_speed is not None and avg_speed is None
+        ):
+            raise RuntimeError("You need to passed max and avg speed or none")
         if not data.elevation.isna().all():
             max_elevation = data.elevation.max()
             min_elevation = data.elevation.min()
@@ -301,18 +311,33 @@ class Track(ABC):
 
             uphill = elevation_metrics.uphill
             downhill = elevation_metrics.downhill
+        overview_metrics = {}
+        for metric in ["heartrate", "cadence", "power"]:
+            overview_metrics[metric] = None
+            if metric in data.columns and not data[metric].isna().all():
+                overview_metrics[metric] = SegmentOverviewMetric[int](
+                    max=int(round(data[metric].max(), 0)),
+                    avg=int(round(data[metric].mean(), 0)),
+                )
 
         return SegmentOverview(
             moving_time_seconds=time,
             total_time_seconds=total_time,
             moving_distance=distance,
             total_distance=total_distance,
-            max_velocity=max_speed,
-            avg_velocity=avg_speed,
+            velocity=SegmentOverviewMetric[float](
+                max=max_speed,
+                avg=avg_speed,  # type: ignore
+            )
+            if max_speed is not None
+            else None,
             max_elevation=max_elevation,
             min_elevation=min_elevation,
             uphill_elevation=uphill,
             downhill_elevation=downhill,
+            cadence=overview_metrics["cadence"],
+            power=overview_metrics["power"],
+            heartrate=overview_metrics["heartrate"],
         )
 
     def get_closest_point(
