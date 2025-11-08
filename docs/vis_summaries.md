@@ -1,5 +1,9 @@
 # Track visualization - Summaries
 
+???+ warning "Extra"
+
+    Starting from 2.0.0: Not all dependencies for the visualizations are installed by default. Please use the `visualization` extra during installation.
+
 
 ## Segment summaries
 
