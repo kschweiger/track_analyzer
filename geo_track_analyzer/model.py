@@ -55,7 +55,10 @@ class SegmentOverviewMetric(Model, Generic[T]):
     """Collection max/average metric in a segement"""
 
     max: T
+    """ Maximum value of the metric """
+
     avg: T
+    """ Average value of the metric"""
 
 
 class SegmentOverview(Model):
@@ -74,8 +77,7 @@ class SegmentOverview(Model):
     """Total distance of the segment in m"""
 
     velocity: SegmentOverviewMetric[float] | None
-    """Velocity in the segment in m/s (only considering velocities below the XX
-    percentile)"""
+    """Velocity in the segment in m/s (only considering velocities below the XX percentile). Saved as [`SegmentOverviewMetric`][geo_track_analyzer.model.SegmentOverviewMetric]"""  # noqa: E501
 
     max_elevation: None | float
     """Maximum elevation in the segment in m"""
@@ -90,13 +92,13 @@ class SegmentOverview(Model):
     """Elevation traveled downhill in m"""
 
     heartrate: SegmentOverviewMetric[int] | None = Field(default=None)
-    """ Heartrate metrics in bpm"""
+    """ Heartrate metrics in bpm. Saved as [`SegmentOverviewMetric`][geo_track_analyzer.model.SegmentOverviewMetric] """  # noqa: E501
 
     power: SegmentOverviewMetric[int] | None = Field(default=None)
-    """ Power metrics in watts"""
+    """ Power metrics in watts. Saved as [`SegmentOverviewMetric`][geo_track_analyzer.model.SegmentOverviewMetric] """  # noqa: E501
 
     cadence: SegmentOverviewMetric[int] | None = Field(default=None)
-    """ Cadence metrics in rpm"""
+    """ Cadence metrics in rpm. Saved as [`SegmentOverviewMetric`][geo_track_analyzer.model.SegmentOverviewMetric] """  # noqa: E501
 
     # Attributes that will be calculated from primary attributes
     moving_distance_km: float = Field(default=-1)

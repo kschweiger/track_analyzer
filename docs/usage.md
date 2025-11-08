@@ -88,6 +88,12 @@ Furthermore an summary of the segments and tracks can be generated in the form o
 
 ### Visualizing the track
 
+???+ warning "Warning"
+
+    Starting from version 2.0.0, the visualizations requires the installation of the `visualization` extra (or you have plotly in your dependencies anyways).
+
+
+
 Visualizations of a track can be generated via the [`Track.plot`][geo_track_analyzer.GPXFileTrack.plot] method via the `kind` parameter. Additionally the
 track data can be extracted with the [`Track.get_track_data`][geo_track_analyzer.GPXFileTrack.get_track_data] or [`Track.get_segment_data`][geo_track_analyzer.GPXFileTrack.get_segment_data]
 methods and using the functions described in the [Profiles and Maps](vis_profiles_and_maps.md) and [Summaries](vis_summaries.md).

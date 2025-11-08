@@ -5,6 +5,7 @@
 ::: geo_track_analyzer.model.Position2D
 ::: geo_track_analyzer.model.Position3D
 ::: geo_track_analyzer.model.ElevationMetrics
+::: geo_track_analyzer.model.SegmentOverviewMetric
 ::: geo_track_analyzer.model.SegmentOverview
 ::: geo_track_analyzer.model.SegmentOverlap
 ::: geo_track_analyzer.model.PointDistance
