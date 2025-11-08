@@ -29,7 +29,6 @@ dependencies = [
   "numpy>=1,<2",
   "gpxpy~=1.6",
   "requests>=2,<3",
-  "plotly>=5,<6",
   "pandas>=2,<3",
   "fitparse~=1.2",
   "pydantic>=2,<3",
@@ -49,6 +48,7 @@ enhance-elevation = 'geo_track_analyzer:update_elevation'
 cli = ["click>=8,<9", "rich"]
 postgis = ["SQLAlchemy"]
 full = ["geo-track-analyzer[cli,postgis]", "psycopg"]
+visualization = ["plotly>=5,<6"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/"]

@@ -5,7 +5,6 @@ from typing import Any, Callable, Dict, Literal, Union
 
 import numpy as np
 import pandas as pd
-import plotly
 from gpxpy.gpx import GPXTrack, GPXTrackPoint, GPXTrackSegment
 
 from geo_track_analyzer.exceptions import GPXPointExtensionError
@@ -454,7 +453,23 @@ def add_zones_to_dataframe(
 ) -> pd.DataFrame:
     zone_bins, names, zone_colors = format_zones_for_digitize(zones)
     if zone_colors is None:
-        zone_colors = plotly.colors.sample_colorscale("viridis", len(names))
+        try:
+            import plotly
+        except ModuleNotFoundError:
+            if len(names) > 8:
+                raise RuntimeError("Out of automatic colors for more than 8 zones")
+            zone_colors = [
+                "#FF0000",
+                "#F71D1D",
+                "#EF3A3A",
+                "#E75656",
+                "#DF7373",
+                "#D78F8F",
+                "#CFABAB",
+                "#C7C7C7",
+            ][0 : len(names)]
+        else:
+            zone_colors = plotly.colors.sample_colorscale("viridis", len(names))
 
     metric_data = data[metric][~data[metric].isna()]
     binned_metric = pd.Series(
