@@ -84,7 +84,7 @@ jobs:
             --index-url https://test.pypi.org/simple/ \
             --extra-index-url https://pypi.org/simple/ \
             --index-strategy unsafe-first-match \
-            geo-track-analyzer[cli]==$VERSION
+            geo-track-analyzer[cli,visualization]==$VERSION
         env:
           VERSION: ${{needs.build.outputs.version}}
       - name: Run API and Worker script
@@ -150,7 +150,7 @@ jobs:
       - name: Build the documentation
         run: |
           uv run python docs/dump_github_releases.py
-          uv run python docs/generate_visualization_examples.py
+          uv run --all-extras docs/generate_visualization_examples.py
           uv run --group doc mkdocs build
       - uses: actions/upload-artifact@master
         with:
