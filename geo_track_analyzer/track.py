@@ -6,14 +6,16 @@ from abc import ABC, abstractmethod
 from copy import copy
 from datetime import datetime
 from itertools import pairwise
-from typing import Dict, Literal, Sequence, TypeVar, final
+from typing import TYPE_CHECKING, Dict, Literal, Sequence, TypeVar, final
 
 import gpxpy
 import numpy as np
 import pandas as pd
 from fitparse import DataMessage, FitFile, StandardUnitsDataProcessor
 from gpxpy.gpx import GPX, GPXTrack, GPXTrackSegment
-from plotly.graph_objs.graph_objs import Figure
+
+if TYPE_CHECKING:
+    from plotly.graph_objs.graph_objs import Figure
 
 from geo_track_analyzer.compare import get_segment_overlap
 from geo_track_analyzer.exceptions import (
