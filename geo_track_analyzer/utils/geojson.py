@@ -43,13 +43,13 @@ class LineProperties(BaseProperties):
 
 class PointFeature(BaseModel):
     type: Literal["Feature"] = "Feature"
-    geometry: PointGeometry
+    geometry: PointGeometry | None = None
     properties: PointProperties
 
 
 class LineFeature(BaseModel):
     type: Literal["Feature"] = "Feature"
-    geometry: LineStringGeometry
+    geometry: LineStringGeometry | None = None
     properties: LineProperties
 
 
@@ -59,8 +59,13 @@ class FeatureCollection(BaseModel):
     properties: BaseProperties | None = None
 
 
-def _convert_points_collection(data: dict, allow_empty_spatial: bool) -> Track:
+def _convert_points_collection(
+    data: dict, allow_empty_spatial: bool, fallback_coordinates: tuple[float, float]
+) -> Track:
     _data = FeatureCollection.model_validate(data)
+
+    if not allow_empty_spatial and any(g.geometry is None for g in _data.features):
+        raise ValueError("One or more features have no geometry")
 
     points = []
     elevations = []
@@ -73,7 +78,13 @@ def _convert_points_collection(data: dict, allow_empty_spatial: bool) -> Track:
     )
 
     for feat in _data.features:
-        lon, lat, ele = feat.geometry.coordinates
+        if allow_empty_spatial:
+            pass
+            lon, lat = fallback_coordinates
+            ele = None
+        else:
+            assert feat.geometry is not None
+            lon, lat, ele = feat.geometry.coordinates
         points.append((lat, lon))
         elevations.append(ele)
         times.append(feat.properties.time)
@@ -84,7 +95,7 @@ def _convert_points_collection(data: dict, allow_empty_spatial: bool) -> Track:
 
     track = PyTrack(
         points=points,
-        elevations=elevations,
+        elevations=None if allow_empty_spatial else elevations,
         times=times,
         extensions=extensions,  # type: ignore
     )
@@ -92,32 +103,46 @@ def _convert_points_collection(data: dict, allow_empty_spatial: bool) -> Track:
     return track
 
 
-def _convert_linestrings_collection(data: dict, allow_empty_spatial: bool) -> Track:
+def _convert_linestrings_collection(
+    data: dict, allow_empty_spatial: bool, fallback_coordinates: tuple[float, float]
+) -> Track:
     _data = LineFeature.model_validate(data)
-    _corrdinates = _data.geometry.coordinates
+
+    if not allow_empty_spatial and _data.geometry is None:
+        raise ValueError("Geometry is missing")
+
     _times = _data.properties.times
+    if allow_empty_spatial:
+        _corrdinates = None
+    else:
+        assert _data.geometry is not None
+        _corrdinates = _data.geometry.coordinates
     _heartrates = _data.properties.heartrates
     _cadences = _data.properties.cadences
     _powers = _data.properties.powers
     _temperatures = _data.properties.temperatures
 
-    if len(_corrdinates) != len(_times):
+    if _corrdinates is not None and len(_corrdinates) != len(_times):
         raise ValueError("Number of coordinates does not match number of timestamps")
-    if _heartrates and len(_corrdinates) != len(_heartrates):
+    if _heartrates and len(_times) != len(_heartrates):
         raise ValueError("Number of coordinates does not match number of heartrates")
-    if _cadences and len(_corrdinates) != len(_cadences):
+    if _cadences and len(_times) != len(_cadences):
         raise ValueError("Number of coordinates does not match number of cadences")
-    if _powers and len(_corrdinates) != len(_powers):
+    if _powers and len(_times) != len(_powers):
         raise ValueError("Number of coordinates does not match number of powers")
-    if _temperatures and len(_corrdinates) != len(_temperatures):
+    if _temperatures and len(_times) != len(_temperatures):
         raise ValueError("Number of coordinates does not match number of temperatures")
 
     points = []
     elevations = []
-    for coord in _corrdinates:
-        lon, lat, ele = coord
-        points.append((lat, lon))
-        elevations.append(ele)
+    if _corrdinates:
+        for coord in _corrdinates:
+            lon, lat, ele = coord
+            points.append((lat, lon))
+            elevations.append(ele)
+    else:
+        elevations = None
+        points = [fallback_coordinates] * len(_times)
 
     track = PyTrack(
         points=points,
@@ -134,7 +159,9 @@ def _convert_linestrings_collection(data: dict, allow_empty_spatial: bool) -> Tr
     return track
 
 
-def read_raw_data(data: dict, allow_empty_spatial: bool) -> Track:
+def read_raw_data(
+    data: dict, allow_empty_spatial: bool, fallback_coordinates: tuple[float, float]
+) -> Track:
     format = "unknown"
     if data.get("type") == "FeatureCollection":
         format = "points_collection"
@@ -146,11 +173,15 @@ def read_raw_data(data: dict, allow_empty_spatial: bool) -> Track:
 
     if format == "points_collection":
         return _convert_points_collection(
-            data=data, allow_empty_spatial=allow_empty_spatial
+            data=data,
+            allow_empty_spatial=allow_empty_spatial,
+            fallback_coordinates=fallback_coordinates,
         )
     elif format == "linestrings_collection":
         return _convert_linestrings_collection(
-            data=data, allow_empty_spatial=allow_empty_spatial
+            data=data,
+            allow_empty_spatial=allow_empty_spatial,
+            fallback_coordinates=fallback_coordinates,
         )
     else:
         raise ValueError("Unsupported GeoJSON format")

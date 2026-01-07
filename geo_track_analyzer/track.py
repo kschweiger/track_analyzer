@@ -1457,6 +1457,7 @@ class GeoJsonTrack(Track):
         _track = read_raw_data(
             data=raw_data,
             allow_empty_spatial=allow_empty_spatial,
+            fallback_coordinates=fallback_coordinates,
         )
 
         self._track = _track.track

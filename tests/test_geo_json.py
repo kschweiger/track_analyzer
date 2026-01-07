@@ -1,6 +1,8 @@
 import importlib.resources
 import json
 
+import pytest
+
 from geo_track_analyzer.track import Track
 from geo_track_analyzer.utils.geojson import (
     _convert_linestrings_collection,
@@ -13,17 +15,51 @@ def test_convert_points_collection() -> None:
     resource_files = importlib.resources.files(resources)
     with open((resource_files / "point_geo.json").joinpath(), "rb") as f:  # type: ignore
         data = json.load(f)
-    print(data)
 
-    track = _convert_points_collection(data, False)
+    track = _convert_points_collection(data, False, (0, 0))
     assert isinstance(track, Track)
+
+
+def test_convert_points_collection_no_geo() -> None:
+    resource_files = importlib.resources.files(resources)
+    with open((resource_files / "point_no_coords_geo.json").joinpath(), "rb") as f:  # type: ignore
+        data = json.load(f)
+
+    track = _convert_points_collection(data, True, (0, 0))
+    assert isinstance(track, Track)
+
+
+def test_convert_points_collection_no_geo_fail() -> None:
+    resource_files = importlib.resources.files(resources)
+    with open((resource_files / "point_no_coords_geo.json").joinpath(), "rb") as f:  # type: ignore
+        data = json.load(f)
+
+    with pytest.raises(ValueError, match="One or more features have no geometry"):
+        _convert_points_collection(data, False, (0, 0))
 
 
 def test_convert_linestrings_collection() -> None:
     resource_files = importlib.resources.files(resources)
     with open((resource_files / "line_geo.json").joinpath(), "rb") as f:  # type: ignore
         data = json.load(f)
-    print(data)
 
-    track = _convert_linestrings_collection(data, False)
+    track = _convert_linestrings_collection(data, False, (0, 0))
     assert isinstance(track, Track)
+
+
+def test_convert_linestrings_collection_no_geo() -> None:
+    resource_files = importlib.resources.files(resources)
+    with open((resource_files / "line_no_coords_geo.json").joinpath(), "rb") as f:  # type: ignore
+        data = json.load(f)
+
+    track = _convert_linestrings_collection(data, True, (0, 0))
+    assert isinstance(track, Track)
+
+
+def test_convert_linestrings_collection_no_geo_fail() -> None:
+    resource_files = importlib.resources.files(resources)
+    with open((resource_files / "line_no_coords_geo.json").joinpath(), "rb") as f:  # type: ignore
+        data = json.load(f)
+
+    with pytest.raises(ValueError, match="Geometry is missing"):
+        _convert_linestrings_collection(data, False, (0, 0))
