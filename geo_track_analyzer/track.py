@@ -874,6 +874,13 @@ class Track(ABC):
                 extensions=self.extensions,
             )
 
+        # Special case if all points are stopped. Since we still want
+        # a plot, we interpret it as all moving. This is expected behaviour
+        # for tracks that all have the same lat/lon coordinates
+        if (data.moving == False).all():  # noqa: E712
+            data.moving = True
+            data.cum_time_moving = data.cum_time_stopped
+
         if use_distance_segments is not None:
             data = generate_distance_segments(data, use_distance_segments)
 
