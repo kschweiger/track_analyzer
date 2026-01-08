@@ -1,0 +1,66 @@
+{
+  "type": "FeatureCollection",
+  "properties": {
+    "name": "Morning Ride with Pause"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "segment_index": 0,
+        "coordTimes": [
+          "2023-10-01T08:00:00Z",
+          "2023-10-01T08:00:05Z"
+        ],
+        "heartRates": [
+          140,
+          142
+        ]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            13.404954,
+            52.520008,
+            30.5
+          ],
+          [
+            13.405000,
+            52.520100,
+            31.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "segment_index": 1,
+        "coordTimes": [
+          "2023-10-01T08:15:00Z",
+          "2023-10-01T08:15:05Z"
+        ],
+        "heartRates": [
+          135,
+          138
+        ]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            13.405100,
+            52.520200,
+            31.2
+          ],
+          [
+            13.405200,
+            52.520300,
+            31.5
+          ]
+        ]
+      }
+    }
+  ]
+}
