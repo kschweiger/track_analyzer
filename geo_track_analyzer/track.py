@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import json
 import logging
 import warnings
 from abc import ABC, abstractmethod
 from copy import copy
 from datetime import datetime
+from io import StringIO
 from itertools import pairwise
 from typing import TYPE_CHECKING, Dict, Literal, Sequence, TypeVar, final
 
@@ -872,6 +874,13 @@ class Track(ABC):
                 extensions=self.extensions,
             )
 
+        # Special case if all points are stopped. Since we still want
+        # a plot, we interpret it as all moving. This is expected behaviour
+        # for tracks that all have the same lat/lon coordinates
+        if (data.moving == False).all():  # noqa: E712
+            data.moving = True
+            data.cum_time_moving = data.cum_time_stopped
+
         if use_distance_segments is not None:
             data = generate_distance_segments(data, use_distance_segments)
 
@@ -1243,7 +1252,7 @@ class FITTrack(Track):
         """Load a .fit file and extract the data into a Track object.
         NOTE: Tested with Wahoo devices only
 
-        :param source: Patch to fit file or byte representation of fit file
+        :param source: Path to fit file or byte representation of fit file
         :param stopped_speed_threshold: Minium speed required for a point to be count
             as moving, defaults to 1
         :param max_speed_percentile: Points with speed outside of the percentile are not
@@ -1393,6 +1402,72 @@ class FITTrack(Track):
             gpx_track.segments.append(gpx_segment)
 
         self._track = gpx.tracks[0]
+        self._update_extensions()
+
+    @property
+    def track(self) -> GPXTrack:
+        return self._track
+
+
+@final
+class GeoJsonTrack(Track):
+    """Track that should be initialized by loading a .fit file"""
+
+    def __init__(
+        self,
+        source: str | bytes,
+        stopped_speed_threshold: float = 1,
+        max_speed_percentile: int = 95,
+        allow_empty_spatial: bool = False,
+        fallback_coordinates: tuple[float, float] = (0.0, 0.0),
+        require_data_extensions: set[str] | None = None,
+        heartrate_zones: None | Zones = None,
+        power_zones: None | Zones = None,
+        cadence_zones: None | Zones = None,
+    ) -> None:
+        """Load a .json file that conforms to a supported geojson format. Currently
+        the GeoJsonTrack supports:
+        1. LineString + Arrays
+        2. Collection of Points
+
+        :param source: Path or byte representation of the json file
+        :param stopped_speed_threshold: Minium speed required for a point to be count
+            as moving, defaults to 1
+        :param max_speed_percentile: Points with speed outside of the percentile are not
+            counted when analyzing the track, defaults to 95
+        :param allow_empty_spatial: Allow geojson files without spatial values. If true,
+            will generate the track with a fixed location (see. fallback_coordinates)
+        :param fallback_coordinates: Coordinates to be used if the geojson file
+            does not contain spatial data, defaults to (0.0, 0.0)
+        :param heartrate_zones: Optional heartrate Zones, defaults to None
+        :param power_zones: Optional power Zones, defaults to None
+        :param cadence_zones: Optional cadence Zones, defaults to None
+        """
+        from geo_track_analyzer.utils.geojson import read_raw_data
+
+        super().__init__(
+            stopped_speed_threshold=stopped_speed_threshold,
+            max_speed_percentile=max_speed_percentile,
+            require_data_extensions=require_data_extensions,
+            heartrate_zones=heartrate_zones,
+            power_zones=power_zones,
+            cadence_zones=cadence_zones,
+        )
+
+        if isinstance(source, str):
+            with open(source, "r") as f:
+                raw_data = json.load(f)
+        else:
+            with StringIO(source.decode("utf-8")) as f:
+                raw_data = json.load(f)
+
+        _track = read_raw_data(
+            data=raw_data,
+            allow_empty_spatial=allow_empty_spatial,
+            fallback_coordinates=fallback_coordinates,
+        )
+
+        self._track = _track.track
         self._update_extensions()
 
     @property

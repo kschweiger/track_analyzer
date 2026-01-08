@@ -1,0 +1,41 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          52.520008,
+          13.404954,
+          30.5
+        ]
+      },
+      "properties": {
+        "time": "2023-10-01T08:00:00Z",
+        "heartRate": 140,
+        "cadence": 85
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          52.520100,
+          13.405000,
+          31.0
+        ]
+      },
+      "properties": {
+        "time": "2023-10-01T08:00:05Z",
+        "heartRate": 142,
+        "cadence": 87,
+        "power": 205.3
+      }
+    }
+  ],
+  "properties": {
+    "name": "Morning Ride"
+  }
+}
