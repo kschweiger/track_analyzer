@@ -9,7 +9,15 @@ from .enhancer import (
     OpenTopoElevationEnhancer,
     get_enhancer,
 )
-from .track import ByteTrack, FITTrack, GPXFileTrack, PyTrack, SegmentTrack, Track
+from .track import (
+    ByteTrack,
+    FITTrack,
+    GeoJsonTrack,
+    GPXFileTrack,
+    PyTrack,
+    SegmentTrack,
+    Track,
+)
 
 __all__ = [
     "ByteTrack",
@@ -18,6 +26,7 @@ __all__ = [
     "EnhancerType",
     "FITTrack",
     "GPXFileTrack",
+    "GeoJsonTrack",
     "OpenElevationEnhancer",
     "OpenTopoElevationEnhancer",
     "PyTrack",

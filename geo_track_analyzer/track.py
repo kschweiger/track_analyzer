@@ -1415,7 +1415,7 @@ class GeoJsonTrack(Track):
 
     def __init__(
         self,
-        source: str | bytes,
+        source: str | bytes | dict,
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
         allow_empty_spatial: bool = False,
@@ -1454,7 +1454,9 @@ class GeoJsonTrack(Track):
             cadence_zones=cadence_zones,
         )
 
-        if isinstance(source, str):
+        if isinstance(source, dict):
+            raw_data = source
+        elif isinstance(source, str):
             with open(source, "r") as f:
                 raw_data = json.load(f)
         else:
