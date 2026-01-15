@@ -1,3 +1,4 @@
+import importlib.resources
 from datetime import datetime, timedelta
 from typing import Literal
 
@@ -15,8 +16,9 @@ from geo_track_analyzer.processing import (
     split_data,
     split_data_by_time,
 )
-from geo_track_analyzer.track import PyTrack, Track
+from geo_track_analyzer.track import GeoJsonTrack, PyTrack, Track
 from geo_track_analyzer.utils.base import distance
+from tests import resources
 
 
 def test_get_processed_track_data(track_for_test: Track) -> None:
@@ -304,3 +306,16 @@ def test_get_processed_segment_data(
     )
 
     assert all(c in data.columns for c in exp_extension_cols)
+
+
+def test_overview_with_no_movement() -> None:
+    resource_files = importlib.resources.files(resources)
+    _file = (resource_files / "processed_Weight_Training.json").read_bytes()
+
+    track = GeoJsonTrack(_file, allow_empty_spatial=True)
+
+    overview = track.get_track_overview()
+
+    assert overview.max_elevation is None
+    assert overview.velocity is None
+    assert overview.heartrate is not None
