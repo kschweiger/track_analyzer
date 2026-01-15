@@ -225,7 +225,10 @@ class Track(ABC):
         track_max_speed = None
         track_avg_speed = None
 
-        if all(seg.has_times() for seg in self.track.segments):
+        if (
+            all(seg.has_times() for seg in self.track.segments)
+            and not track_data.speed.isna().all()
+        ):
             track_max_speed = track_data.speed[track_data.in_speed_percentile].max()
             track_avg_speed = track_data.speed[track_data.in_speed_percentile].mean()
 
