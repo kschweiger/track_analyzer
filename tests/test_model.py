@@ -13,6 +13,7 @@ from geo_track_analyzer.model import (
     PointDistance,
     SegmentOverlap,
     SegmentOverview,
+    SegmentOverviewMetric,
     ZoneInterval,
     Zones,
 )
@@ -36,17 +37,23 @@ def test_segment_overview_post_init_calcs() -> None:
         total_time_seconds=1000,
         moving_distance=moving_distance,
         total_distance=total_distance,
-        max_velocity=max_speed,
-        avg_velocity=avg_speed,
+        velocity=SegmentOverviewMetric(
+            max=max_speed,
+            avg=avg_speed,
+        ),
         max_elevation=300,
         min_elevation=100,
         uphill_elevation=100,
         downhill_elevation=-200,
     )
-    assert so.max_velocity_kmh == max_speed * 3.6
-    assert so.avg_velocity_kmh == avg_speed * 3.6
+    assert so.velocity_kmh is not None
+    assert so.velocity_kmh.max == max_speed * 3.6
+    assert so.velocity_kmh.avg == avg_speed * 3.6
     assert so.moving_distance_km == moving_distance / 1000
     assert so.total_distance_km == total_distance / 1000
+    assert so.cadence is None
+    assert so.heartrate is None
+    assert so.power is None
 
 
 def test_point_distance_init() -> None:

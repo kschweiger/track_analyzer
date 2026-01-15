@@ -9,12 +9,20 @@ from plotly.graph_objs.graph_objs import Figure
 from pytest_mock import MockerFixture
 
 from geo_track_analyzer.exceptions import (
+    GeoJsonWithoutGeometryError,
     TrackInitializationError,
     TrackTransformationError,
     VisualizationSetupError,
 )
 from geo_track_analyzer.model import SegmentOverview, ZoneInterval, Zones
-from geo_track_analyzer.track import ByteTrack, FITTrack, GPXFileTrack, PyTrack, Track
+from geo_track_analyzer.track import (
+    ByteTrack,
+    FITTrack,
+    GeoJsonTrack,
+    GPXFileTrack,
+    PyTrack,
+    Track,
+)
 from geo_track_analyzer.utils.internal import get_extension_value
 from tests import resources
 
@@ -411,6 +419,16 @@ def test_track_overiew(
 
     track_overview_post_add = track.get_track_overview()
     assert track_overview_pre_add != track_overview_post_add
+
+
+def test_track_over_extensions(
+    track_for_test: Track,
+) -> None:
+    overview = track_for_test.get_track_overview()
+
+    assert overview.heartrate is not None
+    assert overview.cadence is not None
+    assert overview.power is not None
 
 
 @pytest.mark.parametrize("conn_segments", ["forward", "full"])
@@ -824,3 +842,37 @@ def test_fit_track() -> None:
     FITTrack((resource_files / "MyWhoosh_1.fit").read_bytes())
 
     assert True
+
+
+@pytest.mark.parametrize(
+    ("file_name", "allow"),
+    [
+        ("line_geo.json", False),
+        ("line_no_coords_geo.json", True),
+        ("point_geo.json", False),
+        ("point_no_coords_geo.json", True),
+        ("line_geo_multi_segment.json", False),
+        ("line_no_coords_geo_multi_segment.json", True),
+    ],
+)
+def test_geojson_track(file_name: str, allow: bool) -> None:
+    resource_files = importlib.resources.files(resources)
+    _file = (resource_files / file_name).read_bytes()
+    GeoJsonTrack(_file, allow_empty_spatial=allow)
+
+    assert True
+
+
+@pytest.mark.parametrize(
+    "file_name",
+    [
+        "line_no_coords_geo.json",
+        "point_no_coords_geo.json",
+        "line_no_coords_geo_multi_segment.json",
+    ],
+)
+def test_geojson_track_no_geo_error(file_name: str) -> None:
+    resource_files = importlib.resources.files(resources)
+    _file = (resource_files / file_name).read_bytes()
+    with pytest.raises(GeoJsonWithoutGeometryError):
+        GeoJsonTrack(_file, allow_empty_spatial=False)

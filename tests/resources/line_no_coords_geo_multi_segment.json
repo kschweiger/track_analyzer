@@ -1,0 +1,36 @@
+{
+  "type": "FeatureCollection",
+  "properties": {
+    "name": "Morning Ride with Pause"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "segment_index": 0,
+        "coordTimes": [
+          "2023-10-01T08:00:00Z",
+          "2023-10-01T08:00:05Z"
+        ],
+        "heartRates": [
+          140,
+          142
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "segment_index": 1,
+        "coordTimes": [
+          "2023-10-01T08:15:00Z",
+          "2023-10-01T08:15:05Z"
+        ],
+        "heartRates": [
+          135,
+          138
+        ]
+      }
+    }
+  ]
+}

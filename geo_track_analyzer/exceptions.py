@@ -40,3 +40,15 @@ class TrackAnalysisError(Exception):
 
 class VisualizationSetupWarning(Warning):
     pass
+
+
+class GeoJsonWithoutGeometryError(Exception):
+    pass
+
+
+class UnsupportedGeoJsonTypeError(Exception):
+    pass
+
+
+class EmptyGeoJsonError(Exception):
+    pass

@@ -1,0 +1,31 @@
+{
+  "type": "Feature",
+  "properties": {
+    "name": "Morning Ride",
+    "coordTimes": [
+      "2023-10-01T08:00:00Z",
+      "2023-10-01T08:00:05Z",
+      "2023-10-01T08:00:10Z"
+    ],
+    "heartRates": [
+      140,
+      142,
+      145
+    ],
+    "cadences": [
+      85,
+      87,
+      88
+    ],
+    "powers": [
+      200.5,
+      205.3,
+      210.0
+    ],
+    "temperatures": [
+      22.5,
+      22.6,
+      22.7
+    ]
+  }
+}

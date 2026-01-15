@@ -5,7 +5,6 @@ from typing import Any, Callable, Dict, Literal, Union
 
 import numpy as np
 import pandas as pd
-import plotly
 from gpxpy.gpx import GPXTrack, GPXTrackPoint, GPXTrackSegment
 
 from geo_track_analyzer.exceptions import GPXPointExtensionError
@@ -22,24 +21,35 @@ def _recalc_cumulated_columns(data: pd.DataFrame) -> pd.DataFrame:
     data.cum_distance = data.distance.cumsum()
 
     cum_time_moving: list[None] | list[float] = []
+    cum_time_stopped: list[None] | list[float] = []
     cum_distance_moving = []
     cum_distance_stopped = []
     for idx, rcrd in enumerate(data.to_dict("records")):
         if idx == 0:
             if rcrd["time"] is None:
                 cum_time_moving.append(None)  # type: ignore
+                cum_time_stopped.append(None)  # type: ignore
             else:
-                cum_time_moving.append(rcrd["time"] if rcrd["moving"] else 0)
+                if rcrd["moving"]:
+                    cum_time_moving.append(rcrd["time"])
+                    cum_time_stopped.append(0)
+                else:
+                    cum_time_moving.append(0)
+                    cum_time_stopped.append(rcrd["time"])
 
             cum_distance_moving.append(rcrd["distance"] if rcrd["moving"] else 0)
             cum_distance_stopped.append(0 if rcrd["moving"] else rcrd["distance"])
         else:
             if rcrd["time"] is None:
                 cum_time_moving.append(None)  # type: ignore
+                cum_time_stopped.append(None)  # type: ignore
             else:
-                cum_time_moving.append(
-                    cum_time_moving[-1] + (rcrd["time"] if rcrd["moving"] else 0)
-                )
+                if rcrd["moving"]:
+                    cum_time_moving.append(cum_time_moving[-1] + rcrd["time"])
+                    cum_time_stopped.append(cum_time_stopped[-1])
+                else:
+                    cum_time_moving.append(cum_time_moving[-1])
+                    cum_time_stopped.append(cum_time_stopped[-1] + rcrd["time"])
 
             cum_distance_moving.append(
                 cum_distance_moving[-1] + (rcrd["distance"] if rcrd["moving"] else 0)
@@ -49,6 +59,7 @@ def _recalc_cumulated_columns(data: pd.DataFrame) -> pd.DataFrame:
             )
 
     data.cum_time_moving = cum_time_moving
+    data.cum_time_stopped = cum_time_stopped
     data.cum_distance_moving = cum_distance_moving
     data.cum_distance_stopped = cum_distance_stopped
 
@@ -206,6 +217,7 @@ def get_processed_segment_data(
         "time": [],
         "cum_time": [],
         "cum_time_moving": [],
+        "cum_time_stopped": [],
         "cum_distance": [],
         "cum_distance_moving": [],
         "cum_distance_stopped": [],
@@ -270,6 +282,7 @@ def _get_processed_data_w_time(
 
     cum_time = 0
     cum_time_moving = 0
+    cum_time_stopped = 0
 
     cum_distance = 0
     cum_moving = 0
@@ -285,8 +298,11 @@ def _get_processed_data_w_time(
                 point_distance = point.distance_2d(previous)
 
             seconds = timedelta.total_seconds()
-            if seconds > 0 and point_distance is not None and point_distance:
-                is_stopped = (point_distance / seconds) <= threshold_ms
+            if seconds > 0 and point_distance is not None:
+                if point_distance:
+                    is_stopped = (point_distance / seconds) <= threshold_ms
+                else:
+                    is_stopped = True
 
                 data["distance"].append(point_distance)
 
@@ -320,10 +336,16 @@ def _get_processed_data_w_time(
                 if not is_stopped:
                     data["speed"].append(point_distance / seconds)
                     cum_time_moving += seconds
-                    data["cum_time_moving"].append(cum_time_moving)
+                    # data["cum_time_moving"].append(cum_time_moving)
+                    # data["cum_time_stopped"].append(None)
                 else:
                     data["speed"].append(None)
-                    data["cum_time_moving"].append(None)
+                    # data["cum_time_moving"].append(None)
+                    cum_time_stopped += seconds
+                    # data["cum_time_stopped"].append(cum_time_stopped)
+
+                data["cum_time_moving"].append(cum_time_moving)
+                data["cum_time_stopped"].append(cum_time_stopped)
 
                 for key in extensions:
                     try:
@@ -364,6 +386,7 @@ def _get_processed_data_wo_time(
             data["time"].append(None)
             data["cum_time"].append(None)
             data["cum_time_moving"].append(None)
+            data["cum_time_stopped"].append(None)
             data["cum_distance"].append(cum_distance)
             data["cum_distance_moving"].append(cum_distance)
             data["cum_distance_stopped"].append(None)
@@ -454,7 +477,23 @@ def add_zones_to_dataframe(
 ) -> pd.DataFrame:
     zone_bins, names, zone_colors = format_zones_for_digitize(zones)
     if zone_colors is None:
-        zone_colors = plotly.colors.sample_colorscale("viridis", len(names))
+        try:
+            import plotly
+        except ModuleNotFoundError:
+            if len(names) > 8:
+                raise RuntimeError("Out of automatic colors for more than 8 zones")
+            zone_colors = [
+                "#FF0000",
+                "#F71D1D",
+                "#EF3A3A",
+                "#E75656",
+                "#DF7373",
+                "#D78F8F",
+                "#CFABAB",
+                "#C7C7C7",
+            ][0 : len(names)]
+        else:
+            zone_colors = plotly.colors.sample_colorscale("viridis", len(names))
 
     metric_data = data[metric][~data[metric].isna()]
     binned_metric = pd.Series(
