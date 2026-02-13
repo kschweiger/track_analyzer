@@ -1414,7 +1414,7 @@ class FITTrack(Track):
 
 @final
 class GeoJsonTrack(Track):
-    """Track that should be initialized by loading a .fit file"""
+    """Track that should be initialized by loading a .json file"""
 
     def __init__(
         self,
