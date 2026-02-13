@@ -37,4 +37,4 @@ __all__ = [
     "update_elevation",
 ]
 
-__version__ = "1.7.1"
+__version__ = "2.0.0"

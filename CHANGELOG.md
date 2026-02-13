@@ -1,4 +1,22 @@
 <!-- insertion marker -->
+<a name="2.0.0"></a>
+
+## [2.0.0](https://github.com/kschweiger/track_analyzer/compare/1.7.1...2.0.0) (2026-02-13)
+
+### Features
+
+- 🗺️ Add GeoJsonTrack dict support and export ([137a3e0](https://github.com/kschweiger/track_analyzer/commit/137a3e05886b6fa54bf448a3408a4859c3e6f69c))
+- 🗺️ Add GeoJSON track support (#35) ([1dabae3](https://github.com/kschweiger/track_analyzer/commit/1dabae33d6c728a917e84e91b1e7e7161fe87554))
+
+### Bug Fixes
+
+- **get_track_overview:** Overview is generated for tracks without movement ([dbbb4c0](https://github.com/kschweiger/track_analyzer/commit/dbbb4c02d167b9700fdcc3b877529a7a3ba0f09b))
+
+### Code Refactoring
+
+- Make plotting code an extra (#30) ([14c98b0](https://github.com/kschweiger/track_analyzer/commit/14c98b04150c5874fec0eceb52b2cff3d728ee6e))
+- **SegmentOverview:** Add heartrate, power, and cadence. Restruture model (#31) ([b2ed106](https://github.com/kschweiger/track_analyzer/commit/b2ed106ddde808c0298487cf2f69540152a1c5e4))
+
 <a name="1.7.1"></a>
 
 ## [1.7.1](https://github.com/kschweiger/track_analyzer/compare/1.7.0...1.7.1) (2025-10-30)
