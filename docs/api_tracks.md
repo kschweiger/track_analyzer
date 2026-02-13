@@ -5,4 +5,5 @@
 ::: geo_track_analyzer.track.ByteTrack
 ::: geo_track_analyzer.track.PyTrack
 ::: geo_track_analyzer.track.SegmentTrack
+::: geo_track_analyzer.track.GeoJsonTrack
 
