@@ -421,7 +421,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/61/ed/5637fe96c56d55dfa
 
 [[package]]
 name = "geo-track-analyzer"
-version = "2.0.0"
+version = "2.0.1"
 source = { editable = "." }
 dependencies = [
     { name = "fitparse" },
