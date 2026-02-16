@@ -424,10 +424,8 @@ name = "geo-track-analyzer"
 version = "2.0.0"
 source = { editable = "." }
 dependencies = [
-    { name = "click" },
     { name = "fitparse" },
     { name = "gpxpy" },
-    { name = "mkdocs" },
     { name = "numpy" },
     { name = "pandas" },
     { name = "pydantic" },
@@ -482,12 +480,10 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "click", specifier = ">=8.3.1" },
     { name = "click", marker = "extra == 'cli'", specifier = ">=8,<9" },
     { name = "fitparse", specifier = "~=1.2" },
     { name = "geo-track-analyzer", extras = ["cli", "postgis"], marker = "extra == 'full'" },
     { name = "gpxpy", specifier = "~=1.6" },
-    { name = "mkdocs", specifier = ">=1.6.1" },
     { name = "numpy", specifier = ">=2,<3" },
     { name = "pandas", specifier = ">=2,<3" },
     { name = "plotly", marker = "extra == 'visualization'", specifier = ">=5,<6" },

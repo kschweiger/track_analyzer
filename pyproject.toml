@@ -33,8 +33,6 @@ dependencies = [
   "fitparse~=1.2",
   "pydantic>=2,<3",
   "pydantic-numpy",
-  "click>=8.3.1",
-  "mkdocs>=1.6.1",
 ]
 
 [project.urls]
