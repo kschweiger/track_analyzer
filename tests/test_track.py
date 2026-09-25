@@ -839,9 +839,57 @@ def test_strip_segments() -> None:
 def test_fit_track() -> None:
     resource_files = importlib.resources.files(resources)
 
-    FITTrack((resource_files / "MyWhoosh_1.fit").read_bytes())
+    track = FITTrack((resource_files / "MyWhoosh_1.fit").read_bytes())
+    data = track.get_track_data()
 
-    assert True
+    assert not data.empty
+    assert data["latitude"].between(-90, 90).all()
+    assert data["longitude"].between(-180, 180).all()
+
+    elevation = data["elevation"].dropna()
+    assert not elevation.empty
+    assert elevation.between(-1_000, 10_000).all()
+
+    heartrate = data["heartrate"].dropna()
+    assert not heartrate.empty
+    assert heartrate.between(0, 200).all()
+
+    cadence = data["cadence"].dropna()
+    assert not cadence.empty
+    assert cadence.between(0, 200).all()
+
+    power = data["power"].dropna()
+    assert not power.empty
+    assert power.between(0, 1_000).all()
+
+    # Calculated track distance and speed are expressed in meters and m/s.
+    calculated_distance = data["distance"].dropna()
+    assert not calculated_distance.empty
+    assert calculated_distance.between(0, 100).all()
+
+    track_speed = data["speed"].dropna()
+    assert not track_speed.empty
+    assert track_speed.between(0, 30).all()
+    assert track_speed.max() > 5
+
+    # fitparse's standard-unit processor leaves the FIT speed extension in km/h.
+    extension_speed = data["enhanced_speed"].dropna()
+    assert not extension_speed.empty
+    assert extension_speed.between(0, 100).all()
+    assert extension_speed.max() > 30
+
+    # The raw FIT record distance extension is in km with the old parser.
+    distance = data["raw_distance"].dropna()
+    assert not distance.empty
+    assert distance.between(0, 150).all()
+    assert distance.max() > 1
+
+    session = track.session_data
+    assert isinstance(session["start_time"], datetime)
+    assert 0 < session["ride_time"] < 10_000
+    assert 0 < session["total_time"] < 10_000
+    assert 1_000 < session["distance"] < 100_000  # meters
+    assert 20 < session["avg_velocity"] < 100  # km/h with fitparse
 
 
 @pytest.mark.parametrize(
