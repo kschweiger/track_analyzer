@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import logging
-import warnings
 from abc import ABC, abstractmethod
 from copy import copy
 from datetime import datetime
@@ -756,16 +755,16 @@ class Track(ABC):
             - map-segments: Visualize coordinates on the map split into segments.
               Pass keyword args for
               [`plot_segments_on_map`][geo_track_analyzer.visualize.plot_segments_on_map]
-            - zone_summary : Visualize an aggregate (time, distance, speed) value for a
+            - zone-summary : Visualize an aggregate (time, distance, speed) value for a
                 metric (heartrate, power, cadence) with defined zones. Pass keyword args
                 for [`plot_track_zones`][geo_track_analyzer.visualize.plot_track_zones],
                 `aggregate` and `metric` are required.
-            - segment_zone_summary : Same as "zone-summary" but split aggregate per
+            - segment-zone-summary : Same as "zone-summary" but split aggregate per
                 segment [`plot_segment_zones`][geo_track_analyzer.visualize.plot_segment_zones]
-            - segment_box : Box plot of a metric (heartrate, power, cadence, speed,
+            - segment-box : Box plot of a metric (heartrate, power, cadence, speed,
                 elevation) per segment. Pass keyword args for [`plot_segments_on_map`][geo_track_analyzer.visualize.plot_segments_on_map]
                 `metric` is required.
-            - segment_summary : Visualize a aggregate (total_time, total_distance,
+            - segment-summary : Visualize a aggregate (total_time, total_distance,
                 avg_speed, max_speed) per segment. Pass keyword args for [`plot_segment_summary`][geo_track_analyzer.visualize.plot_segment_summary]
                 `aggregate` is required.
             - metrics: Visualize the progression of of a metric (elevation, heartrate,
@@ -802,14 +801,6 @@ class Track(ABC):
             "segment-summary",
             "metrics",
         ]
-
-        if "_" in kind and kind.replace("_", "-") in valid_kinds:
-            warnings.warn(
-                "Found %s but in versions >=2 only %s will be supported"
-                % (kind, kind.replace("_", "-")),
-                DeprecationWarning,
-            )
-            kind = kind.replace("_", "-")  # type: ignore
 
         require_elevation = ["profile", "profile-slope"]
         connect_segment_full = ["map-segments"]

@@ -605,10 +605,10 @@ def test_plot_multi_segment_plot(kind: str) -> None:
 @pytest.mark.parametrize(
     ("kind", "kwargs"),
     [
-        ("segment_summary", {"aggregate": "total_distance"}),
-        ("segment_box", {"metric": "elevation"}),
-        ("zone_summary", {"metric": "heartrate", "aggregate": "distance"}),
-        ("segment_zone_summary", {"metric": "heartrate", "aggregate": "distance"}),
+        ("segment-summary", {"aggregate": "total_distance"}),
+        ("segment-box", {"metric": "elevation"}),
+        ("zone-summary", {"metric": "heartrate", "aggregate": "distance"}),
+        ("segment-zone-summary", {"metric": "heartrate", "aggregate": "distance"}),
     ],
 )
 def test_plot_segment_summaries(kind: str, kwargs: dict) -> None:
@@ -634,12 +634,12 @@ def test_plot_segment_summaries(kind: str, kwargs: dict) -> None:
 @pytest.mark.parametrize(
     ("kind", "kwargs"),
     [
-        ("segment_summary", {}),
-        ("segment_box", {}),
-        ("zone_summary", {"aggregate": "distance"}),
-        ("zone_summary", {"metric": "heartrate"}),
-        ("segment_zone_summary", {"aggregate": "distance"}),
-        ("segment_zone_summary", {"metric": "heartrate"}),
+        ("segment-summary", {}),
+        ("segment-box", {}),
+        ("zone-summary", {"aggregate": "distance"}),
+        ("zone-summary", {"metric": "heartrate"}),
+        ("segment-zone-summary", {"aggregate": "distance"}),
+        ("segment-zone-summary", {"metric": "heartrate"}),
     ],
 )
 def test_plot_segment_summaries_kwarg_errors(kind: str, kwargs: dict) -> None:
