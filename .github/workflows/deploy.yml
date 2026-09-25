@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: ["3.12"]
+        python: ["3.14"]
     outputs:
       version: ${{ steps.package-version.outputs.version }}
     steps:
@@ -146,7 +146,7 @@ jobs:
       - name: Install uv and set the python version
         uses: astral-sh/setup-uv@v5
         with:
-          python-version: "3.12"
+          python-version: "3.14"
       - name: Build the documentation
         run: |
           uv run python docs/dump_github_releases.py
