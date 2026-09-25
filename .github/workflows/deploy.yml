@@ -15,9 +15,9 @@ jobs:
     outputs:
       version: ${{ steps.package-version.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Configure uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v10.2.0
       - name: Install Python ${{ matrix.python }}
         run: uv python install ${{ matrix.python }}
       - name: Build package
@@ -28,7 +28,7 @@ jobs:
         run: |
           uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])" > VERSION
           echo "version=$(cat VERSION)" >> $GITHUB_OUTPUT
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: dist-${{ matrix.python }}
           path: dist/
@@ -42,9 +42,9 @@ jobs:
       id-token: write
     steps:
       - name: "Install uv"
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v10.2.0
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: dist/
           merge-multiple: true
@@ -65,14 +65,12 @@ jobs:
           - "ubuntu-latest"
           # - "ubuntu-22.04-arm64"
         python-version:
-          - "3.11"
-          - "3.12"
           - "3.13"
           - "3.14"
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install uv and set the python version
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v10.2.0
         with:
           enable-cache: false
           python-version: ${{ matrix.python-version }}
@@ -100,9 +98,9 @@ jobs:
       id-token: write
     steps:
       - name: "Install uv"
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v10.2.0
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: dist/
           merge-multiple: true
@@ -118,9 +116,9 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Configure uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v10.2.0
       - name: Install Python ${{ matrix.python }}
         run: uv python install ${{ matrix.python }}
       - name: Install git-changelog
@@ -128,12 +126,12 @@ jobs:
       - name: Prepare release notes
         run: git-changelog --release-notes > release-notes.md
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: dist/
           merge-multiple: true
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           body_path: release-notes.md
           files: dist/*
@@ -142,9 +140,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: publish-github
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install uv and set the python version
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v10.2.0
         with:
           python-version: "3.14"
       - name: Build the documentation
@@ -152,7 +150,7 @@ jobs:
           uv run python docs/dump_github_releases.py
           uv run --all-extras docs/generate_visualization_examples.py
           uv run --group doc mkdocs build
-      - uses: actions/upload-artifact@master
+      - uses: actions/upload-artifact@v7
         with:
           name: DocumentationHTML
           path: site/
@@ -169,7 +167,7 @@ jobs:
           # The above command will fail if no changes were present, so we ignore
           # that.
       - name: Push changes
-        uses: ad-m/github-push-action@master
+        uses: ad-m/github-push-action@v1.3.0
         with:
           branch: gh-pages
           directory: gh-pages
