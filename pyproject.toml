@@ -6,9 +6,7 @@ build-backend = "flit_core.buildapi"
 name = "geo-track-analyzer"
 description = "Analyze geospacial data tracks"
 version = "2.0.1"
-authors = [
-  { name = "Korbinian Schweiger", email = "korbinian.schweiger@gmail.com" },
-]
+authors = [{ name = "Korbinian Schweiger", email = "korbinian.schweiger@gmail.com" }]
 readme = "README.md"
 license = { file = "LICENSE" }
 classifiers = [
@@ -30,9 +28,9 @@ dependencies = [
   "gpxpy~=1.6",
   "requests>=2,<3",
   "pandas>=2,<3",
-  "fitparse~=1.2",
   "pydantic>=2,<3",
   "pydantic-numpy",
+  "garmin-fit-sdk>=21.217.0,<22",
 ]
 
 [project.urls]
@@ -58,21 +56,7 @@ line-length = 88
 target-version = "py312"
 
 [tool.ruff.lint]
-select = [
-  "E",
-  "F",
-  "I",
-  "PD",
-  "PT",
-  "NPY",
-  "N",
-  "W",
-  "RET",
-  "ANN",
-  "RUF",
-  "SIM",
-  "PERF",
-]
+select = ["E", "F", "I", "PD", "PT", "NPY", "N", "W", "RET", "ANN", "RUF", "SIM", "PERF"]
 unfixable = ["F841", "RUF015"]
 ignore = [
   "ANN202",
@@ -126,7 +110,7 @@ doc = [
   "mkdocs-click>=0.8.1",
   "mkdocs-material>=9.6.5",
   "mkdocstrings[python]>=0.28.2",
-  "griffe>=0.46.0,<2.0",          # version 2 does introduce issues with mkdocstrings[python]
+  "griffe>=0.46.0,<2.0", # version 2 does introduce issues with mkdocstrings[python]
 ]
 test = [
   "pytest>=8.3.4",

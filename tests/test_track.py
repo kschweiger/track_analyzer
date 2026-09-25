@@ -880,6 +880,7 @@ def test_fit_track() -> None:
 
     # The raw FIT record distance extension is in km with the old parser.
     distance = data["raw_distance"].dropna()
+    print("distance:", distance.max())
     assert not distance.empty
     assert distance.between(0, 150).all()
     assert distance.max() > 1
