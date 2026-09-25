@@ -30,7 +30,7 @@ def _add_segment_borders(data: pd.DataFrame, fig: Figure, color: None | str) -> 
     for idx, segment_border_idx in enumerate(
         data.index[data["segment"] != data["segment"].shift()].to_list()
     ):
-        border_x = data.loc[segment_border_idx].cum_distance_moving
+        border_x = data.loc[segment_border_idx].cum_distance_moving_m
         fig.add_vline(
             x=border_x,
             # Hide line but keep abbitiation for first segment
@@ -45,19 +45,21 @@ def _add_segment_borders(data: pd.DataFrame, fig: Figure, color: None | str) -> 
 def _add_secondary(
     fig: Figure,
     data: pd.DataFrame,
-    secondary: Literal["velocity", "heartrate", "cadence", "power", "speed"],
+    secondary: Literal[
+        "velocity", "heartrate", "cadence", "power", "speed", "speed_ms"
+    ],
     split_by_zone: bool,
     min_zone_size: float,
 ) -> None:
     mode = "lines"
-    fill: None | str = "tozeroy"
+    fill: str | None = "tozeroy"
     y_range_max_factor = 1.2
     y_converter: Callable[[pd.Series], pd.Series] = lambda s: s.fillna(0).astype(int)
     if secondary == "velocity" or secondary == "speed":
         title = "Velocity [km/h]"
         y_range_max_factor = 2.1
         y_converter = lambda s: s * 3.6
-        secondary = "speed"
+        secondary = "speed_ms"
     elif secondary == "heartrate":
         title = "Heart Rate [bpm]"
     elif secondary == "power":
@@ -94,7 +96,7 @@ def _add_secondary(
 
         _add_secondary_cont(
             fig=fig,
-            x=data.cum_distance_moving,
+            x=data.cum_distance_moving_m,
             y=y_data,
             y_range=y_range,
             title=title,
@@ -249,7 +251,7 @@ def plot_track_2d(
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     fig.add_trace(
         go.Scatter(
-            x=data_for_plot.cum_distance_moving,
+            x=data_for_plot.cum_distance_moving_m,
             y=data_for_plot.elevation,
             mode="lines",
             name="Elevation [m]",
@@ -260,7 +262,7 @@ def plot_track_2d(
                 )
                 for rcrd in data_for_plot.to_dict("records")
             ],
-            hovertemplate="<b>Distance</b>: %{x:.1f} km <br><b>Elevation</b>: "
+            hovertemplate="<b>Distance</b>: %{x:.1f} m <br><b>Elevation</b>: "
             + "%{y:.1f} m <br>%{text}<extra></extra>",
             showlegend=False,
         ),
@@ -304,7 +306,7 @@ def plot_track_2d(
             if poi_data.empty:
                 logger.warning("Could not find POI in data. Skipping")
                 continue
-            poi_x = poi_data.iloc[0].cum_distance_moving
+            poi_x = poi_data.iloc[0].cum_distance_moving_m
             poi_y = poi_data.iloc[0].elevation
 
             fig.add_scatter(
@@ -337,8 +339,8 @@ def plot_track_2d(
 
     fig.update_xaxes(
         range=[
-            data_for_plot.iloc[0].cum_distance_moving,
-            data_for_plot.iloc[-1].cum_distance_moving,
+            data_for_plot.iloc[0].cum_distance_moving_m,
+            data_for_plot.iloc[-1].cum_distance_moving_m,
         ]
     )
 
@@ -414,7 +416,7 @@ def plot_track_with_slope(
 
     def calc_slope(row: pd.Series) -> int:
         try:
-            slope = round((row.elevation_diff / row.distance) * 100)
+            slope = round((row.elevation_diff / row.distance_m) * 100)
         except ZeroDivisionError:
             slope = 0
 
@@ -431,7 +433,7 @@ def plot_track_with_slope(
 
     fig.add_trace(
         go.Scatter(
-            x=data.cum_distance_moving,
+            x=data.cum_distance_moving_m,
             y=data.elevation,
             mode="lines",
             name="Elevation [m]",
@@ -454,10 +456,10 @@ def plot_track_with_slope(
         slope_val = this_data.iloc[1].slope
 
         color = slope_color_map[slope_val]
-        max_distance: float = max(this_data.cum_distance_moving)
+        max_distance: float = max(this_data.cum_distance_moving_m)
         fig.add_trace(
             go.Scatter(
-                x=this_data.cum_distance_moving,
+                x=this_data.cum_distance_moving_m,
                 y=this_data.elevation,
                 mode="lines",
                 name=f"Distance {max_distance / 1000:.1f} km",

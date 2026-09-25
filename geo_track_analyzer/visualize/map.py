@@ -76,7 +76,7 @@ def plot_track_enriched_on_map(
     data: pd.DataFrame,
     *,
     enrich_with_column: Literal[
-        "elevation", "speed", "heartrate", "cadence", "power"
+        "elevation", "speed", "speed_ms", "heartrate", "cadence", "power"
     ] = "elevation",
     color_by_zone: bool = False,
     zoom: int = 13,
@@ -126,8 +126,14 @@ def plot_track_enriched_on_map(
     )
 
     # ~~~~~~~~~~~~ Enrichment data ~~~~~~~~~~~~~~~~
+    data_column = (
+        "speed_ms"
+        if enrich_with_column in ["speed", "speed_ms"]
+        else enrich_with_column
+    )
+    enrich_unit_key = "speed" if data_column == "speed_ms" else enrich_with_column
     enrich_unit = (
-        ENRICH_UNITS[enrich_with_column]
+        ENRICH_UNITS[enrich_unit_key]
         if overwrite_unit_text is None
         else overwrite_unit_text
     )
@@ -136,7 +142,7 @@ def plot_track_enriched_on_map(
     )
 
     # ~~~~~~~~~~~ Colors ~~~~~~~~~~~~~~~~~
-    color_column_values = plot_data[enrich_with_column]
+    color_column_values = plot_data[data_column]
 
     if color_column_values.isna().all():
         raise VisualizationSetupError(
@@ -152,7 +158,7 @@ def plot_track_enriched_on_map(
         plot_data = plot_data[~color_column_values.isna()]
         color_column_values = color_column_values[~color_column_values.isna()]
 
-    if enrich_with_column == "speed":
+    if data_column == "speed_ms":
         color_column_values = color_column_values * 3.6
     diff_abs = color_column_values.max() - color_column_values.min()
     assert diff_abs > 0
@@ -310,9 +316,9 @@ def plot_segments_on_map(
         else:
             mean_heartrate, min_heartrate, max_heartrate = np.nan, np.nan, np.nan
 
-        mean_speed = frame.speed.agg("mean") * 3.6
-        min_speed = frame.speed.agg("min") * 3.6
-        max_speed = frame.speed.agg("max") * 3.6
+        mean_speed = frame.speed_ms.agg("mean") * 3.6
+        min_speed = frame.speed_ms.agg("min") * 3.6
+        max_speed = frame.speed_ms.agg("max") * 3.6
 
         if "power" in frame:
             mean_power = frame.power.agg("mean")
@@ -321,7 +327,7 @@ def plot_segments_on_map(
         else:
             mean_power, min_power, max_power = np.nan, np.nan, np.nan
 
-        distance = frame.distance.sum() / 1000
+        distance = frame.distance_m.sum() / 1000
         if frame.time.isna().all():
             total_time = None
         else:

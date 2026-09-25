@@ -158,7 +158,7 @@ def generate_distance_segments(data: pd.DataFrame, distance: float) -> pd.DataFr
 
     :return: Dataframe with updated segments
     """
-    key = "cum_distance_moving"
+    key = "cum_distance_moving_m"
     max_distance = data.iloc[-1][key]
 
     if max_distance < distance:

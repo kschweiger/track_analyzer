@@ -445,10 +445,10 @@ def test_interpolate_points(
     seconds_2: None | int,
     exp_seconds: None | list[int],
 ) -> None:
-    time_1: None | datetime
+    time_1: datetime | None
     time_1 = datetime(2023, 1, 1, 12, 0, seconds_1) if seconds_1 is not None else None
 
-    time_2: None | datetime
+    time_2: datetime | None
     time_2 = datetime(2023, 1, 1, 12, 0, seconds_2) if seconds_2 is not None else None
 
     point_1 = get_extended_track_point(1.100, 1.100, elevation_1, time_1, {})
@@ -635,7 +635,7 @@ def test_format_zones_for_digitize(
         (
             pd.DataFrame(
                 {
-                    "cum_distance_moving": [0, 100, 200, 300, 400, 500, 600, 700],
+                    "cum_distance_moving_m": [0, 100, 200, 300, 400, 500, 600, 700],
                     "segment": [0, 0, 0, 0, 0, 1, 1, 1],
                 }
             ),
@@ -645,7 +645,7 @@ def test_format_zones_for_digitize(
         (
             pd.DataFrame(
                 {
-                    "cum_distance_moving": [0, 100, 200, 300, 400, 500, 600, 700],
+                    "cum_distance_moving_m": [0, 100, 200, 300, 400, 500, 600, 700],
                     "segment": [0, 0, 0, 0, 0, 0, 0, 0],
                 }
             ),
@@ -655,7 +655,7 @@ def test_format_zones_for_digitize(
         (
             pd.DataFrame(
                 {
-                    "cum_distance_moving": [0, 100, 200, 300, 400, 500, 600],
+                    "cum_distance_moving_m": [0, 100, 200, 300, 400, 500, 600],
                     "segment": [0, 0, 0, 0, 0, 0, 0],
                 }
             ),

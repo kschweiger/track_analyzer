@@ -29,7 +29,7 @@ class PlotMetric(StrEnum):
 
 
 class PlotBase(StrEnum):
-    DISTANCE = "cum_distance_moving"
+    DISTANCE = "cum_distance_moving_m"
     DURATION = "cum_time_moving"
 
 
@@ -100,7 +100,7 @@ def _add_scatter_disonct(
         y_min = min(y_min, y_data.min() * y_range_min_factor)
         _add_scatter_cont(
             fig=fig,
-            x=data_.cum_distance_moving,
+            x=data_.cum_distance_moving_m,
             y=y_data,
             y_range=None,
             title=group_name,
@@ -182,7 +182,8 @@ def plot_metrics(
     y_max = -99
     y_min = 99_999
     for metric, secondary, color in zip(metrics, set_secondary, _colors):
-        if data_for_plot[metric].isna().all():
+        metric_column = "speed_ms" if metric == PlotMetric.SPEED else metric
+        if data_for_plot[metric_column].isna().all():
             if len(metrics) == 1:
                 raise VisualizationSetupError(f"Cannot plot {metric}. Data missing")
             warnings.warn(
@@ -198,7 +199,7 @@ def plot_metrics(
         elif metric == PlotMetric.SPEED:
             y_converter = lambda s: s * 3.6
 
-        y_data = y_converter(data_for_plot[metric])
+        y_data = y_converter(data_for_plot[metric_column])
 
         if add_zones and metric in METRICS_WITH_ZONES:
             fill = None

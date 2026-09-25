@@ -28,4 +28,4 @@ except ImportError:
         sys.exit(1)
 
 
-__all__ = ["update_elevation", "extract_track"]
+__all__ = ["extract_track", "update_elevation"]

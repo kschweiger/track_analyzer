@@ -843,6 +843,8 @@ def test_fit_track() -> None:
     data = track.get_track_data()
 
     assert not data.empty
+    assert "speed" not in data.columns
+    assert "distance" not in data.columns
     assert data["latitude"].between(-90, 90).all()
     assert data["longitude"].between(-180, 180).all()
 
@@ -863,11 +865,11 @@ def test_fit_track() -> None:
     assert power.between(0, 1_000).all()
 
     # Calculated track distance and speed are expressed in meters and m/s.
-    calculated_distance = data["distance"].dropna()
+    calculated_distance = data["distance_m"].dropna()
     assert not calculated_distance.empty
     assert calculated_distance.between(0, 100).all()
 
-    track_speed = data["speed"].dropna()
+    track_speed = data["speed_ms"].dropna()
     assert not track_speed.empty
     assert track_speed.between(0, 30).all()
     assert track_speed.max() > 5

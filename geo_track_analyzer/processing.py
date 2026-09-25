@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 def _recalc_cumulated_columns(data: pd.DataFrame) -> pd.DataFrame:
     data = data.copy()
     data.cum_time = data.time.cumsum()
-    data.cum_distance = data.distance.cumsum()
+    data.cum_distance_m = data.distance_m.cumsum()
 
     cum_time_moving: list[None] | list[float] = []
     cum_time_stopped: list[None] | list[float] = []
@@ -37,8 +37,8 @@ def _recalc_cumulated_columns(data: pd.DataFrame) -> pd.DataFrame:
                     cum_time_moving.append(0)
                     cum_time_stopped.append(rcrd["time"])
 
-            cum_distance_moving.append(rcrd["distance"] if rcrd["moving"] else 0)
-            cum_distance_stopped.append(0 if rcrd["moving"] else rcrd["distance"])
+            cum_distance_moving.append(rcrd["distance_m"] if rcrd["moving"] else 0)
+            cum_distance_stopped.append(0 if rcrd["moving"] else rcrd["distance_m"])
         else:
             if rcrd["time"] is None:
                 cum_time_moving.append(None)  # type: ignore
@@ -52,16 +52,16 @@ def _recalc_cumulated_columns(data: pd.DataFrame) -> pd.DataFrame:
                     cum_time_stopped.append(cum_time_stopped[-1] + rcrd["time"])
 
             cum_distance_moving.append(
-                cum_distance_moving[-1] + (rcrd["distance"] if rcrd["moving"] else 0)
+                cum_distance_moving[-1] + (rcrd["distance_m"] if rcrd["moving"] else 0)
             )
             cum_distance_stopped.append(
-                cum_distance_stopped[-1] + (0 if rcrd["moving"] else rcrd["distance"])
+                cum_distance_stopped[-1] + (0 if rcrd["moving"] else rcrd["distance_m"])
             )
 
     data.cum_time_moving = cum_time_moving
     data.cum_time_stopped = cum_time_stopped
-    data.cum_distance_moving = cum_distance_moving
-    data.cum_distance_stopped = cum_distance_stopped
+    data.cum_distance_moving_m = cum_distance_moving
+    data.cum_distance_stopped_m = cum_distance_stopped
 
     return data
 
@@ -102,7 +102,7 @@ def get_processed_track_data(
     track_distance: float = 0
     track_stopped_time: float = 0
     track_stopped_distance: float = 0
-    track_data: None | pd.DataFrame = None
+    track_data: pd.DataFrame | None = None
 
     for i_segment, segment in enumerate(track.segments):
         extend_segment_post = None
@@ -212,15 +212,15 @@ def get_processed_segment_data(
         "latitude": [],
         "longitude": [],
         "elevation": [],
-        "speed": [],
-        "distance": [],
+        "speed_ms": [],
+        "distance_m": [],
         "time": [],
         "cum_time": [],
         "cum_time_moving": [],
         "cum_time_stopped": [],
-        "cum_distance": [],
-        "cum_distance_moving": [],
-        "cum_distance_stopped": [],
+        "cum_distance_m": [],
+        "cum_distance_moving_m": [],
+        "cum_distance_stopped_m": [],
         "moving": [],
     }
 
@@ -304,7 +304,7 @@ def _get_processed_data_w_time(
                 else:
                     is_stopped = True
 
-                data["distance"].append(point_distance)
+                data["distance_m"].append(point_distance)
 
                 if is_stopped:
                     stopped_time += seconds
@@ -322,9 +322,9 @@ def _get_processed_data_w_time(
                 data["time"].append(seconds)
                 data["cum_time"].append(cum_time)
 
-                data["cum_distance"].append(cum_distance)
-                data["cum_distance_moving"].append(cum_moving)
-                data["cum_distance_stopped"].append(cum_stopped)
+                data["cum_distance_m"].append(cum_distance)
+                data["cum_distance_moving_m"].append(cum_moving)
+                data["cum_distance_stopped_m"].append(cum_stopped)
 
                 data["latitude"].append(point.latitude)
                 data["longitude"].append(point.longitude)
@@ -334,12 +334,12 @@ def _get_processed_data_w_time(
                     data["elevation"].append(None)
 
                 if not is_stopped:
-                    data["speed"].append(point_distance / seconds)
+                    data["speed_ms"].append(point_distance / seconds)
                     cum_time_moving += seconds
                     # data["cum_time_moving"].append(cum_time_moving)
                     # data["cum_time_stopped"].append(None)
                 else:
-                    data["speed"].append(None)
+                    data["speed_ms"].append(None)
                     # data["cum_time_moving"].append(None)
                     cum_time_stopped += seconds
                     # data["cum_time_stopped"].append(cum_time_stopped)
@@ -374,7 +374,7 @@ def _get_processed_data_wo_time(
         if point_distance is not None:
             distance += point_distance
 
-            data["distance"].append(point_distance)
+            data["distance_m"].append(point_distance)
             data["latitude"].append(point.latitude)
             data["longitude"].append(point.longitude)
             if point.has_elevation():
@@ -387,10 +387,10 @@ def _get_processed_data_wo_time(
             data["cum_time"].append(None)
             data["cum_time_moving"].append(None)
             data["cum_time_stopped"].append(None)
-            data["cum_distance"].append(cum_distance)
-            data["cum_distance_moving"].append(cum_distance)
-            data["cum_distance_stopped"].append(None)
-            data["speed"].append(None)
+            data["cum_distance_m"].append(cum_distance)
+            data["cum_distance_moving_m"].append(cum_distance)
+            data["cum_distance_stopped_m"].append(None)
+            data["speed_ms"].append(None)
             data["moving"].append(True)
 
             for key in extensions:
@@ -436,7 +436,7 @@ def split_data(
     data = data.copy()
 
     if split_by == "distance":
-        column = "cum_distance_moving" if moving_only else "cum_distance"
+        column = "cum_distance_moving_m" if moving_only else "cum_distance_m"
     else:
         column = "cum_time_moving" if moving_only else "cum_time"
 
