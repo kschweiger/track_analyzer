@@ -1240,7 +1240,14 @@ class SegmentTrack(Track):
 
 @final
 class FITTrack(Track):
-    """Track that should be initialized by loading a .fit file"""
+    """Track initialized from a FIT file.
+
+    FIT record speed and distance extensions are exposed as ``enhanced_speed_ms``
+    (m/s) and ``raw_distance_m`` (m). Session values use ``avg_velocity_ms``,
+    ``max_velocity_ms``, and ``distance_m`` for the corresponding SI values.
+    The calculated dataframe columns ``speed`` and ``distance`` are also in m/s
+    and meters, respectively.
+    """
 
     def __init__(
         self,
@@ -1290,8 +1297,8 @@ class FITTrack(Track):
 
         rename_keys = {
             "heart_rate": "heartrate",
-            "distance": "raw_distance",
-            "speed": "raw_speed",
+            "distance": "raw_distance_m",
+            "enhanced_speed": "enhanced_speed_ms",
             "calories": "cum_calories",
         }
         alias_keys = {"enhanced_speed": ["speed"]}
@@ -1375,11 +1382,11 @@ class FITTrack(Track):
                 "start_time": session.get("start_time"),
                 "ride_time": session.get("total_timer_time"),
                 "total_time": session.get("total_elapsed_time"),
-                "distance": session.get("total_distance"),
+                "distance_m": session.get("total_distance"),
                 "ascent": session.get("total_ascent"),
                 "descent": session.get("total_descent"),
-                "avg_velocity": session.get("avg_speed"),
-                "max_velocity": session.get("max_speed"),
+                "avg_velocity_ms": session.get("avg_speed"),
+                "max_velocity_ms": session.get("max_speed"),
             }
         else:
             logger.debug("Could not load session data from fit file")
