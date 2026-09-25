@@ -29,6 +29,9 @@ Use pytest with `test_*.py` files and `test_*` functions. Prefer real, small fix
 
 Recent history generally uses Conventional Commit prefixes such as `feat:`, `fix:`, `test:`, `build:`, and `doc:`; use a concise imperative summary (for example, `test: cover FIT distance units`). Pull requests should explain the behavior change, mention compatibility or unit changes, and list the tests and checks run. Link a related issue when applicable; include documentation updates for user-visible API changes.
 
+Do not edit `CHANGELOG.md` manually. It is generated automatically during releases.
+Releases are performed manually by a human using the release script in the repository root; agents must never run or perform a release.
+
 ## Configuration
 
 Keep credentials and machine-specific settings out of commits. Use environment variables for local configuration and check `.gitignore` before adding generated coverage, build, or cache files.
