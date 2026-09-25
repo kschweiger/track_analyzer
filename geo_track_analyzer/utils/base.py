@@ -28,6 +28,7 @@ try:
 except ModuleNotFoundError:
     coloredlogs = None
 
+SEMICIRCLES_TO_DEGREES = 180 / 2**31
 
 logger = logging.getLogger(__name__)
 
@@ -685,3 +686,9 @@ def fill_list(values: list[None | float]) -> list[float]:
     if None in values:
         raise RuntimeError
     return values  # type: ignore
+
+
+def semicircles_to_degrees(value: int | None) -> float | None:
+    if value is None:
+        return None
+    return value * SEMICIRCLES_TO_DEGREES

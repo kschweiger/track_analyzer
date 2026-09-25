@@ -872,24 +872,29 @@ def test_fit_track() -> None:
     assert track_speed.between(0, 30).all()
     assert track_speed.max() > 5
 
-    # fitparse's standard-unit processor leaves the FIT speed extension in km/h.
-    extension_speed = data["enhanced_speed"].dropna()
+    # FIT extension values are exposed with names that state their SI units.
+    assert "enhanced_speed" not in data.columns
+    extension_speed = data["enhanced_speed_ms"].dropna()
     assert not extension_speed.empty
-    assert extension_speed.between(0, 100).all()
-    assert extension_speed.max() > 30
+    assert extension_speed.between(0, 30).all()
+    assert extension_speed.max() > 5
 
-    # The raw FIT record distance extension is in km with the old parser.
-    distance = data["raw_distance"].dropna()
+    assert "raw_distance" not in data.columns
+    distance = data["raw_distance_m"].dropna()
     assert not distance.empty
-    assert distance.between(0, 150).all()
-    assert distance.max() > 1
+    assert distance.between(0, 100_000).all()
+    assert distance.max() > 1_000
 
     session = track.session_data
     assert isinstance(session["start_time"], datetime)
     assert 0 < session["ride_time"] < 10_000
     assert 0 < session["total_time"] < 10_000
-    assert 1_000 < session["distance"] < 100_000  # meters
-    assert 20 < session["avg_velocity"] < 100  # km/h with fitparse
+    assert "distance" not in session
+    assert 1_000 < session["distance_m"] < 100_000
+    assert "avg_velocity" not in session
+    assert 0 < session["avg_velocity_ms"] < 30
+    assert "max_velocity" not in session
+    assert session["max_velocity_ms"] is None or 0 < session["max_velocity_ms"] < 30
 
 
 @pytest.mark.parametrize(

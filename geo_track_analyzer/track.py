@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Dict, Literal, Sequence, TypeVar, final
 import gpxpy
 import numpy as np
 import pandas as pd
-from fitparse import DataMessage, FitFile, StandardUnitsDataProcessor
+from garmin_fit_sdk import Decoder, Profile, Stream
 from gpxpy.gpx import GPX, GPXTrack, GPXTrackSegment
 
 if TYPE_CHECKING:
@@ -41,6 +41,7 @@ from geo_track_analyzer.utils.base import (
     fill_list,
     get_point_distance,
     interpolate_segment,
+    semicircles_to_degrees,
 )
 from geo_track_analyzer.utils.internal import (
     BackFillExtensionDict,
@@ -1239,7 +1240,14 @@ class SegmentTrack(Track):
 
 @final
 class FITTrack(Track):
-    """Track that should be initialized by loading a .fit file"""
+    """Track initialized from a FIT file.
+
+    FIT record speed and distance extensions are exposed as ``enhanced_speed_ms``
+    (m/s) and ``raw_distance_m`` (m). Session values use ``avg_velocity_ms``,
+    ``max_velocity_ms``, and ``distance_m`` for the corresponding SI values.
+    The calculated dataframe columns ``speed`` and ``distance`` are also in m/s
+    and meters, respectively.
+    """
 
     def __init__(
         self,
@@ -1277,20 +1285,20 @@ class FITTrack(Track):
 
         if isinstance(source, str):
             logger.info("Loading fit track from file %s", source)
+            stream = Stream.from_file(source)
+
         else:
             logger.info("Using passed bytes data as fit track")
+            stream = Stream.from_byte_array(bytearray(source))
 
-        fit_data = FitFile(
-            source,
-            data_processor=StandardUnitsDataProcessor(),
-        )
+        decoder = Decoder(stream)
 
         points, elevations, times = [], [], []
 
         rename_keys = {
             "heart_rate": "heartrate",
-            "distance": "raw_distance",
-            "speed": "raw_speed",
+            "distance": "raw_distance_m",
+            "enhanced_speed": "enhanced_speed_ms",
             "calories": "cum_calories",
         }
         alias_keys = {"enhanced_speed": ["speed"]}
@@ -1298,85 +1306,108 @@ class FITTrack(Track):
         for value in alias_keys.values():
             alias_values.update(value)
 
-        split_at = set([0])
         extensions = BackFillExtensionDict()
-        for record in fit_data.get_messages(("record", "lap")):  # type: ignore
-            record: DataMessage  # type: ignore
-            if record.mesg_type.name == "lap":
-                split_at.add(len(points))
-            lat = record.get_value("position_lat")
-            long = record.get_value("position_long")
-            ele = record.get_value("enhanced_altitude")
-            if ele is None and (alt := record.get_value("altitude")) is not None:
-                ele = alt
-            ts = record.get_value("timestamp")
 
-            check_vals = [lat, long, ts]
-            if strict_elevation_loading:
-                check_vals.append(ele)
+        splits = []
+        sessions = []
 
-            if any([v is None for v in check_vals]):
-                logger.debug(
-                    "Found records with None value in lat/long/elevation/timestamp "
-                    " - %s/%s/%s/%s",
-                    lat,
-                    long,
-                    ele,
-                    ts,
-                )
-                continue
+        def on_message(mesg_num: int, message: dict) -> None:
+            if mesg_num == Profile["mesg_num"]["LAP"]:
+                splits.append(message)
 
-            record_extensions = {}
-            extension_names = []
-            for field in record.fields:
-                if field.name in [
-                    "position_long",
-                    "position_lat",
-                    "enhanced_altitude",
-                    "altitude",
-                    "timestamp",
-                ]:
-                    continue
-                extension_names.append(field.name)
+            elif mesg_num == Profile["mesg_num"]["SESSION"]:
+                sessions.append(message)
 
-            for name in extension_names:
-                if name in alias_values:
-                    continue
-                value = record.get_value(name)
-                if name in alias_keys and value is None:
-                    for alias in alias_keys[name]:
-                        value = record.get_value(alias)
-                        if value is not None:
-                            break
-                record_extensions[rename_keys.get(name, name)] = value
+            elif mesg_num == Profile["mesg_num"]["RECORD"]:
+                lat = semicircles_to_degrees(message.get("position_lat"))
+                long = semicircles_to_degrees(message.get("position_long"))
+                ele = message.get("enhanced_altitude")
+                if ele is None and (alt := message.get("altitude")) is not None:
+                    ele = alt
+                ts = message.get("timestamp")
+                check_vals = [lat, long, ts]
+                if strict_elevation_loading:
+                    check_vals.append(ele)
+                if all([v is not None for v in check_vals]):
+                    logger.debug(
+                        "Found messages with None value in lat/long/elevation/timestamp "
+                        " - %s/%s/%s/%s",
+                        lat,
+                        long,
+                        ele,
+                        ts,
+                    )
 
-            extensions.fill(record_extensions)
+                    message_extensions = {}
+                    extension_names = []
+                    for field in message:
+                        if field in [
+                            "position_long",
+                            "position_lat",
+                            "enhanced_altitude",
+                            "altitude",
+                            "timestamp",
+                        ]:
+                            continue
+                        extension_names.append(field)
 
-            points.append((lat, long))
-            elevations.append(ele)
-            times.append(ts)
+                    for name in extension_names:
+                        if name in alias_values:
+                            continue
+                        value = message.get(name)
+                        if name in alias_keys and value is None:
+                            for alias in alias_keys[name]:
+                                value = message.get(alias)
+                                if value is not None:
+                                    break
+                        message_extensions[rename_keys.get(name, name)] = value
+
+                    extensions.fill(message_extensions)
+
+                    points.append((lat, long))
+                    elevations.append(ele)
+                    times.append(ts)
+
+        _, errors = decoder.read(
+            mesg_listener=on_message,
+        )
+        # TODO: Errors?
 
         if not strict_elevation_loading and set(elevations) != {None}:
             elevations = fill_list(elevations)
 
-        try:
-            session_data: DataMessage = list(fit_data.get_messages("session"))[-1]  # type: ignore
-        except IndexError:
-            logger.debug("Could not load session data from fit file")
-        else:
+        session = sessions[-1] if sessions else None
+        if session:
             self.session_data = {  # type: ignore
-                "start_time": session_data.get_value("start_time"),
-                "ride_time": session_data.get_value("total_timer_time"),
-                "total_time": session_data.get_value("total_elapsed_time"),
-                "distance": session_data.get_value("total_distance"),
-                "ascent": session_data.get_value("total_ascent"),
-                "descent": session_data.get_value("total_descent"),
-                "avg_velocity": session_data.get_value("avg_speed"),
-                "max_velocity": session_data.get_value("max_speed"),
+                "start_time": session.get("start_time"),
+                "ride_time": session.get("total_timer_time"),
+                "total_time": session.get("total_elapsed_time"),
+                "distance_m": session.get("total_distance"),
+                "ascent": session.get("total_ascent"),
+                "descent": session.get("total_descent"),
+                "avg_velocity_ms": session.get("avg_speed"),
+                "max_velocity_ms": session.get("max_speed"),
             }
+        else:
+            logger.debug("Could not load session data from fit file")
 
-        split_at = sorted(split_at)
-        if len(split_at) == 1:
+        if len(splits) == 1:
+            split_at = [0, len(points)]
+        else:
+            ts_splits = sorted(
+                [
+                    split.get("timestamp")
+                    for split in splits
+                    if split.get("event_type") == "stop"
+                ]
+            )
+            split_at = [0]
+            for i, time in enumerate(times):
+                if not ts_splits:
+                    break
+                if time > ts_splits[0]:
+                    split_at.append(i)
+                    ts_splits.pop(0)
             split_at.append(len(points))
 
         gpx = GPX()
