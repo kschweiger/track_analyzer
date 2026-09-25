@@ -18,8 +18,17 @@ from tests import resources
 def summary_data() -> pd.DataFrame:
     resource_files = importlib.resources.files(resources)
 
-    return pd.read_csv(resource_files / "summary_test_data.csv", sep=";").drop(  # type: ignore
+    data = pd.read_csv(resource_files / "summary_test_data.csv", sep=";").drop(  # type: ignore
         "Unnamed: 0", axis=1
+    )
+    return data.rename(
+        columns={
+            "speed": "speed_ms",
+            "distance": "distance_m",
+            "cum_distance": "cum_distance_m",
+            "cum_distance_moving": "cum_distance_moving_m",
+            "cum_distance_stopped": "cum_distance_stopped_m",
+        }
     )
 
 

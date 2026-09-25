@@ -81,9 +81,9 @@ class Track(ABC):
         max_speed_percentile: int,
         extensions: set[str] | None = None,
         require_data_extensions: set[str] | None = None,
-        heartrate_zones: None | Zones = None,
-        power_zones: None | Zones = None,
-        cadence_zones: None | Zones = None,
+        heartrate_zones: Zones | None = None,
+        power_zones: Zones | None = None,
+        cadence_zones: Zones | None = None,
     ) -> None:
         logger.debug(
             "Using threshold for stopped speed: %s km/h", stopped_speed_threshold
@@ -186,7 +186,7 @@ class Track(ABC):
             self.track.segments.pop(n_segment)
             return True
 
-    def get_xml(self, name: None | str = None, email: None | str = None) -> str:
+    def get_xml(self, name: str | None = None, email: str | None = None) -> str:
         """Get track as .gpx file data
 
         :param name: Optional author name to be added to gpx file, defaults to None
@@ -228,10 +228,10 @@ class Track(ABC):
 
         if (
             all(seg.has_times() for seg in self.track.segments)
-            and not track_data.speed.isna().all()
+            and not track_data.speed_ms.isna().all()
         ):
-            track_max_speed = track_data.speed[track_data.in_speed_percentile].max()
-            track_avg_speed = track_data.speed[track_data.in_speed_percentile].mean()
+            track_max_speed = track_data.speed_ms[track_data.in_speed_percentile].max()
+            track_avg_speed = track_data.speed_ms[track_data.in_speed_percentile].mean()
 
         return self._create_segment_overview(
             time=track_time,
@@ -266,8 +266,8 @@ class Track(ABC):
         avg_speed = None
 
         if self.track.segments[n_segment].has_times():
-            max_speed = data.speed[data.in_speed_percentile].max()
-            avg_speed = data.speed[data.in_speed_percentile].mean()
+            max_speed = data.speed_ms[data.in_speed_percentile].max()
+            avg_speed = data.speed_ms[data.in_speed_percentile].mean()
 
         return self._create_segment_overview(
             time=time,
@@ -285,8 +285,8 @@ class Track(ABC):
         distance: float,
         stopped_time: float,
         stopped_distance: float,
-        max_speed: None | float,
-        avg_speed: None | float,
+        max_speed: float | None,
+        avg_speed: float | None,
         data: pd.DataFrame,
     ) -> SegmentOverview:
         """Derive overview metrics for a segmeent"""
@@ -349,7 +349,7 @@ class Track(ABC):
         )
 
     def get_closest_point(
-        self, n_segment: None | int, latitude: float, longitude: float
+        self, n_segment: int | None, latitude: float, longitude: float
     ) -> PointDistance:
         """
         Get closest point in a segment or track to the passed latitude and longitude
@@ -368,14 +368,14 @@ class Track(ABC):
     def _get_aggregated_pp_distance(self, agg: str, threshold: float) -> float:
         data = self.get_track_data()
 
-        return data[data.distance >= threshold].distance.agg(agg)
+        return data[data.distance_m >= threshold].distance_m.agg(agg)
 
     def _get_aggregated_pp_distance_in_segment(
         self, agg: str, n_segment: int, threshold: float
     ) -> float:
         data = self.get_segment_data(n_segment=n_segment)
 
-        return data[data.distance >= threshold].distance.agg(agg)
+        return data[data.distance_m >= threshold].distance_m.agg(agg)
 
     def get_avg_pp_distance(self, threshold: float = 10) -> float:
         """
@@ -531,7 +531,7 @@ class Track(ABC):
 
         :return: DataFrame with track data
         """
-        track_data: None | pd.DataFrame = None
+        track_data: pd.DataFrame | None = None
 
         _, _, _, _, track_data = self._get_processed_track_data(
             connect_segments=connect_segments
@@ -580,7 +580,7 @@ class Track(ABC):
 
     def get_point_data_in_segmnet(
         self, n_segment: int = 0
-    ) -> tuple[list[tuple[float, float]], None | list[float], None | list[datetime]]:
+    ) -> tuple[list[tuple[float, float]], list[float] | None, list[datetime] | None]:
         """Get raw coordinates (latitude, longitude), times and elevations for the
         segement with the passed index.
 
@@ -615,21 +615,21 @@ class Track(ABC):
         return coords, elevations, times
 
     def _apply_outlier_cleaning(self, data: pd.DataFrame) -> pd.DataFrame:
-        speeds = data.speed[data.speed.notna()].to_list()
+        speeds = data.speed_ms[data.speed_ms.notna()].to_list()
         if not speeds:
             logger.warning(
                 "Trying to apply outlier cleaning to track w/o speed information"
             )
             return data
         speed_percentile = np.percentile(
-            data.speed[data.speed.notna()].to_list(),
+            data.speed_ms[data.speed_ms.notna()].to_list(),
             self.max_speed_percentile,
         )
 
         data_ = data.copy()
 
         data_["in_speed_percentile"] = data_.apply(
-            lambda c: c.speed <= speed_percentile, axis=1
+            lambda c: c.speed_ms <= speed_percentile, axis=1
         )
 
         return data_
@@ -731,9 +731,9 @@ class Track(ABC):
             "metrics",
         ],
         *,
-        segment: None | int | list[int] = None,
-        reduce_pp_intervals: None | int = None,
-        use_distance_segments: None | float = None,
+        segment: int | list[int] | None = None,
+        reduce_pp_intervals: int | None = None,
+        use_distance_segments: float | None = None,
         **kwargs,
     ) -> Figure:
         """
@@ -960,9 +960,9 @@ class GPXFileTrack(Track):
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
         require_data_extensions: set[str] | None = None,
-        heartrate_zones: None | Zones = None,
-        power_zones: None | Zones = None,
-        cadence_zones: None | Zones = None,
+        heartrate_zones: Zones | None = None,
+        power_zones: Zones | None = None,
+        cadence_zones: Zones | None = None,
     ) -> None:
         """Initialize a Track object from a gpx file
 
@@ -1014,9 +1014,9 @@ class ByteTrack(Track):
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
         require_data_extensions: set[str] | None = None,
-        heartrate_zones: None | Zones = None,
-        power_zones: None | Zones = None,
-        cadence_zones: None | Zones = None,
+        heartrate_zones: Zones | None = None,
+        power_zones: Zones | None = None,
+        cadence_zones: Zones | None = None,
     ) -> None:
         """Initialize a Track object from a gpx file
 
@@ -1056,15 +1056,15 @@ class PyTrack(Track):
     def __init__(
         self,
         points: list[tuple[float, float]],
-        elevations: None | list[float],
-        times: None | list[datetime],
+        elevations: list[float] | None,
+        times: list[datetime] | None,
         extensions: dict[str, list[N | None] | None] | None = None,
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
         require_data_extensions: set[str] | None = None,
-        heartrate_zones: None | Zones = None,
-        power_zones: None | Zones = None,
-        cadence_zones: None | Zones = None,
+        heartrate_zones: Zones | None = None,
+        power_zones: Zones | None = None,
+        cadence_zones: Zones | None = None,
     ) -> None:
         """A geospacial data track initialized from python objects
 
@@ -1120,8 +1120,8 @@ class PyTrack(Track):
     def _create_segmeent(
         self,
         points: list[tuple[float, float]],
-        elevations: None | list[float],
-        times: None | list[datetime],
+        elevations: list[float] | None,
+        times: list[datetime] | None,
         extensions: dict[str, list[N | None] | None],
     ) -> GPXTrackSegment:
         elevations_: list[None] | list[float]
@@ -1176,8 +1176,8 @@ class PyTrack(Track):
     def add_segmeent(  # type: ignore
         self,
         points: list[tuple[float, float]],
-        elevations: None | list[float],
-        times: None | list[datetime],
+        elevations: list[float] | None,
+        times: list[datetime] | None,
         extensions: dict[str, list[N | None] | None] | None = None,
     ) -> None:
         if extensions is None:
@@ -1200,9 +1200,9 @@ class SegmentTrack(Track):
         stopped_speed_threshold: float = 1,
         max_speed_percentile: int = 95,
         require_data_extensions: set[str] | None = None,
-        heartrate_zones: None | Zones = None,
-        power_zones: None | Zones = None,
-        cadence_zones: None | Zones = None,
+        heartrate_zones: Zones | None = None,
+        power_zones: Zones | None = None,
+        cadence_zones: Zones | None = None,
     ) -> None:
         """Wrap a GPXTrackSegment into a Track object
 
@@ -1245,8 +1245,8 @@ class FITTrack(Track):
     FIT record speed and distance extensions are exposed as ``enhanced_speed_ms``
     (m/s) and ``raw_distance_m`` (m). Session values use ``avg_velocity_ms``,
     ``max_velocity_ms``, and ``distance_m`` for the corresponding SI values.
-    The calculated dataframe columns ``speed`` and ``distance`` are also in m/s
-    and meters, respectively.
+    Calculated dataframe columns use ``speed_ms``, ``distance_m``, ``cum_distance_m``,
+    ``cum_distance_moving_m``, and ``cum_distance_stopped_m`` for SI values.
     """
 
     def __init__(
@@ -1256,9 +1256,9 @@ class FITTrack(Track):
         max_speed_percentile: int = 95,
         strict_elevation_loading: bool = False,
         require_data_extensions: set[str] | None = None,
-        heartrate_zones: None | Zones = None,
-        power_zones: None | Zones = None,
-        cadence_zones: None | Zones = None,
+        heartrate_zones: Zones | None = None,
+        power_zones: Zones | None = None,
+        cadence_zones: Zones | None = None,
     ) -> None:
         """Load a .fit file and extract the data into a Track object.
         NOTE: Tested with Wahoo devices only
@@ -1455,9 +1455,9 @@ class GeoJsonTrack(Track):
         allow_empty_spatial: bool = False,
         fallback_coordinates: tuple[float, float] = (0.0, 0.0),
         require_data_extensions: set[str] | None = None,
-        heartrate_zones: None | Zones = None,
-        power_zones: None | Zones = None,
-        cadence_zones: None | Zones = None,
+        heartrate_zones: Zones | None = None,
+        power_zones: Zones | None = None,
+        cadence_zones: Zones | None = None,
     ) -> None:
         """Load a .json file that conforms to a supported geojson format. Currently
         the GeoJsonTrack supports:

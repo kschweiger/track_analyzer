@@ -22,7 +22,8 @@ def test_plot_track_line_on_map(track_for_test: Track) -> None:
 
 
 @pytest.mark.parametrize(
-    "enrich_with_column", ["elevation", "speed", "heartrate", "cadence", "power"]
+    "enrich_with_column",
+    ["elevation", "speed", "speed_ms", "heartrate", "cadence", "power"],
 )
 def test_plot_track_enriched_on_map(
     track_for_test: Track, enrich_with_column: str
@@ -132,7 +133,7 @@ def test_plot_segments_on_map_single_segment(track_for_test: Track) -> None:
 def test_plot_segments_on_map_pos_ele_only(track_for_test: Track) -> None:
     data = track_for_test.get_track_data().copy()
     data.time = None
-    data.speed = None
+    data.speed_ms = None
     data.power = None
     data.heartrate = None
 

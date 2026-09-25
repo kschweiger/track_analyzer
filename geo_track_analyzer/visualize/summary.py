@@ -48,10 +48,16 @@ def _aggregate_zone_data(
     time_as_timedelta: bool = False,
 ) -> tuple[pd.DataFrame, str, str]:
     group = data.groupby(f"{metric}_zones")
+    data_column = {"distance": "distance_m", "speed": "speed_ms"}.get(
+        aggregate, aggregate
+    )
     # Make sure that the groups are ordered by metric value
     bin_data = (
         pd.concat(
-            [group[aggregate].agg(aggregation_method), group[metric].min()],  # type: ignore
+            [
+                group[data_column].agg(aggregation_method).rename(aggregate),
+                group[metric].min(),
+            ],
             axis=1,
         )
         .sort_values(metric)[aggregate]
@@ -358,17 +364,17 @@ def plot_segment_summary(
     fig = go.Figure()
 
     if aggregate == "avg_speed":
-        bin_data = _data_for_plot.groupby("segment").speed.agg("mean") * 3.6
+        bin_data = _data_for_plot.groupby("segment").speed_ms.agg("mean") * 3.6
         y_title = "Average velocity [km/h]"
         tickformat = ""
         hover_map_func = lambda v: str(f"{v:.2f} km/h")
     elif aggregate == "max_speed":
-        bin_data = _data_for_plot.groupby("segment").speed.agg("max") * 3.6
+        bin_data = _data_for_plot.groupby("segment").speed_ms.agg("max") * 3.6
         y_title = "Maximum velocity [km/h]"
         tickformat = ""
         hover_map_func = lambda v: str(f"{v:.2f} km/h")
     elif aggregate == "total_distance":
-        bin_data = _data_for_plot.groupby("segment").distance.agg("sum") / 1000
+        bin_data = _data_for_plot.groupby("segment").distance_m.agg("sum") / 1000
         y_title = "Distance [km]"
         tickformat = ""
         hover_map_func = lambda v: str(f"{v:.2f} km")
@@ -434,7 +440,8 @@ def plot_segment_box_summary(
             "Data has no **segment** in columns. Required for plot"
         )
 
-    if metric not in data.columns:
+    data_metric = "speed_ms" if metric == "speed" else metric
+    if data_metric not in data.columns:
         raise VisualizationSetupError("Metric %s not part of the passed data" % metric)
 
     if colors is None:
@@ -453,9 +460,9 @@ def plot_segment_box_summary(
         _data_for_plot = data_for_plot[data_for_plot.segment == segment]
 
         if metric == "speed":
-            box_data = _data_for_plot["speed"] * 3.6
+            box_data = _data_for_plot[data_metric] * 3.6
         else:
-            box_data = _data_for_plot[metric]
+            box_data = _data_for_plot[data_metric]
 
         fig.add_trace(
             go.Box(

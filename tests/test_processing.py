@@ -35,22 +35,37 @@ def test_get_processed_track_data(track_for_test: Track) -> None:
     assert isinstance(track_stopped_time, float)
     assert isinstance(track_stopped_distance, float)
 
+    assert {
+        "speed_ms",
+        "distance_m",
+        "cum_distance_m",
+        "cum_distance_moving_m",
+        "cum_distance_stopped_m",
+    }.issubset(track_data.columns)
+    assert not {
+        "speed",
+        "distance",
+        "cum_distance",
+        "cum_distance_moving",
+        "cum_distance_stopped",
+    }.intersection(track_data.columns)
+
     assert (
-        track_data.cum_distance_moving.iloc[-1]
-        == track_data[track_data.moving].distance.sum()
+        track_data.cum_distance_moving_m.iloc[-1]
+        == track_data[track_data.moving].distance_m.sum()
     )
 
 
 def test_recalc_cumulated_columns() -> None:
     data = pd.DataFrame(
         {
-            "distance": [10, 10, 10, 10, 20, 20, 20, 20],
+            "distance_m": [10, 10, 10, 10, 20, 20, 20, 20],
             "time": [5, 5, 5, 5, 6, 6, 6, 6],
             "cum_time": [5, 10, 15, 20, 6, 12, 18, 24],
             "cum_time_moving": [0, 5, 10, 15, 6, 12, 18, 18],
-            "cum_distance": [10, 20, 30, 40, 20, 40, 60, 80],
-            "cum_distance_moving": [0, 10, 20, 30, 20, 40, 60, 60],
-            "cum_distance_stopped": [10, 10, 10, 10, 10, 10, 10, 30],
+            "cum_distance_m": [10, 20, 30, 40, 20, 40, 60, 80],
+            "cum_distance_moving_m": [0, 10, 20, 30, 20, 40, 60, 60],
+            "cum_distance_stopped_m": [10, 10, 10, 10, 10, 10, 10, 30],
             "moving": [False, True, True, True, True, True, True, False],
         }
     )
@@ -58,16 +73,16 @@ def test_recalc_cumulated_columns() -> None:
     ret_data = _recalc_cumulated_columns(data)
 
     assert ret_data.cum_time.iloc[-1] == ret_data.time.sum()
-    assert ret_data.cum_distance.iloc[-1] == ret_data.distance.sum()
+    assert ret_data.cum_distance_m.iloc[-1] == ret_data.distance_m.sum()
 
     assert (
-        ret_data.cum_distance_moving.iloc[-1]
-        == ret_data[ret_data.moving].distance.sum()
+        ret_data.cum_distance_moving_m.iloc[-1]
+        == ret_data[ret_data.moving].distance_m.sum()
     )
 
     assert (
-        ret_data.cum_distance_stopped.iloc[-1]
-        == ret_data[~ret_data.moving].distance.sum()
+        ret_data.cum_distance_stopped_m.iloc[-1]
+        == ret_data[~ret_data.moving].distance_m.sum()
     )
 
     assert ret_data.cum_time_moving.iloc[-1] == ret_data[ret_data.moving].time.sum()
@@ -104,10 +119,10 @@ def test_split_data(
 
     if moving_only:
         comp_col = (
-            "cum_distance_moving" if split_by == "distance" else "cum_time_moving"
+            "cum_distance_moving_m" if split_by == "distance" else "cum_time_moving"
         )
     else:
-        comp_col = "cum_distance" if split_by == "distance" else "cum_time"
+        comp_col = "cum_distance_m" if split_by == "distance" else "cum_time"
 
     assert not ret_data.compare(data).empty
 
@@ -242,7 +257,7 @@ def test_compare_pp_distance_to_processed_track(track_for_test: Track) -> None:
 
     cum_distance = np.cumsum(distances_for_sum)
 
-    assert 0.99 < cum_distance[-1] / data.cum_distance.iloc[-1] < 1.01
+    assert 0.99 < cum_distance[-1] / data.cum_distance_m.iloc[-1] < 1.01
 
 
 def test_add_zones_to_dataframe() -> None:
