@@ -93,7 +93,7 @@ ignore_missing_imports = true
 [tool.git-changelog]
 output = "CHANGELOG.md"
 convention = "conventional"
-template = "angular"
+template = "path:.git-changelog/angular.md.jinja"
 
 [dependency-groups]
 dev = [
