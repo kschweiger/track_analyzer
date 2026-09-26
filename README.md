@@ -70,5 +70,4 @@ Visualizations of a track can be generated via the `plot` method and the ``kind`
 The following extras are provided by the lib and may be installed additionally:
 
 - **cli**: Adds cli tools for converting fit files to gpx files (`extract-fit-track`) and updating the elevation in a gpx file with via api (`enhance-elevation`)
-- **postgis**: Add functions for integrating with a PostGIS instance provided in the `geo_track_analyzer.postgis` module
 - **full**: Install package will all extras

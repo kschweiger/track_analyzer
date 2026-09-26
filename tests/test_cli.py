@@ -9,7 +9,9 @@ from geo_track_analyzer.enhancer import ElevationEnhancer
 from geo_track_analyzer.track import GPXFileTrack, PyTrack
 
 
-@pytest.mark.skipif(os.environ.get("SKIP_EXTRA_TEST") == "1", reason="DB tests skipped")
+@pytest.mark.skipif(
+    os.environ.get("SKIP_CLI_TEST") == "1", reason="CLI extra tests skipped"
+)
 def test_update_elevation_convert_kwargs() -> None:
     from geo_track_analyzer.cli._update_elevation import convert_kwargs
 
@@ -26,7 +28,9 @@ def test_update_elevation_convert_kwargs() -> None:
     assert not res["EEE"]
 
 
-@pytest.mark.skipif(os.environ.get("SKIP_EXTRA_TEST") == "1", reason="DB tests skipped")
+@pytest.mark.skipif(
+    os.environ.get("SKIP_CLI_TEST") == "1", reason="CLI extra tests skipped"
+)
 def test_update_elevation_fail_no_args() -> None:
     from click.testing import CliRunner
 
@@ -38,7 +42,9 @@ def test_update_elevation_fail_no_args() -> None:
     assert result.exit_code == 2
 
 
-@pytest.mark.skipif(os.environ.get("SKIP_EXTRA_TEST") == "1", reason="DB tests skipped")
+@pytest.mark.skipif(
+    os.environ.get("SKIP_CLI_TEST") == "1", reason="CLI extra tests skipped"
+)
 def test_update_elevation_fail_no_gpx(tmp_path: PosixPath) -> None:
     from click.testing import CliRunner
 
@@ -63,7 +69,9 @@ def test_update_elevation_fail_no_gpx(tmp_path: PosixPath) -> None:
         assert result.exit_code == 2
 
 
-@pytest.mark.skipif(os.environ.get("SKIP_EXTRA_TEST") == "1", reason="DB tests skipped")
+@pytest.mark.skipif(
+    os.environ.get("SKIP_CLI_TEST") == "1", reason="CLI extra tests skipped"
+)
 @pytest.mark.parametrize("raw_args", [["aaa"], ["aaa=xy="]])
 def test_update_elevation_fail_raw_arg_conversion(
     tmp_path: PosixPath, raw_args: list[str]
@@ -92,7 +100,9 @@ def test_update_elevation_fail_raw_arg_conversion(
         assert result.exit_code == 2
 
 
-@pytest.mark.skipif(os.environ.get("SKIP_EXTRA_TEST") == "1", reason="DB tests skipped")
+@pytest.mark.skipif(
+    os.environ.get("SKIP_CLI_TEST") == "1", reason="CLI extra tests skipped"
+)
 def test_update_elevation_succ(
     mocker: MockerFixture,
     tmp_path: PosixPath,

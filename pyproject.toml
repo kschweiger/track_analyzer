@@ -38,8 +38,7 @@ enhance-elevation = 'geo_track_analyzer:update_elevation'
 
 [project.optional-dependencies]
 cli = ["click>=8,<9", "rich"]
-postgis = ["SQLAlchemy"]
-full = ["geo-track-analyzer[cli,postgis]", "psycopg"]
+full = ["geo-track-analyzer[cli]"]
 visualization = ["plotly>=5,<6"]
 
 [build-system]
@@ -104,7 +103,6 @@ dev = [
   "ruff>=0.9.7",
   "uv>=0.6.2",
   "geo-track-analyzer[full]",
-  "python-dotenv>=1.1.0",
 ]
 doc = [
   "mkdocs>=1.6.1",
@@ -120,7 +118,6 @@ test = [
   "pytest-mock>=3.14.0",
   "pytest-retry>=1.7.0",
   "pytest-sugar>=1.0.0",
-  "python-dotenv>=1.1.0",
 ]
 [tool.uv]
 default-groups = ["dev", "test"]

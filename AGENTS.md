@@ -2,7 +2,7 @@
 
 ## Project Structure
 
-`geo_track_analyzer/` contains the library. Core track and data models live in `track.py` and `model.py`; format and analysis helpers are organized under `utils/`, `visualize/`, `cli/`, and `postgis/`. Tests are in `tests/`, with reusable GPX, FIT, GeoJSON, and other fixtures in `tests/resources/`. User documentation is in `docs/`; runnable examples and sample data are in `examples/`.
+`geo_track_analyzer/` contains the library. Core track and data models live in `track.py` and `model.py`; format and analysis helpers are organized under `utils/`, `visualize/`, and `cli/`. Tests are in `tests/`, with reusable GPX, FIT, GeoJSON, and other fixtures in `tests/resources/`. User documentation is in `docs/`; runnable examples and sample data are in `examples/`.
 
 ## Development and Test Commands
 
@@ -13,7 +13,7 @@
 - `pre-commit run --all-files` runs the configured Ruff and repository hygiene hooks.
 - `uv build` builds the distributable package.
 
-CI tests Python 3.11–3.14, including optional integrations. Database tests require PostGIS configuration; see `.github/workflows/test.yml` for the CI setup.
+CI tests Python 3.13–3.14, including optional integrations; see `.github/workflows/test.yml` for the CI setup.
 
 ## Coding Style
 

@@ -14,7 +14,6 @@ nav:
       - Comparison: comparison.md
       - Enhancer: enhancer.md
       - CLI: cli.md
-      - PostGIS: postgis.md
       - GeoJSON Support: geojson.md
   - API Reference:
       - Track Reference: api_tracks.md
