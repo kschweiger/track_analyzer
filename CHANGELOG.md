@@ -1,4 +1,21 @@
 <!-- insertion marker -->
+<a name="3.0.0"></a>
+
+## [3.0.0](https://github.com/kschweiger/track_analyzer/compare/2.0.1...3.0.0) (2026-09-26)
+
+### Bug Fixes
+
+- fix pandas UserWarning about column creation with attribute name ([373db36](https://github.com/kschweiger/track_analyzer/commit/373db36db84194b2e4269742a9402eef9b631747))
+- fix issues for tracks wihout moving points (#34) ([fd900d7](https://github.com/kschweiger/track_analyzer/commit/fd900d7a87de120fe266665743af1d2fa02ed89b))
+
+### Code Refactoring
+
+- **⚠ BREAKING:** remove postgis integration ([33b242b](https://github.com/kschweiger/track_analyzer/commit/33b242bb1be9feca1024b974127fc0fb81053627))
+- **⚠ BREAKING:** **track.plot:** remove deprecated plot kinds ([b2f5305](https://github.com/kschweiger/track_analyzer/commit/b2f5305c1a0dd60c13d63793f1f0f936054c76f6))
+- **⚠ BREAKING:** remove support for python 3.11 and 3.12; 3.14 is default for ci ([444cfb5](https://github.com/kschweiger/track_analyzer/commit/444cfb57232db31c594069467eddd0f857a6e738))
+- **⚠ BREAKING:** rename columns in dataframe to include units ([c252540](https://github.com/kschweiger/track_analyzer/commit/c2525408fae1a01ee79f4ae77ccb574ec23b8d25))
+- **⚠ BREAKING:** replace fitparse with garmin-fit-sdk and save extensions as SI units (#37) ([e290b3d](https://github.com/kschweiger/track_analyzer/commit/e290b3dbb555c0e88beca89b0929dcba8a590cea))
+
 <a name="2.0.1"></a>
 
 ## [2.0.1](https://github.com/kschweiger/track_analyzer/compare/2.0.0...2.0.1) (2026-02-16)
@@ -18,8 +35,8 @@
 
 ### Code Refactoring
 
-- Make plotting code an extra (#30) ([14c98b0](https://github.com/kschweiger/track_analyzer/commit/14c98b04150c5874fec0eceb52b2cff3d728ee6e))
-- **SegmentOverview:** Add heartrate, power, and cadence. Restruture model (#31) ([b2ed106](https://github.com/kschweiger/track_analyzer/commit/b2ed106ddde808c0298487cf2f69540152a1c5e4))
+- **⚠ BREAKING:** Make plotting code an extra (#30) ([14c98b0](https://github.com/kschweiger/track_analyzer/commit/14c98b04150c5874fec0eceb52b2cff3d728ee6e))
+- **⚠ BREAKING:** **SegmentOverview:** Add heartrate, power, and cadence. Restruture model (#31) ([b2ed106](https://github.com/kschweiger/track_analyzer/commit/b2ed106ddde808c0298487cf2f69540152a1c5e4))
 
 <a name="1.7.1"></a>
 
@@ -141,7 +158,7 @@
 ### Code Refactoring
 
 - **get_closest_point:** n_segment type hint and docstring reflects that full track can be used ([453d0dd](https://github.com/kschweiger/track_analyzer/commit/453d0dd77ee386f36671265c98ea406db872b2e5))
-- cli tools are available via extra cli (#17) ([712e59c](https://github.com/kschweiger/track_analyzer/commit/712e59c42ccc32027387a87a05268ec2b3a9200b))
+- **⚠ BREAKING:** cli tools are available via extra cli (#17) ([712e59c](https://github.com/kschweiger/track_analyzer/commit/712e59c42ccc32027387a87a05268ec2b3a9200b))
 
 <a name="1.1.2"></a>
 
@@ -196,7 +213,7 @@
 
 ### Code Refactoring
 
-- Renamed package to geo-track-analyzer ([13779ef](https://github.com/kschweiger/track_analyzer/commit/13779eff5622d3351cb0143419adf7bf0e902acf))
+- **⚠ BREAKING:** Renamed package to geo-track-analyzer ([13779ef](https://github.com/kschweiger/track_analyzer/commit/13779eff5622d3351cb0143419adf7bf0e902acf))
 
 <a name="0.4.1"></a>
 
@@ -261,7 +278,7 @@
 
 <a name="0.2.0"></a>
 
-## [0.2.0](https://github.com/kschweiger/track_analyzer/compare/0.1.2...0.2.0) (2023-09-02)
+## [0.2.0](https://github.com/kschweiger/track_analyzer/compare/0.1.2...0.2.0) (2023-09-03)
 
 ### Features
 
