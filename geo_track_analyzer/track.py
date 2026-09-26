@@ -448,8 +448,7 @@ class Track(ABC):
                 require_extensions=self.require_data_extensions,
             )
 
-            if data.time.notna().any():
-                data = self._apply_outlier_cleaning(data)
+            data = self._apply_outlier_cleaning(data)
 
             self._processed_segment_data[n_segment] = (
                 time,
@@ -486,8 +485,7 @@ class Track(ABC):
             require_extensions=self.require_data_extensions,
         )
 
-        if processed_data.time.notna().any():
-            processed_data = self._apply_outlier_cleaning(processed_data)
+        processed_data = self._apply_outlier_cleaning(processed_data)
 
         return self._set_processed_track_data(
             (
@@ -615,17 +613,18 @@ class Track(ABC):
 
     def _apply_outlier_cleaning(self, data: pd.DataFrame) -> pd.DataFrame:
         speeds = data.speed_ms[data.speed_ms.notna()].to_list()
+        data_ = data.copy()
         if not speeds:
-            logger.warning(
-                "Trying to apply outlier cleaning to track w/o speed information"
-            )
-            return data
+            if data.time.notna().any():
+                logger.warning(
+                    "Trying to apply outlier cleaning to track w/o speed information"
+                )
+            data_["in_speed_percentile"] = False
+            return data_
         speed_percentile = np.percentile(
             data.speed_ms[data.speed_ms.notna()].to_list(),
             self.max_speed_percentile,
         )
-
-        data_ = data.copy()
 
         data_["in_speed_percentile"] = data_.apply(
             lambda c: c.speed_ms <= speed_percentile, axis=1

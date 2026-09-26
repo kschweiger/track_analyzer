@@ -1,5 +1,5 @@
 import importlib.resources
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest.mock import MagicMock
 
 import pandas as pd
@@ -429,6 +429,53 @@ def test_track_over_extensions(
     assert overview.heartrate is not None
     assert overview.cadence is not None
     assert overview.power is not None
+
+
+def test_in_speed_percentile_is_present_when_no_points_are_moving(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    start_time = datetime(2023, 8, 1, 10)
+    track = PyTrack(
+        points=[(1, 1), (1.0001, 1.0001), (1.0002, 1.0002), (1.0003, 1.0003)],
+        elevations=[100, 105, 110, 110],
+        times=[start_time + timedelta(minutes=i) for i in range(4)],
+        extensions={
+            "heart_rate": [120, 130, 140, 140],
+            "power": [150, 160, 170, 170],
+        },
+    )
+
+    data = track.get_track_data()
+
+    assert not data.moving.any()
+    assert "in_speed_percentile" in data.columns
+    assert data.in_speed_percentile.dtype == bool
+    assert not data.in_speed_percentile.any()
+    assert "Trying to apply outlier cleaning to track w/o speed information" in (
+        caplog.text
+    )
+
+
+def test_in_speed_percentile_is_present_for_untimed_tracks(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    track = PyTrack(
+        points=[(1, 1), (1.0001, 1.0001), (1.0002, 1.0002), (1.0003, 1.0003)],
+        elevations=[100, 105, 110, 110],
+        times=None,
+    )
+
+    track_data = track.get_track_data()
+    segment_data = track.get_segment_data()
+
+    for data in (track_data, segment_data):
+        assert "in_speed_percentile" in data.columns
+        assert data.in_speed_percentile.dtype == bool
+        assert not data.in_speed_percentile.any()
+
+    assert "Trying to apply outlier cleaning to track w/o speed information" not in (
+        caplog.text
+    )
 
 
 @pytest.mark.parametrize("conn_segments", ["forward", "full"])
