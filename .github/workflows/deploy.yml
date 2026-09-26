@@ -74,6 +74,8 @@ jobs:
         with:
           enable-cache: false
           python-version: ${{ matrix.python-version }}
+      - name: Create Python environment
+        run: uv venv --python "${{ matrix.python-version }}"
       - name: Waiting 10 seconds
         run: sleep 10
       - name: Install package from test-pypi
@@ -86,8 +88,7 @@ jobs:
         env:
           VERSION: ${{needs.build.outputs.version}}
       - name: Run API and Worker script
-        run: |
-          enhance-elevation --help
+        run: uv run --no-project enhance-elevation --help
   publish-pypi:
     name: Publish Python 🐍 distribution 📦 to PyPI
     needs: verify-installation
