@@ -119,8 +119,8 @@ jobs:
       - uses: actions/checkout@v7
       - name: Configure uv
         uses: astral-sh/setup-uv@v10.2.0
-      - name: Install Python ${{ matrix.python }}
-        run: uv python install ${{ matrix.python }}
+      - name: Install Python 3.14
+        run: uv python install 3.14
       - name: Install git-changelog
         run: uv tool install git-changelog
       - name: Prepare release notes
