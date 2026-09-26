@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 
 def _recalc_cumulated_columns(data: pd.DataFrame) -> pd.DataFrame:
     data = data.copy()
-    data.cum_time = data.time.cumsum()
-    data.cum_distance_m = data.distance_m.cumsum()
+    data["cum_time"] = data["time"].cumsum()
+    data["cum_distance_m"] = data["distance_m"].cumsum()
 
     cum_time_moving: list[None] | list[float] = []
     cum_time_stopped: list[None] | list[float] = []
@@ -58,10 +58,10 @@ def _recalc_cumulated_columns(data: pd.DataFrame) -> pd.DataFrame:
                 cum_distance_stopped[-1] + (0 if rcrd["moving"] else rcrd["distance_m"])
             )
 
-    data.cum_time_moving = cum_time_moving
-    data.cum_time_stopped = cum_time_stopped
-    data.cum_distance_moving_m = cum_distance_moving
-    data.cum_distance_stopped_m = cum_distance_stopped
+    data["cum_time_moving"] = cum_time_moving
+    data["cum_time_stopped"] = cum_time_stopped
+    data["cum_distance_moving_m"] = cum_distance_moving
+    data["cum_distance_stopped_m"] = cum_distance_stopped
 
     return data
 
