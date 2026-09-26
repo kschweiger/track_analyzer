@@ -14,6 +14,7 @@ jobs:
         python: ["3.14"]
     outputs:
       version: ${{ steps.package-version.outputs.version }}
+      test_version: ${{ steps.test-package-version.outputs.version }}
     steps:
       - uses: actions/checkout@v7
       - name: Configure uv
@@ -28,10 +29,21 @@ jobs:
         run: |
           uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])" > VERSION
           echo "version=$(cat VERSION)" >> $GITHUB_OUTPUT
+      - name: Build TestPyPI package
+        id: test-package-version
+        run: |
+          TEST_VERSION="${{ steps.package-version.outputs.version }}.dev${GITHUB_RUN_ID}${GITHUB_RUN_ATTEMPT}"
+          uv version --frozen "$TEST_VERSION"
+          uv build --out-dir dist-testpypi
+          echo "version=$TEST_VERSION" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v7
         with:
-          name: dist-${{ matrix.python }}
+          name: distribution
           path: dist/
+      - uses: actions/upload-artifact@v7
+        with:
+          name: test-distribution
+          path: dist-testpypi/
   publish-testpypi:
     name: Publish Python 🐍 distribution 📦 to Test-PyPI
     needs: build
@@ -41,18 +53,15 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - name: "Install uv"
+      - name: Install uv
         uses: astral-sh/setup-uv@v10.2.0
-      - name: Download artifacts
+      - name: Download TestPyPI artifacts
         uses: actions/download-artifact@v8
         with:
-          path: dist/
-          merge-multiple: true
+          name: test-distribution
+          path: dist-testpypi/
       - name: Publish
-        run: |
-          ls -l
-          ls -l dist/
-          uv publish -v --publish-url https://test.pypi.org/legacy/ dist/*
+        run: uv publish -v --publish-url https://test.pypi.org/legacy/ dist-testpypi/*
   verify-installation:
     name: Cross-Platform 📦 validation from Test-PyPI
     needs:
@@ -76,17 +85,15 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Create Python environment
         run: uv venv --python "${{ matrix.python-version }}"
-      - name: Waiting 10 seconds
-        run: sleep 10
-      - name: Install package from test-pypi
+      - name: Install package from TestPyPI
         run: |
           uv pip install -v --no-cache \
             --index-url https://test.pypi.org/simple/ \
             --extra-index-url https://pypi.org/simple/ \
             --index-strategy unsafe-first-match \
-            geo-track-analyzer[cli,visualization]==$VERSION
+            "geo-track-analyzer[cli,visualization]==${TEST_VERSION}"
         env:
-          VERSION: ${{needs.build.outputs.version}}
+          TEST_VERSION: ${{needs.build.outputs.test_version}}
       - name: Run API and Worker script
         run: uv run --no-project enhance-elevation --help
   publish-pypi:
@@ -103,8 +110,8 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v8
         with:
+          name: distribution
           path: dist/
-          merge-multiple: true
       - name: Publish
         run: |
           ls -l
@@ -129,6 +136,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v8
         with:
+          name: distribution
           path: dist/
           merge-multiple: true
       - name: Release
