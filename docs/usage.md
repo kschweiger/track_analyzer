@@ -18,6 +18,19 @@ The focus of this package lies on analyzing and visualizing tracks of cycling or
 
 Tracks my be initialized from `.gpx` and `.fit` files using the [`GPXFileTrack`][geo_track_analyzer.track.GPXFileTrack] and [`FITTrack`][geo_track_analyzer.track.FITTrack] object, respectively.
 
+Track constructors accept an optional `timezone` argument as a Python `tzinfo` object.
+It is attached to timestamps that do not include an offset. Timestamps with an offset
+keep their original timezone. FIT timestamps are decoded as UTC and the argument is
+ignored. For example, a web application can pass the activity's known timezone when
+importing a GPX file:
+
+```python
+from geo_track_analyzer import GPXFileTrack
+from zoneinfo import ZoneInfo
+
+track = GPXFileTrack("activity.gpx", timezone=ZoneInfo("Europe/Berlin"))
+```
+
 Furhtermore the Track can be initialized programmatically from python objects inside your code using
 
 ```python
