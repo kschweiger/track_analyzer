@@ -1,6 +1,7 @@
 import importlib.resources
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 import pytest
@@ -21,6 +22,7 @@ from geo_track_analyzer.track import (
     GeoJsonTrack,
     GPXFileTrack,
     PyTrack,
+    SegmentTrack,
     Track,
 )
 from geo_track_analyzer.utils.internal import get_extension_value
@@ -978,3 +980,153 @@ def test_geojson_track_no_geo_error(file_name: str) -> None:
     _file = (resource_files / file_name).read_bytes()
     with pytest.raises(GeoJsonWithoutGeometryError):
         GeoJsonTrack(_file, allow_empty_spatial=False)
+
+
+def _naive_test_segment() -> GPXTrackSegment:
+    return GPXTrackSegment(
+        points=[
+            GPXTrackPoint(50.0, 8.0, time=datetime(2024, 1, 1, 12)),
+            GPXTrackPoint(50.001, 8.001, time=datetime(2024, 1, 1, 12, 0, 1)),
+        ]
+    )
+
+
+def _simple_geojson(time: str = "2024-01-01T12:00:00") -> dict:
+    return {
+        "type": "Feature",
+        "geometry": {"type": "LineString", "coordinates": [[8, 50, 10]]},
+        "properties": {"coordTimes": [time]},
+    }
+
+
+def test_pytrack_timezone_applies_to_initial_and_added_segments() -> None:
+    source_timezone = ZoneInfo("Europe/Berlin")
+    track = PyTrack(
+        [(50.0, 8.0)], None, [datetime(2024, 1, 1, 12)], timezone=source_timezone
+    )
+    track.add_segmeent(
+        points=[(50.0, 8.0)],
+        elevations=None,
+        times=[datetime(2024, 1, 1, 13)],
+    )
+
+    assert track.track.segments[0].points[0].time == datetime(
+        2024, 1, 1, 12, tzinfo=source_timezone
+    )
+    assert track.track.segments[1].points[0].time == datetime(
+        2024, 1, 1, 13, tzinfo=source_timezone
+    )
+    assert "2024-01-01T12:00:00+01:00" in track.get_xml()
+
+
+def test_segment_track_timezone_does_not_mutate_source_segment() -> None:
+    segment = _naive_test_segment()
+    track = SegmentTrack(segment, timezone=ZoneInfo("Europe/Berlin"))
+
+    assert track.track.segments[0].points[0].time == datetime(
+        2024, 1, 1, 12, tzinfo=ZoneInfo("Europe/Berlin")
+    )
+    assert segment.points[0].time == datetime(2024, 1, 1, 12)
+
+
+def test_gpx_file_track_timezone_preserves_existing_offsets(
+    mocker: MockerFixture,
+) -> None:
+    gpx = GPX()
+    gpx_track = GPXTrack()
+    segment = _naive_test_segment()
+    segment.points[1].time = datetime(2024, 1, 1, 12, 0, 1, tzinfo=timezone.utc)
+    gpx_track.segments.append(segment)
+    gpx.tracks.append(gpx_track)
+    mocker.patch.object(GPXFileTrack, "_get_gpx", return_value=gpx)
+
+    track = GPXFileTrack("unused.gpx", timezone=ZoneInfo("Europe/Berlin"))
+
+    assert track.track.segments[0].points[0].time == datetime(
+        2024, 1, 1, 12, tzinfo=ZoneInfo("Europe/Berlin")
+    )
+    assert track.track.segments[0].points[1].time == datetime(
+        2024, 1, 1, 12, 0, 1, tzinfo=timezone.utc
+    )
+
+
+def test_byte_track_timezone_applies_to_imported_points() -> None:
+    gpx = GPX()
+    gpx_track = GPXTrack()
+    gpx_track.segments.append(_naive_test_segment())
+    gpx.tracks.append(gpx_track)
+    track = ByteTrack(gpx.to_xml().encode(), timezone=ZoneInfo("Europe/Berlin"))
+
+    assert track.track.segments[0].points[0].time == datetime(
+        2024, 1, 1, 12, tzinfo=ZoneInfo("Europe/Berlin")
+    )
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        _simple_geojson(),
+        {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "geometry": {"type": "Point", "coordinates": [8, 50, 10]},
+                    "properties": {"time": "2024-01-01T12:00:00"},
+                }
+            ],
+        },
+        {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [[8, 50, 10], [8.001, 50.001, 11]],
+                    },
+                    "properties": {
+                        "coordTimes": [
+                            "2024-01-01T12:00:00",
+                            "2024-01-01T12:00:01",
+                        ]
+                    },
+                },
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [[8.002, 50.002, 12], [8.003, 50.003, 13]],
+                    },
+                    "properties": {
+                        "coordTimes": [
+                            "2024-01-01T12:01:00",
+                            "2024-01-01T12:01:01",
+                        ]
+                    },
+                },
+            ],
+        },
+    ],
+    ids=["line-feature", "point-collection", "multisegment-collection"],
+)
+def test_geojson_track_timezone_applies_to_supported_shapes(data: dict) -> None:
+    track = GeoJsonTrack(data, timezone=ZoneInfo("Europe/Berlin"))
+
+    assert all(
+        point.time is not None and point.time.utcoffset().total_seconds() == 3600
+        for segment in track.track.segments
+        for point in segment.points
+    )
+
+
+def test_fit_track_accepts_but_ignores_timezone() -> None:
+    resource_files = importlib.resources.files(resources)
+    track = FITTrack(
+        (resource_files / "MyWhoosh_1.fit").read_bytes(),
+        timezone=ZoneInfo("Europe/Berlin"),
+    )
+
+    assert track.track.segments[0].points[0].time == datetime(
+        2025, 2, 14, 18, 55, 57, tzinfo=timezone.utc
+    )

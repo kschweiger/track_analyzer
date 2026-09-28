@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 import logging
 from abc import ABC, abstractmethod
-from copy import copy
-from datetime import datetime
+from copy import copy, deepcopy
+from datetime import datetime, tzinfo
 from io import StringIO
 from itertools import pairwise
 from typing import TYPE_CHECKING, Dict, Literal, Sequence, TypeVar, final
@@ -83,6 +83,7 @@ class Track(ABC):
         heartrate_zones: Zones | None = None,
         power_zones: Zones | None = None,
         cadence_zones: Zones | None = None,
+        timezone: tzinfo | None = None,
     ) -> None:
         logger.debug(
             "Using threshold for stopped speed: %s km/h", stopped_speed_threshold
@@ -102,6 +103,7 @@ class Track(ABC):
         self.heartrate_zones = heartrate_zones
         self.power_zones = power_zones
         self.cadence_zones = cadence_zones
+        self.timezone = timezone
 
     @property
     @abstractmethod
@@ -116,8 +118,20 @@ class Track(ABC):
 
         :param segment: GPXTracksegment to be added
         """
+        self._apply_timezone_to_segment(segment)
         self.track.segments.append(segment)
         logger.info("Added segment with postition: %s", len(self.track.segments))
+
+    def _apply_timezone_to_segment(self, segment: GPXTrackSegment) -> None:
+        if self.timezone is None:
+            return
+        for point in segment.points:
+            if point.time is not None and point.time.utcoffset() is None:
+                point.time = point.time.replace(tzinfo=self.timezone)
+
+    def _apply_timezone_to_track(self) -> None:
+        for segment in self.track.segments:
+            self._apply_timezone_to_segment(segment)
 
     def strip_segements(self) -> bool:
         """
@@ -953,6 +967,7 @@ class GPXFileTrack(Track):
         heartrate_zones: Zones | None = None,
         power_zones: Zones | None = None,
         cadence_zones: Zones | None = None,
+        timezone: tzinfo | None = None,
     ) -> None:
         """Initialize a Track object from a gpx file
 
@@ -965,6 +980,7 @@ class GPXFileTrack(Track):
         :param heartrate_zones: Optional heartrate Zones, defaults to None
         :param power_zones: Optional power Zones, defaults to None
         :param cadence_zones: Optional cadence Zones, defaults to None
+        :param timezone: Timezone to attach to timestamps without an offset
         """
 
         super().__init__(
@@ -974,6 +990,7 @@ class GPXFileTrack(Track):
             require_data_extensions=require_data_extensions,
             power_zones=power_zones,
             cadence_zones=cadence_zones,
+            timezone=timezone,
         )
 
         logger.info("Loading gpx track from file %s", gpx_file)
@@ -981,6 +998,7 @@ class GPXFileTrack(Track):
         gpx = self._get_gpx(gpx_file)
 
         self._track = gpx.tracks[n_track]
+        self._apply_timezone_to_track()
         self._update_extensions()
 
     @staticmethod
@@ -1007,6 +1025,7 @@ class ByteTrack(Track):
         heartrate_zones: Zones | None = None,
         power_zones: Zones | None = None,
         cadence_zones: Zones | None = None,
+        timezone: tzinfo | None = None,
     ) -> None:
         """Initialize a Track object from a gpx file
 
@@ -1019,6 +1038,7 @@ class ByteTrack(Track):
         :param heartrate_zones: Optional heartrate Zones, defaults to None
         :param power_zones: Optional power Zones, defaults to None
         :param cadence_zones: Optional cadence Zones, defaults to None
+        :param timezone: Timezone to attach to timestamps without an offset
         """
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
@@ -1027,11 +1047,13 @@ class ByteTrack(Track):
             heartrate_zones=heartrate_zones,
             power_zones=power_zones,
             cadence_zones=cadence_zones,
+            timezone=timezone,
         )
 
         gpx = gpxpy.parse(bytefile)
 
         self._track = gpx.tracks[n_track]
+        self._apply_timezone_to_track()
         self._update_extensions()
 
     @property
@@ -1055,6 +1077,7 @@ class PyTrack(Track):
         heartrate_zones: Zones | None = None,
         power_zones: Zones | None = None,
         cadence_zones: Zones | None = None,
+        timezone: tzinfo | None = None,
     ) -> None:
         """A geospacial data track initialized from python objects
 
@@ -1071,6 +1094,7 @@ class PyTrack(Track):
         :param heartrate_zones: Optional heartrate Zones, defaults to None
         :param power_zones: Optional power Zones, defaults to None
         :param cadence_zones: Optional cadence Zones, defaults to None
+        :param timezone: Timezone to attach to timestamps without an offset
         :raises TrackInitializationError: Raised if number of elevation, time, heatrate,
             or cadence values do not match passed points
         """
@@ -1084,6 +1108,7 @@ class PyTrack(Track):
             heartrate_zones=heartrate_zones,
             power_zones=power_zones,
             cadence_zones=cadence_zones,
+            timezone=timezone,
             extensions=set(extensions.keys()),
         )
 
@@ -1102,6 +1127,7 @@ class PyTrack(Track):
         gpx_track.segments.append(gpx_segment)
 
         self._track = gpx.tracks[0]
+        self._apply_timezone_to_track()
 
     @property
     def track(self) -> GPXTrack:
@@ -1193,6 +1219,7 @@ class SegmentTrack(Track):
         heartrate_zones: Zones | None = None,
         power_zones: Zones | None = None,
         cadence_zones: Zones | None = None,
+        timezone: tzinfo | None = None,
     ) -> None:
         """Wrap a GPXTrackSegment into a Track object
 
@@ -1204,7 +1231,11 @@ class SegmentTrack(Track):
         :param heartrate_zones: Optional heartrate Zones, defaults to None
         :param power_zones: Optional power Zones, defaults to None
         :param cadence_zones: Optional cadence Zones, defaults to None
+        :param timezone: Timezone to attach to timestamps without an offset
         """
+        if timezone is not None:
+            segment = deepcopy(segment)
+
         gpx = GPX()
 
         gpx_track = GPXTrack()
@@ -1219,9 +1250,11 @@ class SegmentTrack(Track):
             heartrate_zones=heartrate_zones,
             power_zones=power_zones,
             cadence_zones=cadence_zones,
+            timezone=timezone,
             extensions=get_extensions_in_points(segment.points),
         )
         self._track = gpx.tracks[0]
+        self._apply_timezone_to_track()
 
     @property
     def track(self) -> GPXTrack:
@@ -1249,6 +1282,7 @@ class FITTrack(Track):
         heartrate_zones: Zones | None = None,
         power_zones: Zones | None = None,
         cadence_zones: Zones | None = None,
+        timezone: tzinfo | None = None,
     ) -> None:
         """Load a .fit file and extract the data into a Track object.
         NOTE: Tested with Wahoo devices only
@@ -1263,6 +1297,7 @@ class FITTrack(Track):
         :param heartrate_zones: Optional heartrate Zones, defaults to None
         :param power_zones: Optional power Zones, defaults to None
         :param cadence_zones: Optional cadence Zones, defaults to None
+        :param timezone: Accepted for a common track API; ignored for FIT timestamps
         """
         super().__init__(
             stopped_speed_threshold=stopped_speed_threshold,
@@ -1448,6 +1483,7 @@ class GeoJsonTrack(Track):
         heartrate_zones: Zones | None = None,
         power_zones: Zones | None = None,
         cadence_zones: Zones | None = None,
+        timezone: tzinfo | None = None,
     ) -> None:
         """Load a .json file that conforms to a supported geojson format. Currently
         the GeoJsonTrack supports:
@@ -1466,6 +1502,7 @@ class GeoJsonTrack(Track):
         :param heartrate_zones: Optional heartrate Zones, defaults to None
         :param power_zones: Optional power Zones, defaults to None
         :param cadence_zones: Optional cadence Zones, defaults to None
+        :param timezone: Timezone to attach to timestamps without an offset
         """
         from geo_track_analyzer.utils.geojson import read_raw_data
 
@@ -1476,6 +1513,7 @@ class GeoJsonTrack(Track):
             heartrate_zones=heartrate_zones,
             power_zones=power_zones,
             cadence_zones=cadence_zones,
+            timezone=timezone,
         )
 
         if isinstance(source, dict):
@@ -1494,6 +1532,7 @@ class GeoJsonTrack(Track):
         )
 
         self._track = _track.track
+        self._apply_timezone_to_track()
         self._update_extensions()
 
     @property

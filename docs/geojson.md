@@ -2,6 +2,11 @@
 
 The track enhancer support loading specific configurations of valid GeoJSON file via the [`GeoJsonTrack`][geo_track_analyzer.track.GeoJsonTrack].
 
+`GeoJsonTrack` accepts an optional `timezone` argument as a Python `tzinfo` object. It
+is attached to timestamps that do not include an offset; timestamps that already
+include an offset keep their original timezone. See [Usage](usage.md) for an import
+example.
+
 ???+ warning "Warning"
 
     The order in the cooordinates array must be [longitude, latitude, elevation] and not [latitude, longitude, elevation]. This is a common mistake when working with GeoJSON data and can lead to incorrect results if not handled properly.
@@ -131,5 +136,3 @@ In this case the data is fully represented by a FeatureCollection and each featu
   ]
 }
 ```
-
-
