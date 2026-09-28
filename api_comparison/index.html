@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -550,34 +550,6 @@
     
   
     CLI
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../postgis/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    PostGIS
   
 
     
@@ -1117,7 +1089,8 @@
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Segment defining the bounds inside which the other segments should be contained</p>
+                <p>Segment defining the bounds inside which the other
+segments should be contained</p>
               </div>
             </td>
             <td>
@@ -1201,14 +1174,14 @@
 <span class="normal">53</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">check_segment_bound_overlap</span><span class="p">(</span>
     <span class="n">reference_segments</span><span class="p">:</span> <span class="n">GPXTrackSegment</span><span class="p">,</span> <span class="n">segments</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">GPXTrackSegment</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if segments are within the bounds of a reference segment</span>
+<span class="w">    </span><span class="sd">"""Check if segments are within the bounds of a reference segment</span>
 
 <span class="sd">    :param reference_segments: Segment defining the bounds inside which the other</span>
 <span class="sd">        segments should be contained</span>
 <span class="sd">    :param segments: Segments to be checked</span>
 
 <span class="sd">    :return: List of bools specifying if the segments are inside the refence bounds</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">reference_bounds</span> <span class="o">=</span> <span class="n">reference_segments</span><span class="o">.</span><span class="n">get_bounds</span><span class="p">()</span>
 
     <span class="n">check_bounds</span><span class="p">(</span><span class="n">reference_bounds</span><span class="p">)</span>
@@ -1300,7 +1273,8 @@
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Width (in meters) of the grid that will be filled to estimate the overalp.</p>
+                <p>Width (in meters) of the grid that will be filled to estimate
+the overalp.</p>
               </div>
             </td>
             <td>
@@ -1316,7 +1290,8 @@
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Minimum number of successive points in the segment between two points falling into same plate bin.</p>
+                <p>Minimum number of successive points in the segment
+between two points falling into same plate bin.</p>
               </div>
             </td>
             <td>
@@ -1332,7 +1307,8 @@
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Number of points between sub segments allowed for merging the segments.</p>
+                <p>Number of points between sub segments allowed
+for merging the segments.</p>
               </div>
             </td>
             <td>
@@ -1511,7 +1487,7 @@
     <span class="n">allow_points_outside_bounds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
     <span class="n">overlap_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">SegmentOverlap</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compare the tracks of two segements and caclulate the overlap.</span>
+<span class="w">    </span><span class="sd">"""Compare the tracks of two segements and caclulate the overlap.</span>
 
 <span class="sd">    :param base_segment: Base segement in which the match segment should be found</span>
 <span class="sd">    :param match_segment: Other segmeent that should be found in the base segement</span>
@@ -1524,7 +1500,7 @@
 <span class="sd">    :param overlap_threshold: Minimum overlap required to return the overlap data.</span>
 
 <span class="sd">    :return: list of SegmentOverlap objects.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">bounds_match</span> <span class="o">=</span> <span class="n">match_segment</span><span class="o">.</span><span class="n">get_bounds</span><span class="p">()</span>
 
     <span class="n">check_bounds</span><span class="p">(</span><span class="n">bounds_match</span><span class="p">)</span>
@@ -1562,7 +1538,7 @@
     <span class="c1"># Check if the match segment appears muzltiple times in the base segemnt</span>
     <span class="k">if</span> <span class="n">plate_base</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-            <span class="s2">&quot;Multiple occurances of points within match bounds in base segment&quot;</span>
+            <span class="s2">"Multiple occurances of points within match bounds in base segment"</span>
         <span class="p">)</span>
         <span class="n">base_points_in_bounds</span> <span class="o">=</span> <span class="n">get_points_inside_bounds</span><span class="p">(</span>
             <span class="n">base_segment</span><span class="p">,</span>
@@ -1582,7 +1558,7 @@
             <span class="nb">zip</span><span class="p">(</span><span class="n">sub_segments</span><span class="p">,</span> <span class="n">id_ranges_in_bounds</span><span class="p">)</span>
         <span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-                <span class="s2">&quot;Processing overlap in sub-plate </span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="s2">"Processing overlap in sub-plate </span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span>
                 <span class="n">i_sub_segment</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
                 <span class="nb">len</span><span class="p">(</span><span class="n">sub_segments</span><span class="p">),</span>
             <span class="p">)</span>
@@ -1612,7 +1588,7 @@
 
         <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">sub_segment_overlaps</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">overlap</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Processing overlap in plate&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"Processing overlap in plate"</span><span class="p">)</span>
         <span class="n">segment_overlap</span> <span class="o">=</span> <span class="n">_calc_plate_overlap</span><span class="p">(</span>
             <span class="n">base_segment</span><span class="o">=</span><span class="n">base_segment</span><span class="p">,</span>
             <span class="n">plate_base</span><span class="o">=</span><span class="n">plate_base</span><span class="p">,</span>
@@ -1728,7 +1704,8 @@ bin width. Bins will start at the min latitude and longited values.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Maximum latitude of the gtid. Bins may end with larger values than passed here dependeing on the grid width</p>
+                <p>Maximum latitude of the gtid. Bins may end with larger
+values than passed here dependeing on the grid width</p>
               </div>
             </td>
             <td>
@@ -1744,7 +1721,8 @@ bin width. Bins will start at the min latitude and longited values.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Maximum longitude of the grid. Bins may end with larger values than passed here dependeing on the grid width</p>
+                <p>Maximum longitude of the grid. Bins may end with larger
+values than passed here dependeing on the grid width</p>
               </div>
             </td>
             <td>
@@ -1760,7 +1738,12 @@ bin width. Bins will start at the min latitude and longited values.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If True, successive points (defined by the max_queue_normalize) will not change the values in a bin. This means that each bin values should have the value 1 except there is overlap with points later in the track. To decide this the previous max_queue_normalize points will be considered. So this value dependes on the chosen gridwidth.</p>
+                <p>If True, successive points (defined by the max_queue_normalize)
+will not change the values in a bin. This means that each bin
+values should have the value 1 except there is overlap with
+points later in the track. To decide this the previous
+max_queue_normalize points will be considered. So this value
+dependes on the chosen gridwidth.</p>
               </div>
             </td>
             <td>
@@ -1776,7 +1759,8 @@ bin width. Bins will start at the min latitude and longited values.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Number of previous bins considered when normalize is set to true.</p>
+                <p>Number of previous bins considered when normalize is
+set to true.</p>
               </div>
             </td>
             <td>
@@ -1888,7 +1872,7 @@ bin width. Bins will start at the min latitude and longited values.</p>
     <span class="n">normalize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">max_queue_normalize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Takes a GPXSegement and fills bins of a 2D array (called plate) with the passed</span>
 <span class="sd">    bin width. Bins will start at the min latitude and longited values.</span>
 
@@ -1910,7 +1894,7 @@ bin width. Bins will start at the min latitude and longited values.</p>
 <span class="sd">                                set to true.</span>
 
 <span class="sd">    :return: 2DArray representing the plate.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">bins_latitude</span><span class="p">,</span> <span class="n">bins_longitude</span> <span class="o">=</span> <span class="n">derive_plate_bins</span><span class="p">(</span>
         <span class="n">gird_width</span><span class="p">,</span>
         <span class="n">bounds_min_latitude</span><span class="p">,</span>
@@ -2084,7 +2068,7 @@ bin width. Bins will start at the min latitude and longited values.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.action.edit", "content.code.copy", "content.tabs.link", "content.tooltips", "navigation.expand", "navigation.footer", "navigation.instant", "navigation.sections"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

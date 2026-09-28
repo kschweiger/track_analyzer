@@ -100,7 +100,15 @@ if __name__ == "__main__":
         full_html=False,
     )
 
-    data = pd.read_csv("tests/resources/summary_test_data.csv", sep=";")
+    data = pd.read_csv("tests/resources/summary_test_data.csv", sep=";").rename(
+        columns={
+            "speed": "speed_ms",
+            "distance": "distance_m",
+            "cum_distance": "cum_distance_m",
+            "cum_distance_moving": "cum_distance_moving_m",
+            "cum_distance_stopped": "cum_distance_stopped_m",
+        }
+    )
 
     for agg in ["time", "distance", "speed"]:
         if agg == "time":

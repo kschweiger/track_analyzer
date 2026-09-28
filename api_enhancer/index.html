@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -550,34 +550,6 @@
     
   
     CLI
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../postgis/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    PostGIS
   
 
     
@@ -1200,7 +1172,7 @@
 
 
 <h3 id="geo_track_analyzer.OpenTopoElevationEnhancer" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>              <code class="highlight language-python"><span class="n">OpenTopoElevationEnhancer</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s1">&#39;https://api.opentopodata.org/&#39;</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="s1">&#39;eudem25m&#39;</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;cubic&#39;</span><span class="p">,</span> <span class="n">skip_checks</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>              <code class="highlight language-python"><span class="n">OpenTopoElevationEnhancer</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s1">'https://api.opentopodata.org/'</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="s1">'eudem25m'</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">'cubic'</span><span class="p">,</span> <span class="n">skip_checks</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
 
 </h3>
 
@@ -1285,7 +1257,8 @@ with elevation information.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If true, health checks will be skipped on initialization, defaults to False</p>
+                <p>If true, health checks will be skipped on initialization,
+defaults to False</p>
               </div>
             </td>
             <td>
@@ -1387,43 +1360,43 @@ with elevation information.</p>
 <span class="normal">116</span>
 <span class="normal">117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;https://api.opentopodata.org/&quot;</span><span class="p">,</span>
-    <span class="n">dataset</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;eudem25m&quot;</span><span class="p">,</span>
-    <span class="n">interpolation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cubic&quot;</span><span class="p">,</span>
+    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"https://api.opentopodata.org/"</span><span class="p">,</span>
+    <span class="n">dataset</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"eudem25m"</span><span class="p">,</span>
+    <span class="n">interpolation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"cubic"</span><span class="p">,</span>
     <span class="n">skip_checks</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Setup the enhancer via a opentopodata rest api.</span>
 
-<span class="sd">    :param url: REST api entrypoint url, defaults to &quot;https://api.opentopodata.org/&quot;</span>
-<span class="sd">    :param dataset: Dataset of elevation data , defaults to &quot;eudem25m&quot;</span>
-<span class="sd">    :param interpolation: Interpolation method, defaults to &quot;cubic&quot;</span>
+<span class="sd">    :param url: REST api entrypoint url, defaults to "https://api.opentopodata.org/"</span>
+<span class="sd">    :param dataset: Dataset of elevation data , defaults to "eudem25m"</span>
+<span class="sd">    :param interpolation: Interpolation method, defaults to "cubic"</span>
 <span class="sd">    :param skip_checks: If true, health checks will be skipped on initialization,</span>
 <span class="sd">        defaults to False</span>
 <span class="sd">    :raises APIHealthCheckFailedError: If connection can not established</span>
 <span class="sd">    :raises APIHealthCheckFailedError: Any other error on health check</span>
 <span class="sd">    :raises APIDataNotAvailableError: Dataset is not available at the endpoint</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">base_url</span> <span class="o">=</span> <span class="n">url</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">/v1/</span><span class="si">{</span><span class="n">dataset</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">/v1/</span><span class="si">{</span><span class="n">dataset</span><span class="si">}</span><span class="s2">"</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span> <span class="o">=</span> <span class="n">interpolation</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_checks</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Doing server health check&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"Doing server health check"</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_url</span><span class="si">}</span><span class="s2">/health&quot;</span><span class="p">)</span>
+            <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_url</span><span class="si">}</span><span class="s2">/health"</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ConnectionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">APIHealthCheckFailedError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">APIHealthCheckFailedError</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
 
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Doing dataset check&quot;</span><span class="p">)</span>
-        <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_url</span><span class="si">}</span><span class="s2">/datasets&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"Doing dataset check"</span><span class="p">)</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_url</span><span class="si">}</span><span class="s2">/datasets"</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">APIHealthCheckFailedError</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
-        <span class="n">datasets</span> <span class="o">=</span> <span class="p">[</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">ds</span> <span class="ow">in</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s2">&quot;results&quot;</span><span class="p">]]</span>
+        <span class="n">datasets</span> <span class="o">=</span> <span class="p">[</span><span class="n">ds</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="k">for</span> <span class="n">ds</span> <span class="ow">in</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s2">"results"</span><span class="p">]]</span>
         <span class="k">if</span> <span class="n">dataset</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">datasets</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">APIDataNotAvailableError</span><span class="p">(</span><span class="s2">&quot;Dataset </span><span class="si">%s</span><span class="s2"> not available&quot;</span> <span class="o">%</span> <span class="n">dataset</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">APIDataNotAvailableError</span><span class="p">(</span><span class="s2">"Dataset </span><span class="si">%s</span><span class="s2"> not available"</span> <span class="o">%</span> <span class="n">dataset</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -1533,13 +1506,13 @@ with elevation information.</p>
 <span class="normal">63</span>
 <span class="normal">64</span>
 <span class="normal">65</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">enhance_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track</span><span class="p">:</span> <span class="n">GPXTrack</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GPXTrack</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Main method to enhance a passed GPX track with elevation information</span>
 
 <span class="sd">    :param track: Track to be enhanced.</span>
 
 <span class="sd">    :returns: The enhanced track</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">inplace</span><span class="p">:</span>
         <span class="n">track_</span> <span class="o">=</span> <span class="n">track</span>
     <span class="k">else</span><span class="p">:</span>
@@ -1596,7 +1569,8 @@ for the passed input coordinates</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>list of latitude, longitude tuples for which the elevation should be determined.</p>
+                <p>list of latitude, longitude tuples for which the
+elevation should be determined.</p>
               </div>
             </td>
             <td>
@@ -1612,7 +1586,8 @@ for the passed input coordinates</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Optionally split request into multiple requires to get around size restrictions, defaults to None</p>
+                <p>Optionally split request into multiple requires to get
+around size restrictions, defaults to None</p>
               </div>
             </td>
             <td>
@@ -1725,7 +1700,7 @@ for the passed input coordinates</p>
     <span class="n">input_coordinates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
     <span class="n">split_requests</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Send a post request to the api endoint to query elevation data</span>
+<span class="w">    </span><span class="sd">"""Send a post request to the api endoint to query elevation data</span>
 <span class="sd">    for the passed input coordinates</span>
 
 <span class="sd">    :param input_coordinates: list of latitude, longitude tuples for which the</span>
@@ -1736,8 +1711,8 @@ for the passed input coordinates</p>
 <span class="sd">    :raises APIResponseError: Any none 200 response form the endpoint</span>
 
 <span class="sd">    :returns: A list of Elevations for the passed coordinates.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Getting elevation data&quot;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"Getting elevation data"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">split_requests</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">split_input_coord</span> <span class="o">=</span> <span class="p">[</span><span class="n">input_coordinates</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
@@ -1748,23 +1723,23 @@ for the passed input coordinates</p>
 
     <span class="n">ret_elevations</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">coords</span> <span class="ow">in</span> <span class="n">split_input_coord</span><span class="p">:</span>
-        <span class="n">locations</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">locations</span> <span class="o">=</span> <span class="s2">""</span>
         <span class="k">for</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">:</span>
-            <span class="n">locations</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">latitude</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">longitude</span><span class="si">}</span><span class="s2">|&quot;</span>
+            <span class="n">locations</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">latitude</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">longitude</span><span class="si">}</span><span class="s2">|"</span>
 
         <span class="n">locations</span> <span class="o">=</span> <span class="n">locations</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="p">{</span>
-                <span class="s2">&quot;locations&quot;</span><span class="p">:</span> <span class="n">locations</span><span class="p">,</span>
-                <span class="s2">&quot;interpolation&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">,</span>
+                <span class="s2">"locations"</span><span class="p">:</span> <span class="n">locations</span><span class="p">,</span>
+                <span class="s2">"interpolation"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
             <span class="n">result_data</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">result_data</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">]:</span>
-                <span class="n">ret_elevations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">&quot;elevation&quot;</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">result_data</span><span class="p">[</span><span class="s2">"results"</span><span class="p">]:</span>
+                <span class="n">ret_elevations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">"elevation"</span><span class="p">])</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">APIResponseError</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
@@ -1789,7 +1764,7 @@ for the passed input coordinates</p>
 
 
 <h3 id="geo_track_analyzer.OpenElevationEnhancer" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>              <code class="highlight language-python"><span class="n">OpenElevationEnhancer</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s1">&#39;https://api.open-elevation.com&#39;</span><span class="p">)</span></code>
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>              <code class="highlight language-python"><span class="n">OpenElevationEnhancer</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s1">'https://api.open-elevation.com'</span><span class="p">)</span></code>
 
 </h3>
 
@@ -1855,17 +1830,17 @@ with elevation information.</p>
 <span class="normal">183</span>
 <span class="normal">184</span>
 <span class="normal">185</span>
-<span class="normal">186</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;https://api.open-elevation.com&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="normal">186</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"https://api.open-elevation.com"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Setup the enhancer via the url of the rest api of open-elevation</span>
 
 <span class="sd">    :param url: URL of the API gateway</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">/api/v1/lookup&quot;</span>
+<span class="sd">    """</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">/api/v1/lookup"</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">CaseInsensitiveDict</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;Accept&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;application/json&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;application/json&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">"Accept"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"application/json"</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">"Content-Type"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"application/json"</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -1975,13 +1950,13 @@ with elevation information.</p>
 <span class="normal">63</span>
 <span class="normal">64</span>
 <span class="normal">65</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">enhance_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track</span><span class="p">:</span> <span class="n">GPXTrack</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GPXTrack</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Main method to enhance a passed GPX track with elevation information</span>
 
 <span class="sd">    :param track: Track to be enhanced.</span>
 
 <span class="sd">    :returns: The enhanced track</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">inplace</span><span class="p">:</span>
         <span class="n">track_</span> <span class="o">=</span> <span class="n">track</span>
     <span class="k">else</span><span class="p">:</span>
@@ -2037,7 +2012,8 @@ with elevation information.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>list of latitude, longitude tuples for which the elevation should be determined.</p>
+                <p>list of latitude, longitude tuples for which the
+elevation should be determined.</p>
               </div>
             </td>
             <td>
@@ -2101,25 +2077,25 @@ with elevation information.</p>
 <span class="normal">213</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_elevation_data</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">input_coordinates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Send a POST request to the Open-Elevation API specified in the init.</span>
 
 <span class="sd">    :param input_coordinates: list of latitude, longitude tuples for which the</span>
 <span class="sd">        elevation should be determined.</span>
 
 <span class="sd">    :returns: A list of Elevations for the passed coordinates.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;locations&quot;</span><span class="p">:</span> <span class="p">[]}</span>
+<span class="sd">    """</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"locations"</span><span class="p">:</span> <span class="p">[]}</span>
     <span class="k">for</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span> <span class="ow">in</span> <span class="n">input_coordinates</span><span class="p">:</span>
-        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;locations&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="n">latitude</span><span class="p">,</span> <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="n">longitude</span><span class="p">})</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">"locations"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"latitude"</span><span class="p">:</span> <span class="n">latitude</span><span class="p">,</span> <span class="s2">"longitude"</span><span class="p">:</span> <span class="n">longitude</span><span class="p">})</span>
 
     <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
         <span class="n">result_data</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
         <span class="n">ret_elevations</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">result_data</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">]:</span>
-            <span class="n">ret_elevations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">&quot;elevation&quot;</span><span class="p">]))</span>
+        <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">result_data</span><span class="p">[</span><span class="s2">"results"</span><span class="p">]:</span>
+            <span class="n">ret_elevations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">"elevation"</span><span class="p">]))</span>
 
         <span class="k">return</span> <span class="n">ret_elevations</span>
     <span class="k">else</span><span class="p">:</span>
@@ -2244,18 +2220,18 @@ with elevation information.</p>
 <span class="normal">226</span>
 <span class="normal">227</span>
 <span class="normal">228</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_enhancer</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="n">EnhancerType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">Enhancer</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a Enhance object for a specific enpoint by passing a distinct name</span>
+<span class="w">    </span><span class="sd">"""Get a Enhance object for a specific enpoint by passing a distinct name</span>
 
 <span class="sd">    :param name: Name of enhancer. Chose OpenTopoElevation or OpenElevation</span>
 <span class="sd">    :raises NotImplementedError: If an invalid name is passed</span>
 <span class="sd">    :return: An Enhancer object</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">EnhancerType</span><span class="o">.</span><span class="n">OPENTOPOELEVATION</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">OpenTopoElevationEnhancer</span>
     <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="n">EnhancerType</span><span class="o">.</span><span class="n">OPENELEVATION</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">OpenElevationEnhancer</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Can not return Enhancer for name </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"Can not return Enhancer for name </span><span class="si">%s</span><span class="s2">"</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2395,7 +2371,7 @@ with elevation information.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.action.edit", "content.code.copy", "content.tabs.link", "content.tooltips", "navigation.expand", "navigation.footer", "navigation.instant", "navigation.sections"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>
