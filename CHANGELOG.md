@@ -1,4 +1,12 @@
 <!-- insertion marker -->
+<a name="3.1.0"></a>
+
+## [3.1.0](https://github.com/kschweiger/track_analyzer/compare/3.0.0...3.1.0) (2026-09-28)
+
+### Features
+
+- track object can be initialized with timezone (#39) ([e0fc872](https://github.com/kschweiger/track_analyzer/commit/e0fc8729598c560451dba17ee483a4f3c12ad28d))
+
 <a name="3.0.0"></a>
 
 ## [3.0.0](https://github.com/kschweiger/track_analyzer/compare/2.0.1...3.0.0) (2026-09-26)
