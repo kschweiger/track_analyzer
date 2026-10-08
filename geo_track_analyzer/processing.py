@@ -208,7 +208,7 @@ def get_processed_segment_data(
 
     threshold_ms = stopped_speed_threshold / 3.6
 
-    data: Dict[str, list[None | Union[float, bool]]] = {
+    data: Dict[str, list[Union[float, bool, str] | None]] = {
         "latitude": [],
         "longitude": [],
         "elevation": [],
@@ -349,9 +349,14 @@ def _get_processed_data_w_time(
 
                 for key in extensions:
                     try:
-                        data[key].append(float(get_extension_value(point, key)))
+                        _ext_value = get_extension_value(point, key)
                     except GPXPointExtensionError:
                         data[key].append(None)
+                    else:
+                        try:
+                            data[key].append(float(_ext_value))
+                        except ValueError:
+                            data[key].append(_ext_value)
 
     # print(extensions)
     # for key, values in data.items():
@@ -395,9 +400,14 @@ def _get_processed_data_wo_time(
 
             for key in extensions:
                 try:
-                    data[key].append(float(get_extension_value(point, key)))
+                    _ext_value = get_extension_value(point, key)
                 except GPXPointExtensionError:
                     data[key].append(None)
+                else:
+                    try:
+                        data[key].append(float(_ext_value))
+                    except ValueError:
+                        data[key].append(_ext_value)
 
     return distance, data
 
