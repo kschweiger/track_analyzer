@@ -1,4 +1,12 @@
 <!-- insertion marker -->
+<a name="3.1.1"></a>
+
+## [3.1.1](https://github.com/kschweiger/track_analyzer/compare/3.1.0...3.1.1) (2026-10-08)
+
+### Bug Fixes
+
+- **processing:** resolve issue with non-float extensions ([5e6bfd4](https://github.com/kschweiger/track_analyzer/commit/5e6bfd461cf8343b84edb01b4a8712a079dc6dc2))
+
 <a name="3.1.0"></a>
 
 ## [3.1.0](https://github.com/kschweiger/track_analyzer/compare/3.0.0...3.1.0) (2026-09-28)
