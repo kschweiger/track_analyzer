@@ -11,6 +11,8 @@ if ! uv run --no-sync python bump.py . "$1" --init --package geo_track_analyzer;
   exit 1
 fi
 
+uv lock
+
 VERSION=$(uv run --no-sync python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
 if [ -z "$VERSION" ]; then
   echo "Could not determine the new version. Exiting..." >&2
