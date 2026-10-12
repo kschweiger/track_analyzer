@@ -109,7 +109,7 @@ doc = [
   "mkdocs-click>=0.9.0",
   "mkdocs-material>=9.7.7",
   "mkdocstrings[python]>=1.0.6",
-  "griffe>=0.46.0,<2.0", # version 2 does introduce issues with mkdocstrings[python]
+  "griffe>=0.49.0,<2.0", # version 2 does introduce issues with mkdocstrings[python]
 ]
 test = [
   "pytest>=9.1.1",
