@@ -18,11 +18,11 @@ classifiers = [
 keywords = ["fit", "gpx", "visualization", "analysis"]
 requires-python = ">=3.13"
 dependencies = [
-  "numpy>=2,<3",
+  "numpy>=2.5.3,<3",
   "gpxpy~=1.6",
-  "requests>=2,<3",
-  "pandas>=2,<3",
-  "pydantic>=2,<3",
+  "requests>=2.34.2,<3",
+  "pandas>=2.3.3,<3",
+  "pydantic>=2.13.5,<3",
   "pydantic-numpy",
   "garmin-fit-sdk>=21.217.0,<22",
 ]
@@ -37,12 +37,12 @@ extract-fit-track = 'geo_track_analyzer:extract_track'
 enhance-elevation = 'geo_track_analyzer:update_elevation'
 
 [project.optional-dependencies]
-cli = ["click>=8,<9", "rich"]
+cli = ["click>=8.5.0,<9", "rich"]
 full = ["geo-track-analyzer[cli]"]
-visualization = ["plotly>=5,<6"]
+visualization = ["plotly>=5.24.1,<6"]
 
 [build-system]
-requires = ["uv_build>=0.12.19,<0.13"]
+requires = ["uv_build>=0.12.23,<0.13"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
@@ -97,27 +97,27 @@ template = "path:.git-changelog/angular.md.jinja"
 
 [dependency-groups]
 dev = [
-  "bpython>=0.25",
-  "debugpy>=1.8.12",
-  "pre-commit>=4.1.0",
-  "ruff>=0.9.7",
-  "uv>=0.6.2",
+  "bpython>=0.26",
+  "debugpy>=1.8.22",
+  "pre-commit>=4.6.2",
+  "ruff>=0.16.10",
+  "uv>=0.12.23",
   "geo-track-analyzer[full]",
 ]
 doc = [
   "mkdocs>=1.6.1",
-  "mkdocs-click>=0.8.1",
-  "mkdocs-material>=9.6.5",
-  "mkdocstrings[python]>=0.28.2",
+  "mkdocs-click>=0.9.0",
+  "mkdocs-material>=9.7.7",
+  "mkdocstrings[python]>=1.0.6",
   "griffe>=0.46.0,<2.0", # version 2 does introduce issues with mkdocstrings[python]
 ]
 test = [
-  "pytest>=8.3.4",
-  "pytest-cov>=6.0.0",
-  "pytest-dependency>=0.6.0",
-  "pytest-mock>=3.14.0",
+  "pytest>=9.1.1",
+  "pytest-cov>=7.1.0",
+  "pytest-dependency>=0.6.1",
+  "pytest-mock>=3.16.0",
   "pytest-retry>=1.7.0",
-  "pytest-sugar>=1.0.0",
+  "pytest-sugar>=1.1.1",
 ]
 [tool.uv]
 default-groups = ["dev", "test"]
