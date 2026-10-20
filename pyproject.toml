@@ -21,7 +21,7 @@ dependencies = [
   "numpy>=2.5.3,<3",
   "gpxpy~=1.6",
   "requests>=2.34.2,<3",
-  "pandas>=2.3.3,<3",
+  "pandas>=3.0.6,<4",
   "pydantic>=2.13.5,<3",
   "pydantic-numpy",
   "garmin-fit-sdk>=21.217.0,<22",
