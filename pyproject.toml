@@ -18,13 +18,13 @@ classifiers = [
 keywords = ["fit", "gpx", "visualization", "analysis"]
 requires-python = ">=3.13"
 dependencies = [
-  "numpy>=2.5.3,<3",
+  "numpy>=2.5.4,<3",
   "gpxpy~=1.6",
   "requests>=2.34.2,<3",
   "pandas>=2.3.3,<3",
-  "pydantic>=2.13.5,<3",
+  "pydantic>=2.14.1,<3",
   "pydantic-numpy",
-  "garmin-fit-sdk>=21.217.0,<22",
+  "garmin-fit-sdk>=21.218.0,<22",
 ]
 
 [project.urls]
@@ -99,23 +99,23 @@ template = "path:.git-changelog/angular.md.jinja"
 dev = [
   "bpython>=0.26",
   "debugpy>=1.8.22",
-  "pre-commit>=4.6.2",
-  "ruff>=0.16.10",
-  "uv>=0.12.23",
+  "pre-commit>=4.7.0",
+  "ruff>=0.17.1",
+  "uv>=0.13.1",
   "geo-track-analyzer[full]",
 ]
 doc = [
   "mkdocs>=1.6.1",
   "mkdocs-click>=0.9.0",
   "mkdocs-material>=9.7.7",
-  "mkdocstrings[python]>=1.0.6",
+  "mkdocstrings[python]>=1.0.7",
   "griffe>=2.3.2,<2.4", # version 2 does introduce issues with mkdocstrings[python]
 ]
 test = [
   "pytest>=9.1.1",
   "pytest-cov>=7.1.0",
   "pytest-dependency>=0.6.1",
-  "pytest-mock>=3.16.0",
+  "pytest-mock>=3.17.0",
   "pytest-retry>=1.7.0",
   "pytest-sugar>=1.1.1",
 ]
