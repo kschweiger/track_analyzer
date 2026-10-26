@@ -42,7 +42,7 @@ full = ["geo-track-analyzer[cli]"]
 visualization = ["plotly>=5.24.1,<6"]
 
 [build-system]
-requires = ["uv_build>=0.13.1,<0.14"]
+requires = ["uv_build>=0.13.2,<0.14"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
@@ -101,7 +101,7 @@ dev = [
   "debugpy>=1.8.22",
   "pre-commit>=4.7.0",
   "ruff>=0.17.1",
-  "uv>=0.13.1",
+  "uv>=0.13.2",
   "geo-track-analyzer[full]",
 ]
 doc = [

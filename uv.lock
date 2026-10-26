@@ -494,7 +494,7 @@ dev = [
     { name = "geo-track-analyzer", extras = ["full"] },
     { name = "pre-commit", specifier = ">=4.7.0" },
     { name = "ruff", specifier = ">=0.17.1" },
-    { name = "uv", specifier = ">=0.13.1" },
+    { name = "uv", specifier = ">=0.13.2" },
 ]
 doc = [
     { name = "griffe", specifier = ">=2.4.0,<2.5" },
