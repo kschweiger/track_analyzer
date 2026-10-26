@@ -39,7 +39,7 @@ enhance-elevation = 'geo_track_analyzer:update_elevation'
 [project.optional-dependencies]
 cli = ["click>=8.5.0,<9", "rich"]
 full = ["geo-track-analyzer[cli]"]
-visualization = ["plotly>=5.24.1,<6"]
+visualization = ["plotly>=7.1.0,<8"]
 
 [build-system]
 requires = ["uv_build>=0.12.23,<0.13"]
