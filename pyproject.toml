@@ -22,7 +22,7 @@ dependencies = [
   "gpxpy~=1.6",
   "requests>=2.34.2,<3",
   "pandas>=2.3.3,<3",
-  "pydantic>=2.14.1,<3",
+  "pydantic>=2.14.2,<3",
   "pydantic-numpy",
   "garmin-fit-sdk>=21.218.0,<22",
 ]
@@ -42,7 +42,7 @@ full = ["geo-track-analyzer[cli]"]
 visualization = ["plotly>=5.24.1,<6"]
 
 [build-system]
-requires = ["uv_build>=0.13.5,<0.14"]
+requires = ["uv_build>=0.13.6,<0.14"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
@@ -100,8 +100,8 @@ dev = [
   "bpython>=0.26",
   "debugpy>=1.8.22",
   "pre-commit>=4.7.0",
-  "ruff>=0.17.2",
-  "uv>=0.13.5",
+  "ruff>=0.17.3",
+  "uv>=0.13.6",
   "geo-track-analyzer[full]",
 ]
 doc = [
@@ -112,7 +112,7 @@ doc = [
   "griffe>=2.4.1,<2.5", # version 2 does introduce issues with mkdocstrings[python]
 ]
 test = [
-  "pytest>=9.1.1",
+  "pytest>=9.2.0",
   "pytest-cov>=7.1.0",
   "pytest-dependency>=0.6.1",
   "pytest-mock>=3.17.0",
