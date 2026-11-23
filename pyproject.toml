@@ -18,7 +18,7 @@ classifiers = [
 keywords = ["fit", "gpx", "visualization", "analysis"]
 requires-python = ">=3.13"
 dependencies = [
-  "numpy>=2.5.4,<3",
+  "numpy>=2.5.5,<3",
   "gpxpy~=1.6",
   "requests>=2.34.2,<3",
   "pandas>=2.3.3,<3",
@@ -42,7 +42,7 @@ full = ["geo-track-analyzer[cli]"]
 visualization = ["plotly>=5.24.1,<6"]
 
 [build-system]
-requires = ["uv_build>=0.13.7,<0.14"]
+requires = ["uv_build>=0.13.8,<0.14"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
@@ -100,8 +100,8 @@ dev = [
   "bpython>=0.26",
   "debugpy>=1.8.22",
   "pre-commit>=4.7.0",
-  "ruff>=0.17.4",
-  "uv>=0.13.7",
+  "ruff>=0.17.5",
+  "uv>=0.13.8",
   "geo-track-analyzer[full]",
 ]
 doc = [
